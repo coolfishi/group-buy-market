@@ -1,8 +1,10 @@
-export type CategoryId = 'vinyl' | 'anime' | 'mecha'
+export type CategoryId = 'naruto' | 'jjk'
 
 export interface ProductImage {
   src: string
   alt: string
+  /** 图集缩略图下的短标签，例如“正面” */
+  label: string
 }
 
 export interface Product {
@@ -15,8 +17,14 @@ export interface Product {
   size: string
   material: string
   scale: string
-  weight: string
-  edition: string
+  /** 厂商 */
+  maker: string
+  /** 产品线，例如 POP UP PARADE、粘土人 */
+  line: string
+  /** 厂商官方定价（日元），仅作资料展示 */
+  officialPriceJpy: number
+  /** 商品资料与图片来源 */
+  sourceUrl: string
   images: ProductImage[]
   /** 仅演示模式使用的价格；真实模式价格以接口为准 */
   demoPrice: { original: number; group: number }

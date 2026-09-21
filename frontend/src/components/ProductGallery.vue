@@ -4,7 +4,6 @@ import type { ProductImage } from '@/types'
 
 const props = defineProps<{ images: ProductImage[] }>()
 const current = ref(0)
-const labels = ['正面', '细节', '包装']
 
 function onKeydown(e: KeyboardEvent) {
   if (e.key === 'ArrowRight') current.value = (current.value + 1) % props.images.length
@@ -18,7 +17,7 @@ function onKeydown(e: KeyboardEvent) {
 <template>
   <div class="gallery">
     <div class="main">
-      <img :src="images[current].src" :alt="images[current].alt" width="800" height="800" />
+      <img :src="images[current].src" :alt="images[current].alt" width="550" height="800" />
     </div>
     <div class="thumbs" role="group" aria-label="切换商品图片" @keydown="onKeydown">
       <button
@@ -27,11 +26,11 @@ function onKeydown(e: KeyboardEvent) {
         type="button"
         class="thumb"
         :aria-pressed="i === current"
-        :aria-label="`查看${labels[i] ?? `第 ${i + 1} 张`}图`"
+        :aria-label="`查看${img.label}图`"
         @click="current = i"
       >
-        <img :src="img.src" alt="" width="120" height="120" loading="lazy" />
-        <span>{{ labels[i] }}</span>
+        <img :src="img.src" alt="" width="84" height="122" loading="lazy" />
+        <span>{{ img.label }}</span>
       </button>
     </div>
   </div>
@@ -39,7 +38,8 @@ function onKeydown(e: KeyboardEvent) {
 
 <style scoped>
 .main {
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 11 / 16;
+  max-height: calc(100vh - 180px);
   border-radius: var(--r-plinth);
   background: var(--plinth);
   overflow: hidden;
@@ -48,7 +48,7 @@ function onKeydown(e: KeyboardEvent) {
 .main img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
 }
 
 .thumbs {
@@ -72,8 +72,8 @@ function onKeydown(e: KeyboardEvent) {
 
 .thumb img {
   width: 84px;
-  height: 84px;
-  object-fit: contain;
+  height: 122px;
+  object-fit: cover;
   border-radius: 12px;
   background: var(--plinth);
   border: 2px solid transparent;
@@ -94,7 +94,7 @@ function onKeydown(e: KeyboardEvent) {
     width: 64px;
   }
   .thumb img {
-    height: 64px;
+    height: 93px;
   }
 }
 </style>

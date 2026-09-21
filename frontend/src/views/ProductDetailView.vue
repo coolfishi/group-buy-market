@@ -6,7 +6,7 @@ import PriceTag from '@/components/PriceTag.vue'
 import ProductGallery from '@/components/ProductGallery.vue'
 import StateBlock from '@/components/StateBlock.vue'
 import TeamItem from '@/components/TeamItem.vue'
-import { categoryName, findProduct } from '@/data/products'
+import { categoryName, copyrightNotice, findProduct } from '@/data/products'
 import { api, errorMessage, isApiError } from '@/services'
 import { useSessionStore } from '@/stores/session'
 import { useToastStore } from '@/stores/toast'
@@ -156,7 +156,7 @@ const targetText = computed(() => {
       <ProductGallery :images="product.images" />
 
       <section class="buy" aria-labelledby="product-name">
-        <p class="kicker">{{ categoryName(product.category) }}，{{ product.scale }}</p>
+        <p class="kicker">{{ categoryName(product.category) }}，{{ product.maker }} {{ product.line }}</p>
         <h1 id="product-name">{{ product.name }}</h1>
         <p class="tagline">{{ product.tagline }}</p>
 
@@ -235,7 +235,10 @@ const targetText = computed(() => {
       <div class="about-body">
         <h2 id="about-title">设计介绍</h2>
         <p v-for="(para, i) in product.description" :key="i">{{ para }}</p>
-        <p class="disclaimer">原创概念演示商品，不代表任何官方授权产品，页面不展示销量与评价。</p>
+        <p class="disclaimer">
+          {{ copyrightNotice }}
+          <a :href="product.sourceUrl" target="_blank" rel="noopener noreferrer">查看官方产品页</a>
+        </p>
       </div>
       <div>
         <h2>尺寸与材质</h2>
@@ -243,8 +246,9 @@ const targetText = computed(() => {
           <div><dt>尺寸</dt><dd>{{ product.size }}</dd></div>
           <div><dt>材质</dt><dd>{{ product.material }}</dd></div>
           <div><dt>比例</dt><dd>{{ product.scale }}</dd></div>
-          <div><dt>重量</dt><dd>{{ product.weight }}</dd></div>
-          <div><dt>版本</dt><dd>{{ product.edition }}</dd></div>
+          <div><dt>厂商</dt><dd>{{ product.maker }}</dd></div>
+          <div><dt>系列</dt><dd>{{ product.line }}</dd></div>
+          <div><dt>官方定价</dt><dd>{{ product.officialPriceJpy.toLocaleString('zh-CN') }} 日元（本站价格为演示价）</dd></div>
         </dl>
       </div>
     </section>

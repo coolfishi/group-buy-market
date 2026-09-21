@@ -7,7 +7,7 @@ const config = readConfig({
   VITE_APP_MODE: 'live',
   VITE_GBM_API_BASE: 'https://gbm.example.com/',
   VITE_MALL_API_BASE: 'https://mall.example.com',
-  VITE_LIVE_SKU_MAP: '{"TS-2001":"7001"}',
+  VITE_LIVE_SKU_MAP: '{"JJ-01":"7001"}',
   VITE_PAY_ALLOWED_ORIGINS: 'https://openapi.alipay.com',
   VITE_REQUEST_TIMEOUT_MS: '2000',
 })
@@ -28,23 +28,23 @@ afterEach(() => vi.unstubAllGlobals())
 describe('真实模式配置', () => {
   it('只有映射了 SKU 的商品可购买', () => {
     const api = createLiveApi(config, async () => {})
-    expect(api.purchasability('TS-2001').ok).toBe(true)
-    expect(api.purchasability('TS-1001').ok).toBe(false)
+    expect(api.purchasability('JJ-01').ok).toBe(true)
+    expect(api.purchasability('NR-01').ok).toBe(false)
   })
 
   it('未映射商品不会发起请求，也不会退回演示数据', async () => {
     const fetch = mockFetch(() => ({ code: '0000' }))
     const api = createLiveApi(config, async () => {})
-    await expect(api.getMarket('TS-1001', user)).rejects.toMatchObject({ kind: 'not_purchasable' })
-    await expect(api.checkout(user, { productId: 'TS-1001', type: 'single' })).rejects.toMatchObject({
+    await expect(api.getMarket('NR-01', user)).rejects.toMatchObject({ kind: 'not_purchasable' })
+    await expect(api.checkout(user, { productId: 'NR-01', type: 'single' })).rejects.toMatchObject({
       kind: 'not_purchasable',
     })
     expect(fetch).not.toHaveBeenCalled()
   })
 
   it('缺少服务地址时明确报错', async () => {
-    const api = createLiveApi(readConfig({ VITE_APP_MODE: 'live', VITE_LIVE_SKU_MAP: '{"TS-2001":"7001"}' }), async () => {})
-    expect(api.purchasability('TS-2001')).toMatchObject({ ok: false })
+    const api = createLiveApi(readConfig({ VITE_APP_MODE: 'live', VITE_LIVE_SKU_MAP: '{"JJ-01":"7001"}' }), async () => {})
+    expect(api.purchasability('JJ-01')).toMatchObject({ ok: false })
     await expect(api.listOrders(user, null, 10)).rejects.toMatchObject({ kind: 'config' })
   })
 
@@ -71,7 +71,7 @@ describe('拼团配置', () => {
       },
     }))
     const api = createLiveApi(config, async () => {})
-    const market = await api.getMarket('TS-2001', user)
+    const market = await api.getMarket('JJ-01', user)
     expect(fetch.mock.calls[0][0]).toBe('https://gbm.example.com/api/v1/gbm/index/query_group_buy_market_config')
     expect(JSON.parse(fetch.mock.calls[0][1].body as string)).toEqual({
       userId: 'oUser123456',
@@ -91,15 +91,15 @@ describe('拼团配置', () => {
     const api = createLiveApi(config, async (ms) => {
       delays.push(ms)
     })
-    await api.getMarket('TS-2001', user)
-    await api.getMarket('TS-2001', user)
+    await api.getMarket('JJ-01', user)
+    await api.getMarket('JJ-01', user)
     expect(delays.length).toBe(1)
     expect(delays[0]).toBeGreaterThan(1000)
   })
 
   it('未登录不查询', async () => {
     const api = createLiveApi(config, async () => {})
-    await expect(api.getMarket('TS-2001', null)).rejects.toMatchObject({ kind: 'unauthorized' })
+    await expect(api.getMarket('JJ-01', null)).rejects.toMatchObject({ kind: 'unauthorized' })
   })
 })
 
@@ -120,7 +120,7 @@ describe('订单', () => {
     const api = createLiveApi(config, async () => {})
     const first = await api.listOrders(user, null, 10)
     expect(first).toMatchObject({ hasMore: true, lastId: '18' })
-    expect(first.orders[0]).toMatchObject({ productId: 'TS-2001', productName: '星轨旅人·澪', status: 'PAY_SUCCESS', payAmount: 420 })
+    expect(first.orders[0]).toMatchObject({ productId: 'JJ-01', productName: 'POP UP PARADE 五条悟', status: 'PAY_SUCCESS', payAmount: 420 })
     const second = await api.listOrders(user, first.lastId, 10)
     expect(JSON.parse(fetch.mock.calls[1][1].body as string)).toEqual({ userId: 'oUser123456', lastId: '18', pageSize: 10 })
     expect(second).toMatchObject({ hasMore: false })
@@ -182,21 +182,21 @@ describe('支付表单适配器', () => {
   it('下单返回订单号；复用的旧订单按订单号确认付款结果', async () => {
     mockFetch(() => ({ code: '0000', data: { form, orderId: '116229990525' } }))
     const api = createLiveApi(config, async () => {})
-    const res = await api.checkout(user, { productId: 'TS-2001', type: 'single' })
+    const res = await api.checkout(user, { productId: 'JJ-01', type: 'single' })
     expect(res).toMatchObject({ kind: 'redirect', orderId: '116229990525' })
     // 订单创建时间早于本次下单（复用），按时间找不到，按订单号能找到
     mockFetch(() => ({
       code: '0000',
       data: { orderList: [{ orderId: '116229990525', productId: '7001', status: 'PAY_SUCCESS', orderTime: Date.now() - 13 * 60_000, payAmount: 99 }], hasMore: false, lastId: 1 },
     }))
-    expect(await api.findRecentOrder(user, 'TS-2001', Date.now())).toBeNull()
-    expect(await api.findRecentOrder(user, 'TS-2001', Date.now(), '116229990525')).toMatchObject({ status: 'PAY_SUCCESS' })
+    expect(await api.findRecentOrder(user, 'JJ-01', Date.now())).toBeNull()
+    expect(await api.findRecentOrder(user, 'JJ-01', Date.now(), '116229990525')).toMatchObject({ status: 'PAY_SUCCESS' })
   })
 
   it('下单时解析支付表单', async () => {
     const fetch = mockFetch(() => ({ code: '0000', data: form }))
     const api = createLiveApi(config, async () => {})
-    const result = await api.checkout(user, { productId: 'TS-2001', type: 'join', activityId: 100123, teamId: 't2' })
+    const result = await api.checkout(user, { productId: 'JJ-01', type: 'join', activityId: 100123, teamId: 't2' })
     expect(result.kind).toBe('redirect')
     expect(JSON.parse(fetch.mock.calls[0][1].body as string)).toEqual({
       userId: 'oUser123456',

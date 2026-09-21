@@ -11,7 +11,7 @@
 | `/login` | 登录：演示模式用体验账号，真实模式用微信扫码；登录后回到原页面 |
 | `/orders` | 我的订单：分页加载、退单、支付完成、拼团成功、退款处理中等状态 |
 
-六款商品都是原创概念演示款（潮流公仔、动漫手办、机甲模型各两款），不代表任何官方授权产品，页面不展示销量和评价。素材是 `public/art/` 下的 SVG，由 `npm run gen:assets` 生成。
+展品是 Good Smile Company 的六款手办（《火影忍者》《咒术回战》各三款），规格按官方产品页整理，售价为演示价。图片在 `public/art/`，来自官方产品页，版权归原权利人；本项目仅作演示，不是官方或授权销售渠道，页面不展示销量和评价。
 
 ## 快速开始
 
@@ -28,7 +28,7 @@ npm run dev          # 演示模式，打开 http://localhost:5173
 内置的演示场景包括：
 
 - 差一人成团的拼团：参团付款后显示“拼团成功”。
-- 已满员的拼团（云朵小芽）和已过期的拼团（鸣镝 VX-07）：参团按钮不可点。
+- 已满员的拼团（漩涡鸣人）和已过期的拼团（虎杖悠仁）：参团按钮不可点。
 - 模拟收银台可以“取消支付”，取消后订单关闭，名额释放。
 - 退单后约 8 秒内显示“退款处理中”，之后自动变为“已关闭，已退款”。
 
@@ -42,7 +42,6 @@ npm test             # 单元测试（Vitest）
 npm run test:e2e     # 浏览器端到端测试（Playwright，默认使用本机 Edge）
 npm run build        # 演示模式生产构建，输出 dist/
 npm run build:live   # 真实模式生产构建
-npm run gen:assets   # 重新生成商品 SVG 素材
 ```
 
 端到端测试默认用本机安装的 Microsoft Edge（`channel: msedge`），不需要额外下载浏览器；想用 Chrome 可以设置 `PW_CHANNEL=chrome`。设置 `E2E_BASE_URL` 可以直接测试已部署的站点，例如 `E2E_BASE_URL=https://shop.openrelayx.cc/demo/ npm run test:e2e`。
@@ -57,7 +56,7 @@ npm run gen:assets   # 重新生成商品 SVG 素材
 | `VITE_GBM_API_BASE` | 拼团服务地址，经 Nginx 同源代理时填 `/` |
 | `VITE_MALL_API_BASE` | 支付商城地址（微信登录、下单、订单、退单），同源代理时填 `/` |
 | `VITE_SOURCE` / `VITE_CHANNEL` | 渠道与来源，需与后端拼团活动配置一致 |
-| `VITE_LIVE_SKU_MAP` | 前端商品 ID 到后端真实 SKU 的映射，例如 `{"TS-2001":"1000002"}` |
+| `VITE_LIVE_SKU_MAP` | 前端商品 ID 到后端真实 SKU 的映射，例如 `{"JJ-01":"JJ-01"}` |
 | `VITE_PAY_ALLOWED_ORIGINS` | 允许提交支付表单的地址，逗号分隔 |
 | `VITE_REQUEST_TIMEOUT_MS` | 请求超时，默认 10000 |
 | `GBM_PROXY_TARGET` / `MALL_PROXY_TARGET` | 仅本地开发：vite 代理目标，不会打包进前端 |
@@ -103,8 +102,7 @@ upstream 地址请改成你自己的服务，不要照抄示例；仓库里的�
 frontend/
   deploy/nginx.conf         Nginx 配置示例
   e2e/                      Playwright 端到端测试
-  public/art/               商品 SVG 素材
-  scripts/                  素材生成脚本
+  public/art/               商品图片（来自官方产品页）
   src/
     components/             通用组件：商品卡片、拼团条目、价格、弹窗、状态块、提示
     config/env.ts           环境配置解析

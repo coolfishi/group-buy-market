@@ -2,6 +2,7 @@
 import AppHeader from '@/components/AppHeader.vue'
 import ToastHost from '@/components/ToastHost.vue'
 import { appConfig } from '@/config/env'
+import { copyrightNotice } from '@/data/products'
 import { asset } from '@/utils/asset'
 
 const isLive = appConfig.mode === 'live'
@@ -17,7 +18,7 @@ const isLive = appConfig.mode === 'live'
     <div class="container foot">
       <p class="brand">玩集 TOYSPACE</p>
       <p>
-        页面展示的六款商品均为原创概念演示，不代表任何官方授权产品；页面不展示销量与评价。
+        {{ copyrightNotice }}页面不展示销量与评价。
       </p>
       <p v-if="isLive"><a :href="asset('demo/')">打开演示站</a>：不用登录和付款，先体验完整拼团流程。</p>
     </div>

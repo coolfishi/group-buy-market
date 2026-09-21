@@ -101,7 +101,7 @@ onMounted(() => {
 <template>
   <section class="container login">
     <div class="art" aria-hidden="true">
-      <img :src="asset('art/TS-1002-main.svg')" alt="" width="800" height="800" />
+      <img :src="asset('art/JJ-01-3.jpg')" alt="" width="550" height="800" />
     </div>
 
     <div class="panel">
@@ -158,17 +158,18 @@ onMounted(() => {
 }
 
 .art {
+  justify-self: center;
   border-radius: var(--r-plinth);
   background: var(--plinth);
   overflow: hidden;
-  aspect-ratio: 1 / 1;
-  max-height: 560px;
+  aspect-ratio: 11 / 16;
+  width: min(100%, 400px);
 }
 
 .art img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
 }
 
 h1 {

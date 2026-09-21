@@ -7,7 +7,6 @@ import { useNow } from '@/composables/useNow'
 import { categories, filterProducts, findProduct, products } from '@/data/products'
 import { api, errorMessage } from '@/services'
 import type { ActiveTeam, CategoryId } from '@/types'
-import { asset } from '@/utils/asset'
 import { formatCountdown } from '@/utils/format'
 
 const route = useRoute()
@@ -48,6 +47,18 @@ async function loadTeams() {
   }
 }
 
+// 主视觉三张海报：左鸣人、中五条悟、右虎杖
+const heroPosters = (
+  [
+    ['NR-01', 'left'],
+    ['JJ-01', 'center'],
+    ['JJ-02', 'right'],
+  ] as const
+).map(([id, pos]) => {
+  const p = findProduct(id)!
+  return { id, pos, src: p.images[0].src, alt: p.images[0].alt }
+})
+
 const liveTeams = computed(() => (teams.value ?? []).filter((t) => t.validEndTime > now.value))
 
 onMounted(loadTeams)
@@ -57,20 +68,17 @@ onMounted(loadTeams)
   <section class="window" aria-labelledby="hero-title">
     <div class="container stage">
       <p class="wordmark" aria-hidden="true">TOYSPACE</p>
-      <img
-        class="hero-figures"
-        :src="asset('art/hero.svg')"
-        alt="侦察机甲、星轨旅人和夜航猫船长站在三座展台上"
-        width="1200"
-        height="800"
-        fetchpriority="high"
-      />
+      <div class="posters">
+        <RouterLink v-for="p in heroPosters" :key="p.id" :to="`/products/${p.id}`" class="poster" :class="p.pos">
+          <img :src="p.src" :alt="p.alt" width="550" height="800" fetchpriority="high" />
+        </RouterLink>
+      </div>
     </div>
     <div class="floor">
       <div class="container intro">
         <div class="intro-copy">
-          <h1 id="hero-title">秋季新品上展台</h1>
-          <p>六款原创潮玩：软胶公仔、比例手办和拼装机甲。约上朋友一起拼，人齐就按拼团价成交。</p>
+          <h1 id="hero-title">忍者与咒术师上展台</h1>
+          <p>《火影忍者》和《咒术回战》六款手办。约上朋友一起拼，人齐就按拼团价成交。</p>
         </div>
         <div class="intro-actions">
           <a href="#shelf" class="btn btn-primary">看全部新品</a>
@@ -89,7 +97,7 @@ onMounted(loadTeams)
             <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2" />
             <path d="M16 16l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
           </svg>
-          <input v-model="query" type="search" placeholder="搜索名称、材质" aria-label="搜索展品" />
+          <input v-model="query" type="search" placeholder="搜索角色、作品、系列" aria-label="搜索展品" />
         </div>
         <div class="chips" role="group" aria-label="按分类筛选">
           <button type="button" class="chip" :aria-pressed="category === 'all'" @click="category = 'all'">全部</button>
@@ -178,7 +186,7 @@ onMounted(loadTeams)
 </template>
 
 <style scoped>
-/* 橱窗：巨大字标在后，展台人偶站在前面 */
+/* 橱窗：巨大字标在后，三张手办海报压在字标下半部分 */
 .window {
   overflow: hidden;
   padding-top: clamp(20px, 4vw, 48px);
@@ -189,10 +197,10 @@ onMounted(loadTeams)
   z-index: 1;
 }
 
-/* 展台地面：人偶的底座压在地面边缘上 */
+/* 展台地面：海报底部落在地面上 */
 .floor {
-  margin-top: clamp(-96px, -7vw, -28px);
-  padding-top: clamp(40px, 7vw, 104px);
+  margin-top: clamp(-120px, -9vw, -36px);
+  padding-top: clamp(48px, 8vw, 120px);
   background: var(--plinth);
 }
 
@@ -208,11 +216,39 @@ onMounted(loadTeams)
   white-space: nowrap;
 }
 
-.hero-figures {
+.posters {
   position: relative;
-  width: min(100%, 980px);
-  margin: clamp(-150px, -12vw, -40px) auto 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: clamp(10px, 2vw, 24px);
+  margin-top: clamp(-120px, -9vw, -34px);
   animation: rise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.poster {
+  display: block;
+  width: clamp(92px, 20vw, 250px);
+  aspect-ratio: 11 / 16;
+  border-radius: var(--r-plinth);
+  overflow: hidden;
+  background: var(--ink);
+  outline: 6px solid var(--paper);
+}
+
+.poster.center {
+  width: clamp(116px, 25vw, 310px);
+}
+
+.poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.poster:hover img {
+  transform: scale(1.04);
 }
 
 @keyframes rise {
@@ -228,7 +264,7 @@ onMounted(loadTeams)
   align-items: flex-end;
   justify-content: space-between;
   gap: 20px 40px;
-  padding-block: 8px 44px;
+  padding-block: clamp(20px, 3vw, 36px) 44px;
 }
 
 .intro-copy {
@@ -383,7 +419,8 @@ h2 {
   height: 72px;
   border-radius: 12px;
   background: var(--plinth);
-  object-fit: contain;
+  object-fit: cover;
+  object-position: center 25%;
 }
 
 .team-body {

@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 const widths = [375, 768, 1440]
-const pages = ['./', 'products/TS-2001', 'products/TS-3002', 'login', 'orders']
+const pages = ['./', 'products/JJ-01', 'products/JJ-03', 'login', 'orders']
 
 for (const width of widths) {
   test(`${width}px：无横向溢出、图片不变形、操作栏不遮挡`, async ({ page }) => {
@@ -18,18 +18,23 @@ for (const width of widths) {
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
       expect(overflow, `${path} 横向溢出`).toBeLessThanOrEqual(0)
 
-      // 商品图容器保持正方形，图片以 contain 显示
+      // 商品图按比例裁切（cover），不会被拉伸：object-fit 为 fill 且显示比例与原图不同即视为变形
       const distorted = await page.evaluate(() =>
-        [...document.querySelectorAll<HTMLImageElement>('.plinth img, .main img, .thumb img, .art img')]
-          .filter((img) => img.clientWidth > 0)
-          .filter((img) => getComputedStyle(img).objectFit !== 'contain' || Math.abs(img.clientWidth - img.clientHeight) > 2)
+        [...document.querySelectorAll<HTMLImageElement>('main img')]
+          .filter((img) => img.clientWidth > 0 && img.naturalWidth > 0)
+          .filter((img) => {
+            const fit = getComputedStyle(img).objectFit
+            const shown = img.clientWidth / img.clientHeight
+            const natural = img.naturalWidth / img.naturalHeight
+            return fit === 'fill' && Math.abs(shown - natural) > 0.02
+          })
           .map((img) => img.src),
       )
       expect(distorted, `${path} 图片变形`).toEqual([])
     }
 
     // 手机底部购买栏不遮挡页面最后的内容
-    await page.goto('products/TS-2001')
+    await page.goto('products/JJ-01')
     await page.waitForLoadState('networkidle')
     const bar = page.getByRole('region', { name: '购买' })
     if (width <= 720) {

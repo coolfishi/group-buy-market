@@ -40,8 +40,8 @@ post() { curl -s -X POST "$B$1" -H "Authorization: Bearer $2" -H 'Content-Type: 
 latest() { post /api/v1/alipay/query_user_order_list "$1" '{"lastId":null,"pageSize":5}'; }
 
 TA=$(token "$UA"); TB=$(token "$UB")
-echo "1. 用户 A 发起拼团（星轨旅人，2 人团）"
-R=$(post /api/v1/alipay/create_pay_order "$TA" '{"productId":"TS-2001","marketType":1,"activityId":200103}')
+echo "1. 用户 A 发起拼团（五条悟，2 人团）"
+R=$(post /api/v1/alipay/create_pay_order "$TA" '{"productId":"JJ-01","marketType":1,"activityId":200204}')
 [ "$(echo "$R" | json "d['code']")" = "0000" ] || fail "开团下单 $R"
 echo "$R" | json "d['data']['form']" | grep -q '<form' || fail "没有返回支付表单"
 L=$(latest "$TA"); OA=$(echo "$L" | json "d['data']['orderList'][0]['orderId']"); TEAM=$(echo "$L" | json "d['data']['orderList'][0]['teamId']")
@@ -53,7 +53,7 @@ ST=$(latest "$TA" | json "d['data']['orderList'][0]['status']"); echo "   A 状�
 [ "$(sql "SELECT complete_count FROM group_buy_market.group_buy_order WHERE team_id='$TEAM'")" = "1" ] || fail "拼团侧完成数应为 1"
 
 echo "3. 用户 B 参团并付款"
-R=$(post /api/v1/alipay/create_pay_order "$TB" "{\"productId\":\"TS-2001\",\"marketType\":1,\"activityId\":200103,\"teamId\":\"$TEAM\"}")
+R=$(post /api/v1/alipay/create_pay_order "$TB" "{\"productId\":\"JJ-01\",\"marketType\":1,\"activityId\":200204,\"teamId\":\"$TEAM\"}")
 [ "$(echo "$R" | json "d['code']")" = "0000" ] || fail "参团下单 $R"
 OB=$(latest "$TB" | json "d['data']['orderList'][0]['orderId']")
 post /api/v1/alipay/mock_paid "$TB" "{\"orderId\":\"$OB\"}" >/dev/null
@@ -70,7 +70,7 @@ echo "   A：$SA，B：$SB，队伍状态：$(sql "SELECT status FROM group_buy_
 echo "   通知任务：$(sql "SELECT CONCAT(notify_type,' ',notify_status) FROM group_buy_market.notify_task WHERE team_id='$TEAM' AND notify_category='trade_settlement'")（1=送达）"
 
 echo "5. 满员队伍再参团被拒"
-R=$(post /api/v1/alipay/create_pay_order "$(token e2ec$SUFFIX)" "{\"productId\":\"TS-2001\",\"marketType\":1,\"activityId\":200103,\"teamId\":\"$TEAM\"}")
+R=$(post /api/v1/alipay/create_pay_order "$(token e2ec$SUFFIX)" "{\"productId\":\"JJ-01\",\"marketType\":1,\"activityId\":200204,\"teamId\":\"$TEAM\"}")
 echo "   $(echo "$R" | json "d['code'] + ' ' + d['info']")"
 [ "$(echo "$R" | json "d['code']")" != "0000" ] || fail "满员队伍不应能参团"
 
@@ -81,7 +81,7 @@ L=$(latest "$TA"); echo "   A：$(echo "$L" | json "d['data']['orderList'][0]['s
 echo "   拼团侧订单状态：$(sql "SELECT status FROM group_buy_market.group_buy_order_list WHERE out_trade_no='$OA'")（2=已退单）"
 
 echo "7. 单独购买 + 取消未付款订单"
-post /api/v1/alipay/create_pay_order "$TA" '{"productId":"TS-1001","marketType":0}' >/dev/null
+post /api/v1/alipay/create_pay_order "$TA" '{"productId":"NR-01","marketType":0}' >/dev/null
 OS=$(latest "$TA" | json "d['data']['orderList'][0]['orderId']")
 R=$(post /api/v1/alipay/refund_order "$TA" "{\"orderId\":\"$OS\"}"); echo "   $(echo "$R" | json "d['data']['message']")"
 

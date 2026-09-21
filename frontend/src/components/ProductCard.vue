@@ -14,10 +14,10 @@ const cover = computed(() => props.product.images[0])
   <article class="exhibit">
     <RouterLink :to="`/products/${product.id}`" class="link">
       <div class="plinth">
-        <img :src="cover.src" :alt="cover.alt" width="800" height="800" loading="lazy" />
+        <img :src="cover.src" :alt="cover.alt" width="550" height="800" loading="lazy" />
       </div>
       <div class="placard">
-        <p class="cat">{{ categoryName(product.category) }}，{{ product.scale }}</p>
+        <p class="cat">{{ categoryName(product.category) }}</p>
         <h3 class="name">{{ product.name }}</h3>
         <p class="spec">{{ product.size }}</p>
         <p v-if="isDemo" class="prices">
@@ -37,8 +37,9 @@ const cover = computed(() => props.product.images[0])
   border-radius: var(--r-plinth);
 }
 
+/* 官方图是 11:16 的竖版棚拍，按原比例铺满 */
 .plinth {
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 11 / 16;
   border-radius: var(--r-plinth);
   background: var(--plinth);
   overflow: hidden;
@@ -47,7 +48,7 @@ const cover = computed(() => props.product.images[0])
 .plinth img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
