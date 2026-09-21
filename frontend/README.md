@@ -45,7 +45,7 @@ npm run build:live   # 真实模式生产构建
 npm run gen:assets   # 重新生成商品 SVG 素材
 ```
 
-端到端测试默认用本机安装的 Microsoft Edge（`channel: msedge`），不需要额外下载浏览器；想用 Chrome 可以设置 `PW_CHANNEL=chrome`。设置 `E2E_BASE_URL` 可以直接测试已部署的站点，例如 `E2E_BASE_URL=http://40.160.139.154:8898/demo/ npm run test:e2e`。
+端到端测试默认用本机安装的 Microsoft Edge（`channel: msedge`），不需要额外下载浏览器；想用 Chrome 可以设置 `PW_CHANNEL=chrome`。设置 `E2E_BASE_URL` 可以直接测试已部署的站点，例如 `E2E_BASE_URL=https://shop.openrelayx.cc/demo/ npm run test:e2e`。
 
 ## 真实模式
 

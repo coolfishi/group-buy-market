@@ -9,14 +9,14 @@
 
 | 线上地址 | 说明 |
 | --- | --- |
-| http://40.160.139.154:8898/ | 商城：微信登录、支付宝沙箱付款、真实拼团链路 |
-| http://40.160.139.154:8898/demo/ | 演示站：本地模拟数据，不需要登录和付款即可走完整流程 |
-| http://40.160.139.154:8898/admin/ | 管理台 |
+| https://shop.openrelayx.cc/ | 商城：微信登录、支付宝沙箱付款、真实拼团链路 |
+| https://shop.openrelayx.cc/demo/ | 演示站：本地模拟数据，不需要登录和付款即可走完整流程 |
+| https://shop.openrelayx.cc/admin/ | 管理台 |
 
 拼团查询接口对外开放：
 
 ```bash
-curl -X POST http://40.160.139.154:8898/api/v1/gbm/index/query_group_buy_market_config \
+curl -X POST https://shop.openrelayx.cc/api/v1/gbm/index/query_group_buy_market_config \
   -H 'Content-Type: application/json' \
   -d '{"userId":"u001","source":"s01","channel":"c01","goodsId":"TS-2001"}'
 ```

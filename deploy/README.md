@@ -1,21 +1,26 @@
 # 服务器部署
 
-线上环境是一台 Ubuntu 24.04 服务器。Nginx 在 `8898` 端口提供商城、演示站、管理台和接口，在 `80` 端口只开放微信回调这一条路径。
+线上环境是一台 Ubuntu 24.04 服务器，域名 `shop.openrelayx.cc` 经 Cloudflare 代理（SSL 模式 Full）回源到服务器。
 
 | 地址 | 内容 |
 | --- | --- |
-| http://40.160.139.154:8898/ | 商城（真实模式：微信登录、支付宝付款、真实拼团） |
-| http://40.160.139.154:8898/demo/ | 演示站（本地模拟数据，不需要登录和付款） |
-| http://40.160.139.154:8898/admin/ | 管理台 |
+| https://shop.openrelayx.cc/ | 商城（真实模式：微信登录、支付宝付款、真实拼团） |
+| https://shop.openrelayx.cc/demo/ | 演示站（本地模拟数据，不需要登录和付款） |
+| https://shop.openrelayx.cc/admin/ | 管理台 |
+
+同样的内容也可以用 `http://40.160.139.154:8898/` 直接访问。
 
 ```
-浏览器 ──▶ Nginx :8898
+浏览器 ──▶ Cloudflare ──▶ Nginx :443 shop.openrelayx.cc（Let's Encrypt 证书，:80 跳转 HTTPS）
+浏览器 ──▶ Nginx :8898（IP 直连）
+            两者共用 snippets/toyspace-site.conf：
             ├── /  /demo/  /admin/          静态页面（SPA 回退）
             ├── /api/v1/gbm/index/           拼团查询 → 127.0.0.1:18091（仅 POST）
             ├── /api/v1/login/ /api/v1/alipay/  商城服务 → 127.0.0.1:13100
             ├── /api/admin/                  管理接口 → 127.0.0.1:13100
             └── 其余 /api/*                  404
-微信服务器 ──▶ Nginx :80  /api/v1/weixin/portal/receive → 商城服务（其余路径断开连接）
+微信 / 支付宝回调 ──▶ https://shop.openrelayx.cc/api/v1/weixin/portal/receive、/api/v1/alipay/alipay_notify_url
+                  （IP 的 80 端口也保留这两条路径，其余请求断开连接）
 
 Docker Compose（项目名 toyspace，内部网络 backend）
   toyspace-app       拼团营销服务（Java）
@@ -45,24 +50,24 @@ cd /opt/toyspace-backend && sudo docker compose up -d mall   # 修改后重启�
 1. 打开 [微信公众平台接口测试号](https://mp.weixin.qq.com/debug/cgi-bin/sandbox?t=sandbox/login)，记下 appID 和 appsecret。
 2. 在 `mall.env` 里填好 `WECHAT_APP_ID` 和 `WECHAT_APP_SECRET`。`WECHAT_TOKEN` 自己定一个随机字符串，然后重启商城服务。
 3. 在测试号页面的“接口配置信息”里填写：
-   - URL：`http://40.160.139.154/api/v1/weixin/portal/receive`
+   - URL：`https://shop.openrelayx.cc/api/v1/weixin/portal/receive`（`http://40.160.139.154/api/v1/weixin/portal/receive` 同样可用）
    - Token：与 `WECHAT_TOKEN` 相同
 
    提交时微信会校验签名，显示“配置成功”即可。
-4. 打开商城登录页，用微信扫码（首次需关注测试号），网页会自动登录。
+4. 打开 https://shop.openrelayx.cc/login ，用微信扫码（首次需关注测试号），网页会自动登录。
 
 **支付宝（开放平台沙箱）**
 
 1. 登录 [支付宝开放平台](https://open.alipay.com) 控制台，进入“沙箱应用”。
 2. 记下 APPID，在“开发信息”里选择“系统默认密钥”，复制应用私钥和支付宝公钥。
 3. 填写 `ALIPAY_APP_ID`、`ALIPAY_PRIVATE_KEY`、`ALIPAY_PUBLIC_KEY`。密钥整段写在一行里，然后重启商城服务。
-4. 付款时使用沙箱提供的买家账号。付款结果会通过异步通知回调到 `http://40.160.139.154:8898/api/v1/alipay/alipay_notify_url`；如果通知没有到达，商城每 20 秒也会主动查询一次。
+4. 付款时使用沙箱提供的买家账号。付款结果会通过异步通知回调到 `https://shop.openrelayx.cc/api/v1/alipay/alipay_notify_url`（`ALIPAY_NOTIFY_URL`）；如果通知没有到达，商城每 20 秒也会主动查询一次。
 
 配好后，管理台“概览”里的接入状态会变成“已配置”。
 
 ## 管理台
 
-地址：http://40.160.139.154:8898/admin/ ，用户名 `admin`。密码在服务器上查看：
+地址：https://shop.openrelayx.cc/admin/ ，用户名 `admin`。密码在服务器上查看：
 
 ```bash
 sudo grep ADMIN_PASSWORD /opt/toyspace-backend/mall.env
@@ -92,7 +97,16 @@ mysql/sql/2-29-group_buy_market.sql
 integration-test.sh       真实链路集成测试
 ```
 
-静态页面在 `/var/www/toyspace`、`/var/www/toyspace-demo`、`/var/www/toyspace-admin`。Nginx 配置见 [nginx-toyspace.conf](nginx-toyspace.conf) 和 [nginx-toyspace-wechat.conf](nginx-toyspace-wechat.conf)。
+静态页面在 `/var/www/toyspace`、`/var/www/toyspace-demo`、`/var/www/toyspace-admin`。Nginx 配置在 [nginx/](nginx/)：
+
+| 文件 | 服务器上的位置 | 作用 |
+| --- | --- | --- |
+| `toyspace-site.conf` | `/etc/nginx/snippets/` | 站点公共配置：静态页面、接口代理与拦截 |
+| `toyspace-domain.conf` | `sites-available/toyspace-domain` | shop.openrelayx.cc：80 跳转、443 证书、Cloudflare 真实 IP |
+| `toyspace-8898.conf` | `sites-available/toyspace` | IP 直连 8898 端口 |
+| `toyspace-ip80.conf` | `sites-available/toyspace-wechat` | IP 的 80 端口只放行微信与支付宝回调 |
+
+`/etc/nginx/snippets/cloudflare-realip.conf` 由 Cloudflare 公布的地址段生成（`https://www.cloudflare.com/ips-v4`、`ips-v6`），地址段变化时重新生成即可。证书由 certbot 用 webroot（`/var/www/certbot`）方式签发，系统的 certbot 定时任务自动续期。
 
 ## 更新
 
