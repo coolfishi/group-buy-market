@@ -1,0 +1,97 @@
+# 玩集 TOYSPACE 拼团营销服务
+# 所有中间件只在内部网络可见，应用仅绑定 127.0.0.1，由 Nginx 反向代理对外
+name: toyspace
+
+services:
+  mysql:
+    image: mysql:8.0.32
+    container_name: toyspace-mysql
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - ./mysql/conf/my.cnf:/etc/mysql/conf.d/mysql.cnf:ro
+      - ./mysql/sql:/docker-entrypoint-initdb.d:ro
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    networks: [backend]
+
+  redis:
+    image: redis:6.2
+    container_name: toyspace-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [backend]
+
+  rabbitmq:
+    image: rabbitmq:3.12.9
+    container_name: toyspace-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: toyspace
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+    networks: [backend]
+
+  app:
+    image: eclipse-temurin:8-jre
+    container_name: toyspace-app
+    restart: unless-stopped
+    depends_on:
+      mysql: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+    working_dir: /app
+    command: ["java", "-Xms256m", "-Xmx768m", "-jar", "/app/group-buy-market-app.jar"]
+    environment:
+      TZ: Asia/Shanghai
+      SPRING_PROFILES_ACTIVE: prod
+      SERVER_PORT: "8091"
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/group_buy_market?useUnicode=true&characterEncoding=utf8&autoReconnect=true&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: "5"
+      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: "10"
+      SPRING_RABBITMQ_ADDRESSES: rabbitmq
+      SPRING_RABBITMQ_PORT: "5672"
+      SPRING_RABBITMQ_USERNAME: toyspace
+      SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      REDIS_SDK_CONFIG_HOST: redis
+      REDIS_SDK_CONFIG_PORT: "6379"
+      XFG_WRENCH_CONFIG_REGISTER_HOST: redis
+      XFG_WRENCH_CONFIG_REGISTER_PORT: "6379"
+    volumes:
+      - ./app/group-buy-market-app.jar:/app/group-buy-market-app.jar:ro
+      - ./logs:/data/log
+    ports:
+      - "127.0.0.1:18091:8091"
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+    networks: [backend]
+
+volumes:
+  mysql-data:
+  redis-data:
+  rabbitmq-data:
+
+networks:
+  backend:

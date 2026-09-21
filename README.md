@@ -7,7 +7,15 @@
 
 前端自带演示模式，不启动后端也能完整体验“浏览 → 登录 → 开团/参团 → 支付 → 订单 → 退单”的流程。
 
-**在线演示**：http://40.160.139.154:8898 （演示模式，数据只保存在你的浏览器里，不会真实扣款）
+**在线演示**：http://40.160.139.154:8898 （前端为演示模式，数据只保存在你的浏览器里，不会真实扣款）
+
+**线上接口**：拼团营销服务已部署在同一台服务器，可以直接调用查询接口：
+
+```bash
+curl -X POST http://40.160.139.154:8898/api/v1/gbm/index/query_group_buy_market_config \
+  -H 'Content-Type: application/json' \
+  -d '{"userId":"u001","source":"s01","channel":"c01","goodsId":"9890001"}'
+```
 
 ## 功能
 
@@ -105,6 +113,10 @@ npm run dev
    java -jar group-buy-market-app/target/group-buy-market-app.jar
    ```
 
+### 服务器部署
+
+用 Docker Compose 部署后端和中间件、Nginx 托管前端，配置文件和步骤见 [deploy/README.md](deploy/README.md)。
+
 ### 前端对接后端
 
 复制 `frontend/.env.live.example` 为 `frontend/.env.live.local`，填写服务地址、渠道和商品 SKU 映射，然后执行 `npm run dev:live`。变量说明、接口列表和 Nginx 部署方式见 [frontend/README.md](frontend/README.md)。
@@ -129,6 +141,7 @@ npm run test:e2e    # 端到端测试：核心购买流程，375 / 768 / 1440 �
 ├── group-buy-market-infrastructure/   基础设施层
 ├── group-buy-market-trigger/          触发层
 ├── group-buy-market-types/            通用类型
+├── deploy/                            服务器部署：Docker Compose、Nginx
 └── docs/
     ├── dev-ops/                       Docker Compose、Nginx、MySQL、监控配置
     └── tag/                           各阶段版本的部署文件
