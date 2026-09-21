@@ -12,7 +12,9 @@
     "typecheck": "vue-tsc --noEmit",
     "test": "vitest run",
     "gen:assets": "node scripts/generate-product-art.mjs",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "build:demo-sub": "vue-tsc --noEmit && vite build --base /demo/",
+    "build:server": "vue-tsc --noEmit && vite build --mode server"
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "^5.3.0",

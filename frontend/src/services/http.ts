@@ -74,6 +74,7 @@ export interface RequestOptions {
   query?: Record<string, string>
   timeoutMs: number
   signal?: AbortSignal
+  headers?: Record<string, string>
 }
 
 export async function request<T>(url: string, options: RequestOptions): Promise<T> {
@@ -92,7 +93,7 @@ export async function request<T>(url: string, options: RequestOptions): Promise<
   try {
     response = await fetch(fullUrl, {
       method: options.method ?? 'POST',
-      headers: options.body !== undefined ? { 'Content-Type': 'application/json' } : undefined,
+      headers: { ...(options.body !== undefined ? { 'Content-Type': 'application/json' } : {}), ...options.headers },
       body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
       signal: controller.signal,
     })

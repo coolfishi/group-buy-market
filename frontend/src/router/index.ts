@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory, type RouterHistory } from 'vue-router'
 import { useSessionStore } from '@/stores/session'
 
-export function createAppRouter(history: RouterHistory = createWebHistory()) {
+export function createAppRouter(history: RouterHistory = createWebHistory(import.meta.env.BASE_URL)) {
   const router = createRouter({
     history,
     routes: [

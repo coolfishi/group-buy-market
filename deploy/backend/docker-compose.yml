@@ -1,5 +1,5 @@
-# 玩集 TOYSPACE 拼团营销服务
-# 所有中间件只在内部网络可见，应用仅绑定 127.0.0.1，由 Nginx 反向代理对外
+# 玩集 TOYSPACE：拼团营销服务 + 商城服务
+# 所有中间件只在内部网络可见；拼团服务与商城服务仅绑定 127.0.0.1，由 Nginx 反向代理对外
 name: toyspace
 
 services:
@@ -83,6 +83,35 @@ services:
       - ./logs:/data/log
     ports:
       - "127.0.0.1:18091:8091"
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+    networks: [backend]
+
+  mall:
+    build: ./mall
+    image: toyspace-mall:latest
+    container_name: toyspace-mall
+    restart: unless-stopped
+    depends_on:
+      mysql: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      app: { condition: service_started }
+    env_file:
+      - mall.env
+    environment:
+      TZ: Asia/Shanghai
+      PORT: "3100"
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_USER: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      GBM_BASE_URL: http://app:8091
+      INTERNAL_BASE_URL: http://mall:3100
+    ports:
+      - "127.0.0.1:13100:3100"
     logging:
       driver: json-file
       options: { max-size: "10m", max-file: "3" }

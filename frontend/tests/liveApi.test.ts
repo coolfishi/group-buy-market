@@ -11,7 +11,7 @@ const config = readConfig({
   VITE_PAY_ALLOWED_ORIGINS: 'https://openapi.alipay.com',
   VITE_REQUEST_TIMEOUT_MS: '2000',
 })
-const user = { userId: 'oUser123456', displayName: '微信用户' }
+const user = { userId: 'oUser123456', displayName: '微信用户', token: 'signed.token' }
 const json = (body: unknown) => new Response(JSON.stringify(body), { headers: { 'Content-Type': 'application/json' } })
 
 function mockFetch(handler: (url: string, body: any) => unknown) {
@@ -133,6 +133,23 @@ describe('订单', () => {
     await expect(api.refund(user, 'A2')).resolves.toBe('WAIT_REFUND')
     mockFetch(() => ({ code: '0000', data: { success: false, message: '订单已发货' } }))
     await expect(api.refund(user, 'A2')).rejects.toMatchObject({ kind: 'business', message: '订单已发货' })
+  })
+
+  it('商城接口携带登录令牌；没有令牌时不发请求', async () => {
+    const fetch = mockFetch(() => ({ code: '0000', data: { orderList: [], hasMore: false, lastId: null } }))
+    const api = createLiveApi(config, async () => {})
+    await api.listOrders(user, null, 10)
+    expect((fetch.mock.calls[0][1].headers as Record<string, string>).Authorization).toBe('Bearer signed.token')
+    await expect(api.listOrders({ userId: 'x', displayName: 'x' }, null, 10)).rejects.toMatchObject({ kind: 'unauthorized' })
+    expect(fetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('扫码登录返回令牌与 openid', async () => {
+    mockFetch(() => ({ code: '0000', data: { token: 't.sig', userId: 'oOpen', displayName: '微信用户 oOp***pen' } }))
+    const api = createLiveApi(config, async () => {})
+    await expect(api.wechatCheckLogin('tk', 'SCENE')).resolves.toEqual({ token: 't.sig', userId: 'oOpen', displayName: '微信用户 oOp***pen' })
+    mockFetch(() => ({ code: '0001', info: '未登录' }))
+    await expect(api.wechatCheckLogin('tk', 'SCENE')).resolves.toBeNull()
   })
 
   it('登录失效向上抛出', async () => {

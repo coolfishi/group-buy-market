@@ -9,7 +9,8 @@ export default defineConfig({
   timeout: 60_000,
   fullyParallel: false,
   use: {
-    baseURL: remote ?? 'http://localhost:5174',
+    // 以 / 结尾，测试里用相对路径，便于测试部署在子路径（如 /demo/）的站点
+    baseURL: remote ? remote.replace(/\/?$/, '/') : 'http://localhost:5174/',
     channel: process.env.PW_CHANNEL ?? 'msedge',
     trace: 'retain-on-failure',
   },

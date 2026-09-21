@@ -1,0 +1,31 @@
+{
+  "name": "toyspace-mall",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "玩集 TOYSPACE 商城服务：微信登录、支付宝支付、订单与管理后台接口",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@fastify/formbody": "^9.0.0",
+    "alipay-sdk": "^4.14.0",
+    "fast-xml-parser": "^5.11.1",
+    "fastify": "^5.12.5",
+    "ioredis": "^6.0.0",
+    "mysql2": "^3.24.4"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.1"
+  }
+}

@@ -1,4 +1,5 @@
 import type { CategoryId, Product } from '@/types'
+import { asset } from '@/utils/asset'
 
 export const categories: { id: CategoryId; name: string }[] = [
   { id: 'vinyl', name: '潮流公仔' },
@@ -11,9 +12,9 @@ export function categoryName(id: CategoryId): string {
 }
 
 const images = (id: string, name: string) => [
-  { src: `/art/${id}-main.svg`, alt: `${name}展台正面图` },
-  { src: `/art/${id}-detail.svg`, alt: `${name}头部细节图` },
-  { src: `/art/${id}-box.svg`, alt: `${name}开窗包装图` },
+  { src: asset(`art/${id}-main.svg`), alt: `${name}展台正面图` },
+  { src: asset(`art/${id}-detail.svg`), alt: `${name}头部细节图` },
+  { src: asset(`art/${id}-box.svg`), alt: `${name}开窗包装图` },
 ]
 
 // 六款原创概念演示商品，不涉及任何既有作品或官方授权

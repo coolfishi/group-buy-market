@@ -76,6 +76,12 @@ export function createLiveApi(config: AppConfig, fetchDelay = (ms: number) => ne
     return sku
   }
 
+  /** 商城接口用令牌识别用户，请求体里的 userId 只作兼容 */
+  function auth(user: User): Record<string, string> {
+    if (!user.token) throw new ApiError('unauthorized', '登录已失效，请重新登录。')
+    return { Authorization: `Bearer ${user.token}` }
+  }
+
   function mapOrder(raw: NonNullable<OrderListResponse['orderList']>[number]): Order {
     const localId = raw.productId ? reverseSku.get(String(raw.productId)) : undefined
     const product = localId ? findProduct(localId) : products.find((p) => p.name === raw.productName)
@@ -92,6 +98,7 @@ export function createLiveApi(config: AppConfig, fetchDelay = (ms: number) => ne
   async function listOrders(user: User, lastId: string | null, pageSize: number): Promise<OrderPage> {
     const data = await request<OrderListResponse>(mallUrl('/api/v1/alipay/query_user_order_list'), {
       body: { userId: user.userId, lastId, pageSize },
+      headers: auth(user),
       timeoutMs: config.timeoutMs,
     })
     const orders = (data?.orderList ?? []).map(mapOrder)
@@ -176,12 +183,14 @@ export function createLiveApi(config: AppConfig, fetchDelay = (ms: number) => ne
 
     async wechatCheckLogin(ticket, sceneStr) {
       try {
-        const token = await request<string>(mallUrl('/api/v1/login/check_login_scene'), {
-          method: 'GET',
-          query: { ticket, sceneStr },
-          timeoutMs: config.timeoutMs,
-        })
-        return token ? { userId: token, displayName: `微信用户 ${maskUserId(token)}` } : null
+        const data = await request<string | { token: string; userId: string; displayName?: string }>(
+          mallUrl('/api/v1/login/check_login_scene'),
+          { method: 'GET', query: { ticket, sceneStr }, timeoutMs: config.timeoutMs },
+        )
+        if (!data) return null
+        // 商城服务返回签名令牌与 openid；兼容只返回 openid 字符串的旧接口
+        if (typeof data === 'string') return { userId: data, displayName: `微信用户 ${maskUserId(data)}`, token: data }
+        return { userId: data.userId, displayName: data.displayName ?? `微信用户 ${maskUserId(data.userId)}`, token: data.token }
       } catch (e) {
         // 未扫码时后端返回非成功码，视为等待
         if (e instanceof ApiError && e.kind === 'business') return null
@@ -205,6 +214,7 @@ export function createLiveApi(config: AppConfig, fetchDelay = (ms: number) => ne
                 activityId: req.activityId,
                 marketType: 1,
               },
+        headers: auth(user),
         timeoutMs: config.timeoutMs,
       })
       return { kind: 'redirect', form: parsePayForm(html, config.payAllowedOrigins), startedAt: Date.now() }
@@ -225,6 +235,7 @@ export function createLiveApi(config: AppConfig, fetchDelay = (ms: number) => ne
     async refund(user, orderId) {
       const data = await request<RefundResponse>(mallUrl('/api/v1/alipay/refund_order'), {
         body: { userId: user.userId, orderId },
+        headers: auth(user),
         timeoutMs: config.timeoutMs,
       })
       if (!data?.success) {

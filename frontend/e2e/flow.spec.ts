@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 
-async function fresh(page: Page, path = '/') {
+async function fresh(page: Page, path = './') {
   await page.goto(path)
   await page.evaluate(() => {
     localStorage.clear()
@@ -56,46 +56,46 @@ test('浏览筛选 → 登录 → 参团 → 模拟支付 → 订单 → 退单�
 })
 
 test('开团后取消支付，订单关闭', async ({ page }) => {
-  await fresh(page, '/login')
+  await fresh(page, 'login')
   await page.getByRole('button', { name: '用体验账号登录' }).click()
   await expect(page).not.toHaveURL(/\/login/)
-  await page.goto('/products/TS-3002')
+  await page.goto('products/TS-3002')
   await page.locator('.buy').getByRole('button', { name: /发起拼团/ }).click()
   const dialog = page.getByRole('dialog')
   await dialog.getByRole('button', { name: /确认开团/ }).click()
   await dialog.getByRole('button', { name: '取消支付' }).click()
   await expect(dialog.getByRole('heading', { name: '已取消支付' })).toBeVisible()
-  await page.goto('/orders')
+  await page.goto('orders')
   await expect(page.locator('li.order').first().getByText('已关闭')).toBeVisible()
   await expect(page.locator('li.order').first().getByText('已取消支付')).toBeVisible()
 })
 
 test('过期与满员的拼团不能参加', async ({ page }) => {
-  await fresh(page, '/products/TS-1001')
+  await fresh(page, 'products/TS-1001')
   await expect(page.locator('#teams').getByRole('button', { name: '已满员' })).toBeDisabled()
-  await page.goto('/products/TS-3001')
+  await page.goto('products/TS-3001')
   await expect(page.locator('#teams').getByRole('button', { name: '已结束' })).toBeDisabled()
 })
 
 test('提交期间按钮禁用，防止重复下单', async ({ page }) => {
-  await fresh(page, '/login')
+  await fresh(page, 'login')
   await page.getByRole('button', { name: '用体验账号登录' }).click()
   await expect(page).not.toHaveURL(/\/login/)
-  await page.goto('/products/TS-2002')
+  await page.goto('products/TS-2002')
   await page.locator('.buy').getByRole('button', { name: /单独购买/ }).click()
   const btn = page.getByRole('dialog').getByRole('button', { name: /确认购买/ })
   await btn.click()
   await expect(page.getByRole('dialog').getByRole('button', { name: /正在提交|确认支付/ }).last()).toBeVisible()
   await page.getByRole('dialog').getByRole('button', { name: /确认支付/ }).click()
-  await page.goto('/orders')
+  await page.goto('orders')
   await expect(page.locator('li.order')).toHaveCount(1)
 })
 
 test('弹窗键盘操作与焦点恢复', async ({ page }) => {
-  await fresh(page, '/login')
+  await fresh(page, 'login')
   await page.getByRole('button', { name: '用体验账号登录' }).click()
   await expect(page).not.toHaveURL(/\/login/)
-  await page.goto('/products/TS-1002')
+  await page.goto('products/TS-1002')
   const trigger = page.locator('.buy').getByRole('button', { name: /单独购买/ })
   await trigger.focus()
   await page.keyboard.press('Enter')
@@ -106,6 +106,6 @@ test('弹窗键盘操作与焦点恢复', async ({ page }) => {
 })
 
 test('订单页需要登录', async ({ page }) => {
-  await fresh(page, '/orders')
+  await fresh(page, 'orders')
   await expect(page).toHaveURL(/\/login\?redirect=(%2F|\/)orders/)
 })

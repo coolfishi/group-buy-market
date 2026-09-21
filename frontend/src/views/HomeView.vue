@@ -7,6 +7,7 @@ import { useNow } from '@/composables/useNow'
 import { categories, filterProducts, findProduct, products } from '@/data/products'
 import { api, errorMessage } from '@/services'
 import type { ActiveTeam, CategoryId } from '@/types'
+import { asset } from '@/utils/asset'
 import { formatCountdown } from '@/utils/format'
 
 const route = useRoute()
@@ -58,7 +59,7 @@ onMounted(loadTeams)
       <p class="wordmark" aria-hidden="true">TOYSPACE</p>
       <img
         class="hero-figures"
-        src="/art/hero.svg"
+        :src="asset('art/hero.svg')"
         alt="侦察机甲、星轨旅人和夜航猫船长站在三座展台上"
         width="1200"
         height="800"

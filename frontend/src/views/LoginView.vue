@@ -2,10 +2,11 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { usePolling } from '@/composables/usePolling'
-import { api, errorMessage } from '@/services'
+import { api, errorMessage, isApiError } from '@/services'
 import { useSessionStore } from '@/stores/session'
 import { useToastStore } from '@/stores/toast'
 import type { User } from '@/types'
+import { asset } from '@/utils/asset'
 import { safeRedirect } from '@/utils/intent'
 
 const route = useRoute()
@@ -41,7 +42,7 @@ async function demoLogin() {
 
 // 真实模式：微信扫码
 const QR_TTL_MS = 5 * 60_000
-const qrState = ref<'loading' | 'ready' | 'expired' | 'error'>('loading')
+const qrState = ref<'loading' | 'ready' | 'expired' | 'error' | 'unavailable'>('loading')
 const qrSrc = ref('')
 let ticket = ''
 let sceneStr = ''
@@ -82,6 +83,11 @@ async function loadQr() {
       }
     }, QR_TTL_MS)
   } catch (e) {
+    // 服务端还没配置微信公众号：不是临时故障，不提示重试
+    if (isApiError(e) && e.code === 'WECHAT_UNCONFIGURED') {
+      qrState.value = 'unavailable'
+      return
+    }
     error.value = errorMessage(e)
     qrState.value = 'error'
   }
@@ -95,7 +101,7 @@ onMounted(() => {
 <template>
   <section class="container login">
     <div class="art" aria-hidden="true">
-      <img src="/art/TS-1002-main.svg" alt="" width="800" height="800" />
+      <img :src="asset('art/TS-1002-main.svg')" alt="" width="800" height="800" />
     </div>
 
     <div class="panel">
@@ -114,6 +120,14 @@ onMounted(() => {
           <span v-if="busy" class="spinner" aria-hidden="true" />
           {{ busy ? '正在登录' : '用体验账号登录' }}
         </button>
+      </div>
+
+      <div v-else-if="qrState === 'unavailable'" class="method">
+        <div class="account">
+          <p class="acc-name">微信登录暂未开通</p>
+          <p class="acc-note">商城正在接入微信公众号，开通后就可以扫码登录下单。现在可以先在演示站体验完整的拼团流程，演示站的订单不会真实扣款。</p>
+        </div>
+        <a :href="asset('demo/')" class="btn btn-primary btn-block">打开演示站</a>
       </div>
 
       <div v-else class="method">

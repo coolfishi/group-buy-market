@@ -1,0 +1,281 @@
+:root {
+  --paper: #faf7f2;
+  --panel: #ffffff;
+  --plinth: #efe8dd;
+  --line: #e4dccf;
+  --ink: #22201e;
+  --graphite: #6b6560;
+  --violet: #6a2bff;
+  --violet-press: #5114e0;
+  --violet-mist: #eee7ff;
+  --ok: #1d7550;
+  --ok-bg: #e2f1e8;
+  --warn: #8f5500;
+  --warn-bg: #fbeed6;
+  --danger: #b0301b;
+  --danger-bg: #fbe5df;
+
+  --font-display: 'Bricolage Grotesque Variable', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-body: 'PingFang SC', 'Noto Sans SC', 'Source Han Sans SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, sans-serif;
+  --sidebar: 220px;
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: 1.625rem;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+
+h2 {
+  font-size: 1.0625rem;
+  font-weight: 700;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--violet);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.num {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+}
+
+.muted {
+  color: var(--graphite);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  border: 1.5px solid transparent;
+  border-radius: 999px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  background: transparent;
+  text-decoration: none;
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--violet);
+  color: #fff;
+}
+
+.btn-primary:not(:disabled):hover {
+  background: var(--violet-press);
+}
+
+.btn-secondary {
+  border-color: var(--ink);
+}
+
+.btn-secondary:not(:disabled):hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.btn-danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.btn-danger:not(:disabled):hover {
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn-link {
+  height: auto;
+  padding: 2px 4px;
+  border-radius: 4px;
+  color: var(--violet);
+  font-weight: 500;
+}
+
+.btn-link:not(:disabled):hover {
+  text-decoration: underline;
+}
+
+.btn-link.danger {
+  color: var(--danger);
+}
+
+.field {
+  display: grid;
+  gap: 4px;
+}
+
+.field > span {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.field small {
+  color: var(--graphite);
+  font-size: 12px;
+}
+
+.input,
+select.input,
+textarea.input {
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+}
+
+textarea.input {
+  height: auto;
+  padding: 8px 10px;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--ink);
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.stack {
+  display: grid;
+  gap: 14px;
+}
+
+/* 数据表：细线分隔、数字等宽，不用卡片阴影 */
+.table-wrap {
+  overflow-x: auto;
+  border-top: 2px solid var(--ink);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  white-space: nowrap;
+}
+
+th,
+td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+th {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--graphite);
+}
+
+td.num,
+th.num {
+  text-align: right;
+}
+
+tbody tr:hover {
+  background: #fdfbf7;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.toolbar .spacer {
+  flex: 1;
+}
+
+.empty {
+  padding: 40px 0;
+  text-align: center;
+  color: var(--graphite);
+}
+
+.error-line {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}

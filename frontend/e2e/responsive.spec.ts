@@ -1,14 +1,14 @@
 import { expect, test } from '@playwright/test'
 
 const widths = [375, 768, 1440]
-const pages = ['/', '/products/TS-2001', '/products/TS-3002', '/login', '/orders']
+const pages = ['./', 'products/TS-2001', 'products/TS-3002', 'login', 'orders']
 
 for (const width of widths) {
   test(`${width}px：无横向溢出、图片不变形、操作栏不遮挡`, async ({ page }) => {
     await page.setViewportSize({ width, height: 860 })
-    await page.goto('/login')
+    await page.goto('login')
     await page.evaluate(() => localStorage.clear())
-    await page.goto('/login')
+    await page.goto('login')
     await page.getByRole('button', { name: '用体验账号登录' }).click()
 
     for (const path of pages) {
@@ -29,7 +29,7 @@ for (const width of widths) {
     }
 
     // 手机底部购买栏不遮挡页面最后的内容
-    await page.goto('/products/TS-2001')
+    await page.goto('products/TS-2001')
     await page.waitForLoadState('networkidle')
     const bar = page.getByRole('region', { name: '购买' })
     if (width <= 720) {

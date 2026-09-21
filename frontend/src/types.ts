@@ -92,4 +92,6 @@ export type CheckoutResult =
 export interface User {
   userId: string
   displayName: string
+  /** 真实模式：商城服务签发的登录令牌 */
+  token?: string
 }
