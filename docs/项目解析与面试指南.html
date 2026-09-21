@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>拼团营销系统面试指南</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  :root {
+    --bg: #F3F5F8;
+    --surface: #FFFFFF;
+    --surface-2: #E9EDF2;
+    --ink: #1B2431;
+    --ink-2: #4A5563;
+    --muted: #7A8494;
+    --line: #D5DBE4;
+    --accent: #C9382A;
+    --accent-soft: #FBE9E6;
+    --second: #1F6F8B;
+    --second-soft: #E3F0F5;
+    --code-bg: #EEF1F5;
+    --warn-soft: #FFF4DC;
+    --warn: #9A6400;
+    --serif: "Noto Serif SC", "Songti SC", "SimSun", serif;
+    --sans: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    --mono: "JetBrains Mono", "Cascadia Code", Consolas, monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12171E;
+      --surface: #1A2129;
+      --surface-2: #232C36;
+      --ink: #E6EAF0;
+      --ink-2: #B7C0CC;
+      --muted: #7F8A99;
+      --line: #2F3A47;
+      --accent: #F0705F;
+      --accent-soft: #3A2320;
+      --second: #5FB3CF;
+      --second-soft: #16303A;
+      --code-bg: #0F141A;
+      --warn-soft: #33290F;
+      --warn: #E5B65A;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12171E;
+    --surface: #1A2129;
+    --surface-2: #232C36;
+    --ink: #E6EAF0;
+    --ink-2: #B7C0CC;
+    --muted: #7F8A99;
+    --line: #2F3A47;
+    --accent: #F0705F;
+    --accent-soft: #3A2320;
+    --second: #5FB3CF;
+    --second-soft: #16303A;
+    --code-bg: #0F141A;
+    --warn-soft: #33290F;
+    --warn: #E5B65A;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.85;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--second); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  :focus-visible { outline: 2px solid var(--second); outline-offset: 2px; }
+
+  .shell { display: grid; grid-template-columns: 260px minmax(0, 1fr); min-height: 100vh; }
+  nav.toc {
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+    padding: 28px 20px 40px 24px;
+    border-right: 1px solid var(--line);
+    background: var(--surface);
+    font-size: 13.5px;
+  }
+  nav.toc .brand { font-family: var(--serif); font-weight: 700; font-size: 17px; line-height: 1.3; margin-bottom: 4px; }
+  nav.toc .brand-sub { color: var(--muted); font-size: 12px; margin-bottom: 22px; letter-spacing: .04em; }
+  nav.toc ol { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 2px; }
+  nav.toc li a { display: block; padding: 5px 8px; border-radius: 4px; color: var(--ink-2); }
+  nav.toc li a:hover { background: var(--surface-2); text-decoration: none; color: var(--ink); }
+  nav.toc li a.active { background: var(--accent-soft); color: var(--accent); font-weight: 500; }
+  nav.toc li.sub a { padding-left: 22px; font-size: 12.5px; color: var(--muted); }
+  nav.toc .toc-ch { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-right: 6px; }
+
+  main { padding: 48px 56px 96px; }
+  article { max-width: 46em; }
+
+  header.hero { margin-bottom: 40px; padding-bottom: 28px; border-bottom: 2px solid var(--ink); }
+  .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+  h1 { font-family: var(--serif); font-size: 38px; line-height: 1.25; margin: 0 0 14px; font-weight: 700; text-wrap: balance; }
+  .lede { font-size: 17px; color: var(--ink-2); max-width: 40em; margin: 0 0 18px; }
+  .readpath { display: flex; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--muted); align-items: center; }
+  .readpath span.step { background: var(--surface-2); padding: 2px 10px; border-radius: 3px; color: var(--ink-2); font-family: var(--mono); font-size: 12px; }
+
+  section { margin-top: 64px; scroll-margin-top: 24px; }
+  h2 { font-family: var(--serif); font-size: 28px; line-height: 1.3; margin: 0 0 8px; font-weight: 700; text-wrap: balance; }
+  h2 .num { font-family: var(--mono); font-size: 14px; color: var(--accent); display: block; letter-spacing: .1em; margin-bottom: 6px; font-weight: 600; }
+  h3 { font-family: var(--serif); font-size: 20px; margin: 40px 0 10px; font-weight: 700; scroll-margin-top: 24px; }
+  h4 { font-size: 15.5px; margin: 26px 0 6px; font-weight: 700; color: var(--ink); }
+  p { margin: 0 0 14px; }
+  ul, ol { padding-left: 1.4em; margin: 0 0 14px; }
+  li { margin-bottom: 5px; }
+  strong { font-weight: 700; }
+  code { font-family: var(--mono); font-size: .86em; background: var(--code-bg); padding: 1px 5px; border-radius: 3px; color: var(--ink); }
+  pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; overflow-x: auto; margin: 0 0 16px; font-family: var(--mono); font-size: 13px; line-height: 1.6; }
+  pre code { background: none; padding: 0; font-size: inherit; }
+  pre.mermaid { background: var(--surface); text-align: center; padding: 12px; }
+
+  .tablewrap { overflow-x: auto; margin: 0 0 18px; border: 1px solid var(--line); border-radius: 6px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; background: var(--surface); }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; line-height: 1.6; }
+  th { background: var(--surface-2); font-weight: 700; font-size: 13px; letter-spacing: .02em; white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+  td code { white-space: nowrap; }
+  .num-col { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+  .callout { border-left: 3px solid var(--accent); background: var(--accent-soft); padding: 12px 16px; margin: 0 0 18px; border-radius: 0 6px 6px 0; }
+  .callout.note { border-left-color: var(--second); background: var(--second-soft); }
+  .callout.warn { border-left-color: var(--warn); background: var(--warn-soft); }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout .label { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; display: block; margin-bottom: 4px; color: var(--accent); }
+  .callout.note .label { color: var(--second); }
+  .callout.warn .label { color: var(--warn); }
+
+  .flow { list-style: none; padding: 0; margin: 0 0 18px; counter-reset: step; }
+  .flow li { position: relative; padding-left: 40px; margin-bottom: 10px; counter-increment: step; }
+  .flow li::before { content: counter(step); position: absolute; left: 0; top: 4px; width: 26px; height: 26px; border-radius: 50%; background: var(--ink); color: var(--bg); font-family: var(--mono); font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+  .flow li b { color: var(--ink); }
+
+  .hl { display: grid; gap: 12px; margin-bottom: 18px; }
+  .hl-item { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; }
+  .hl-item h4 { margin: 0 0 6px; font-size: 15px; }
+  .hl-item h4 .k { font-family: var(--mono); color: var(--accent); font-size: 12px; margin-right: 8px; }
+  .hl-item p { margin: 0 0 4px; font-size: 14.5px; color: var(--ink-2); }
+  .hl-item .where { font-size: 13px; color: var(--muted); }
+
+  .resume { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 18px 22px; margin-bottom: 18px; }
+  .resume h4 { margin: 0 0 10px; }
+  .resume ul { margin-bottom: 0; }
+
+  .qa-tools { display: flex; gap: 10px; align-items: center; margin: 10px 0 20px; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
+  .qa-tools button { font: inherit; font-size: 13px; padding: 5px 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 4px; cursor: pointer; }
+  .qa-tools button:hover { background: var(--surface-2); }
+  details.qa { border-bottom: 1px solid var(--line); padding: 4px 0; }
+  details.qa summary { cursor: pointer; list-style: none; display: flex; gap: 12px; padding: 10px 0; font-weight: 500; line-height: 1.5; }
+  details.qa summary::-webkit-details-marker { display: none; }
+  details.qa summary .qn { font-family: var(--mono); color: var(--accent); font-size: 13px; flex: 0 0 34px; padding-top: 3px; font-weight: 600; }
+  details.qa summary .arrow { margin-left: auto; color: var(--muted); transition: transform .15s; flex: 0 0 auto; padding-top: 3px; }
+  details.qa[open] summary .arrow { transform: rotate(90deg); }
+  details.qa .ans { padding: 2px 0 14px 46px; font-size: 15px; }
+  details.qa .ans .tag { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; color: var(--muted); display: block; margin-top: 8px; }
+  details.qa .ans p { margin-bottom: 6px; }
+  @media (prefers-reduced-motion: reduce) { details.qa summary .arrow { transition: none; } }
+
+  .pitfall td:first-child { white-space: nowrap; }
+
+  .oral-group { margin-bottom: 38px; }
+  .grp-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; padding-bottom: 8px; margin: 36px 0 18px; border-bottom: 2px solid var(--ink); }
+  .grp-head .gname { font-family: var(--serif); font-size: 20px; font-weight: 700; }
+  .grp-head .gpath { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  .grp-head .gcount { margin-left: auto; font-family: var(--mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .oral-item { margin-bottom: 26px; }
+  .oral-q { display: flex; gap: 10px; align-items: baseline; font-weight: 700; font-size: 16px; line-height: 1.6; margin-bottom: 8px; flex-wrap: wrap; }
+  .oral-q .qnum { font-family: var(--mono); color: var(--accent); font-size: 14px; flex: 0 0 auto; }
+  .must { font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em; background: var(--accent); color: var(--surface); padding: 1px 7px; border-radius: 3px; flex: 0 0 auto; align-self: center; }
+  :root[data-theme="dark"] .must, :root:not([data-theme="light"]) .must { color: #12171E; }
+  .script { border-left: 3px solid var(--second); background: var(--surface); border-radius: 0 6px 6px 0; padding: 14px 20px 16px; position: relative; }
+  .script .slabel { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--second); display: block; margin-bottom: 8px; }
+  .script p { font-size: 15.5px; line-height: 2.05; margin: 0 0 12px; color: var(--ink); }
+  .script p:last-child { margin-bottom: 0; }
+  .tips { background: var(--surface-2); border-radius: 6px; padding: 18px 22px; margin-top: 28px; }
+  .tips h4 { margin-top: 0; }
+  .tips p { margin-bottom: 10px; font-size: 15px; }
+  .tips p:last-child { margin-bottom: 0; }
+
+  .topic { font-family: var(--mono); font-size: 10.5px; letter-spacing: .04em; background: var(--second-soft); color: var(--second); padding: 1px 7px; border-radius: 3px; flex: 0 0 auto; align-self: center; font-weight: 500; }
+  .mock-tip { font-size: 14px; color: var(--ink-2); margin: 0 0 10px; }
+  .mock-tip b { color: var(--accent); font-weight: 600; }
+  .ex-label { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); display: block; margin: 12px 0 6px; }
+  .ex-setup { font-size: 14.5px; color: var(--ink-2); margin: 0 0 8px; }
+  .ex-after { font-size: 14px; color: var(--ink-2); margin: 0 0 12px; }
+  .followup { margin-top: 18px; padding-left: 16px; border-left: 2px dashed var(--line); }
+  .followup .fq { font-weight: 700; font-size: 15px; margin: 0 0 8px; }
+
+  footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+
+  @media (max-width: 900px) {
+    .shell { grid-template-columns: 1fr; }
+    nav.toc { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--line); }
+    nav.toc ol { flex-direction: row; flex-wrap: wrap; gap: 4px; }
+    nav.toc li.sub { display: none; }
+    main { padding: 28px 18px 64px; }
+    h1 { font-size: 30px; }
+    h2 { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+<nav class="toc" id="toc">
+  <div class="brand">拼团营销系统<br>面试指南</div>
+  <div class="brand-sub">group-buy-market · DDD · Java 8</div>
+  <ol>
+    <li><a href="#ch1"><span class="toc-ch">01</span>一句话认识这个项目</a></li>
+    <li><a href="#ch2"><span class="toc-ch">02</span>项目怎么分层</a></li>
+    <li><a href="#ch3"><span class="toc-ch">03</span>四条核心业务流程</a></li>
+    <li class="sub"><a href="#f1">试算：策略树</a></li>
+    <li class="sub"><a href="#f2">锁单：责任链 + Redis 抢库存</a></li>
+    <li class="sub"><a href="#f3">结算：本地消息表</a></li>
+    <li class="sub"><a href="#f4">退单：策略 + MQ</a></li>
+    <li><a href="#ch4"><span class="toc-ch">04</span>技术亮点</a></li>
+    <li><a href="#ch5"><span class="toc-ch">05</span>简历怎么写</a></li>
+    <li><a href="#ch6"><span class="toc-ch">06</span>面试问答 35 题</a></li>
+    <li class="sub"><a href="#qa-a">A 基础理解</a></li>
+    <li class="sub"><a href="#qa-b">B 设计模式</a></li>
+    <li class="sub"><a href="#qa-c">C 并发与分布式</a></li>
+    <li class="sub"><a href="#qa-d">D 可靠性与一致性</a></li>
+    <li class="sub"><a href="#qa-e">E 扩展与追问</a></li>
+    <li><a href="#ch7"><span class="toc-ch">07</span>已知的坑与改进点</a></li>
+    <li><a href="#ch8"><span class="toc-ch">08</span>口语化答题稿 20 题</a></li>
+    <li class="sub"><a href="#o1">试算接口 4 题</a></li>
+    <li class="sub"><a href="#o2">锁单接口 5 题</a></li>
+    <li class="sub"><a href="#o3">结算接口 4 题</a></li>
+    <li class="sub"><a href="#o4">退单接口 4 题</a></li>
+    <li class="sub"><a href="#o5">综合题 3 题</a></li>
+    <li><a href="#ch9"><span class="toc-ch">09</span>模拟面试 18 题</a></li>
+    <li class="sub"><a href="#m3">抢最后一个名额 + 退单追问</a></li>
+    <li class="sub"><a href="#m6">重复结算请求</a></li>
+    <li class="sub"><a href="#round2">第二轮 8 题</a></li>
+    <li class="sub"><a href="#round3">第三轮 幂等 3 题</a></li>
+    <li><a href="#appx"><span class="toc-ch">附</span>接口 / Key / 错误码 / 启动</a></li>
+  </ol>
+</nav>
+
+<main>
+<article>
+
+<header class="hero">
+  <div class="eyebrow">Project Study Guide</div>
+  <h1>拼团营销系统项目解析与面试指南</h1>
+  <p class="lede">面向第一次接触这个项目、准备把它写进简历的读者。全文只讲项目里真实存在的东西，每个类名、方法名、表名都能在代码里找到。</p>
+  <div class="readpath">建议阅读顺序 <span class="step">01 整体印象</span>→<span class="step">03 核心流程</span>→<span class="step">06 背题</span></div>
+</header>
+
+<!-- ============ 01 ============ -->
+<section id="ch1">
+  <h2><span class="num">CHAPTER 01</span>一句话认识这个项目</h2>
+
+  <h3>它是做什么的</h3>
+  <p>想象你在拼多多买东西：</p>
+  <ol class="flow">
+    <li>打开商品页，看到「单买 100 元，拼团 90 元」。</li>
+    <li>你点「发起拼团」或「参与别人的团」，系统给你<b>锁一个名额</b>。</li>
+    <li>你付款。系统记一笔「这个团又多了一个已付款的人」。</li>
+    <li>人凑齐了，系统通知商城：「这个团成了，可以发货」。</li>
+    <li>没凑齐、或者你申请退款，系统把你的名额<b>退回去</b>，让别人还能进来。</li>
+  </ol>
+  <p>本项目就是上面这套逻辑的<strong>后端服务</strong>。它不是完整商城，而是一个<strong>营销中台</strong>：商城（作者的另一个工程 <code>s-pay-mall-ddd-market</code>）通过 HTTP 调用它，它负责「算折扣价、锁名额、记结算、通知成团、处理退单」，<strong>不负责支付本身</strong>。</p>
+
+  <h3>对外提供的 5 个接口</h3>
+  <div class="tablewrap"><table>
+    <tr><th>接口</th><th>作用</th><th>谁调用</th></tr>
+    <tr><td><code>POST /api/v1/gbm/index/query_group_buy_market_config</code></td><td>首页营销试算：折后价、进行中的团、统计</td><td>商城商品页</td></tr>
+    <tr><td><code>POST /api/v1/gbm/trade/lock_market_pay_order</code></td><td>锁单：开新团或加入已有团，占一个名额</td><td>商城下单时</td></tr>
+    <tr><td><code>POST /api/v1/gbm/trade/settlement_market_pay_order</code></td><td>结算：支付成功后通知本系统，人齐就成团并回调</td><td>商城支付成功回调</td></tr>
+    <tr><td><code>POST /api/v1/gbm/trade/refund_market_pay_order</code></td><td>退单：用户退款，退回名额</td><td>商城退款时</td></tr>
+    <tr><td><code>GET /api/v1/gbm/dcc/update_config</code></td><td>动态配置热更新（降级、切量、黑名单）</td><td>运维 / 管理员</td></tr>
+  </table></div>
+
+  <h3>技术栈一览（只列真实用到的）</h3>
+  <div class="tablewrap"><table>
+    <tr><th>分类</th><th>技术</th><th>在项目里干什么</th></tr>
+    <tr><td>框架</td><td>Spring Boot 2.7.12，Java 8，Maven 多模块</td><td>基础骨架</td></tr>
+    <tr><td>持久层</td><td>MyBatis（XML Mapper）+ MySQL 8 + HikariCP</td><td>10 张业务表</td></tr>
+    <tr><td>缓存 / 分布式</td><td>Redisson 3.26</td><td>分布式锁、<code>incr/decr</code> 抢库存、<code>RBitSet</code> 人群标签、动态配置发布订阅</td></tr>
+    <tr><td>消息队列</td><td>RabbitMQ（Topic 交换机）</td><td>成团通知、退单后恢复库存</td></tr>
+    <tr><td>HTTP 调用</td><td>OkHttp3</td><td>成团后 HTTP 回调商城</td></tr>
+    <tr><td>缓存</td><td>Redis（Guava 仅配置、未使用）</td><td>活动和折扣配置先查 Redis 再查数据库；Guava 本地缓存只声明了 Bean，代码里没有用到</td></tr>
+    <tr><td>定时任务</td><td>Spring <code>@Scheduled</code> + Redisson 锁</td><td>回调补偿、超时未支付自动退单</td></tr>
+    <tr><td>设计框架</td><td>作者自研 <code>xfg-wrench</code> 组件</td><td>责任链、策略树、<code>@DCCValue</code>、<code>@RateLimiterAccessInterceptor</code></td></tr>
+    <tr><td>可观测</td><td>logback + Logstash（ELK）、Actuator + Prometheus + Grafana</td><td>日志与监控</td></tr>
+    <tr><td>部署</td><td>Docker Compose</td><td>一键拉起 MySQL、Redis、RabbitMQ、ELK、Grafana、Nginx</td></tr>
+  </table></div>
+
+  <div class="callout warn"><span class="label">面试防翻车</span><p>项目里<strong>没有</strong> xxl-job、Dubbo、RocketMQ、Nacos、Spring Cloud、分库分表组件、Lua 脚本。简历上千万别写这些。</p></div>
+</section>
+
+<!-- ============ 02 ============ -->
+<section id="ch2">
+  <h2><span class="num">CHAPTER 02</span>项目怎么分层（DDD 四层 + 六模块）</h2>
+
+  <h3>用「餐厅」理解六个模块</h3>
+  <p>DDD（领域驱动设计）听起来很玄，其实就是「把代码按职责分开放」。把系统想成一家餐厅：</p>
+  <div class="tablewrap"><table>
+    <tr><th>模块</th><th>餐厅角色</th><th>放什么</th></tr>
+    <tr><td><code>group-buy-market-api</code></td><td>菜单</td><td>对外接口定义 <code>IMarketTradeService</code> 等 + 请求/响应 DTO。别的系统引入这个包就知道怎么调用</td></tr>
+    <tr><td><code>group-buy-market-trigger</code></td><td>服务员</td><td>接收外部请求：HTTP Controller、MQ 消费者、定时任务</td></tr>
+    <tr><td><code>group-buy-market-domain</code></td><td>厨师</td><td><strong>核心业务逻辑</strong>：试算、锁单、结算、退单。只定义「需要什么数据」的接口</td></tr>
+    <tr><td><code>group-buy-market-infrastructure</code></td><td>采购员</td><td>实现 domain 的接口：查数据库、操作 Redis、发 MQ、调 HTTP</td></tr>
+    <tr><td><code>group-buy-market-types</code></td><td>公共餐具</td><td>通用枚举 <code>ResponseCode</code>、异常 <code>AppException</code>、常量</td></tr>
+    <tr><td><code>group-buy-market-app</code></td><td>餐厅本身</td><td>启动类、配置类（线程池、Redis、OkHttp、Guava）、yml、Mapper XML、测试用例</td></tr>
+  </table></div>
+
+  <h3>依赖方向与「依赖倒置」</h3>
+<pre><code>app → trigger → domain → types
+app → infrastructure → domain
+trigger → api</code></pre>
+  <p>关键点：<strong>domain 不依赖 infrastructure</strong>。domain 里只有接口（如 <code>ITradeRepository</code>），infrastructure 里是实现（<code>TradeRepository</code>）。厨师说「我要一条鱼」，不关心采购员去哪买的。换数据库、换 Redis，厨师的代码一行不改。</p>
+
+  <h3>三个子领域</h3>
+  <div class="tablewrap"><table>
+    <tr><th>子领域</th><th>目录</th><th>做什么</th></tr>
+    <tr><td><code>activity</code></td><td>营销活动</td><td>优惠试算（策略树）、四种折扣计算、人群标签判断</td></tr>
+    <tr><td><code>trade</code></td><td>交易</td><td>锁单、结算、退单（三条责任链）、回调任务</td></tr>
+    <tr><td><code>tag</code></td><td>人群标签</td><td>把用户打上标签，写入 DB + Redis 位图</td></tr>
+  </table></div>
+  <p>每个子领域内部固定分为：<code>model</code>（实体 / 值对象 / 聚合）、<code>service</code>（业务逻辑）、<code>adapter</code>（对外依赖的接口：repository 仓储、port 端口）。</p>
+
+  <h3>关键类速查表</h3>
+  <div class="tablewrap"><table>
+    <tr><th>职责</th><th>类</th><th>路径（相对各模块 src/main/java/cn/bugstack/）</th></tr>
+    <tr><td>首页试算接口</td><td><code>MarketIndexController</code></td><td>trigger/http/</td></tr>
+    <tr><td>交易三接口</td><td><code>MarketTradeController</code></td><td>trigger/http/</td></tr>
+    <tr><td>试算入口</td><td><code>IndexGroupBuyMarketServiceImpl</code></td><td>domain/activity/service/</td></tr>
+    <tr><td>试算策略树节点</td><td><code>RootNode</code> <code>SwitchNode</code> <code>MarketNode</code> <code>TagNode</code> <code>EndNode</code> <code>ErrorNode</code></td><td>domain/activity/service/trial/node/</td></tr>
+    <tr><td>折扣策略</td><td><code>ZJCalculateService</code> <code>MJCalculateService</code> <code>ZKCalculateService</code> <code>NCalculateService</code></td><td>domain/activity/service/discount/impl/</td></tr>
+    <tr><td>锁单</td><td><code>TradeLockOrderService</code> + 三个 Filter</td><td>domain/trade/service/lock/</td></tr>
+    <tr><td>结算</td><td><code>TradeSettlementOrderService</code> + 四个 Filter</td><td>domain/trade/service/settlement/</td></tr>
+    <tr><td>退单</td><td><code>TradeRefundOrderService</code> + 三个策略</td><td>domain/trade/service/refund/</td></tr>
+    <tr><td>回调任务</td><td><code>TradeTaskService</code></td><td>domain/trade/service/task/</td></tr>
+    <tr><td>仓储实现（最核心）</td><td><code>TradeRepository</code>（约 700 行）<code>ActivityRepository</code> <code>TagRepository</code></td><td>infrastructure/adapter/repository/</td></tr>
+    <tr><td>回调出口</td><td><code>TradePort</code></td><td>infrastructure/adapter/port/</td></tr>
+    <tr><td>Redis 封装</td><td><code>RedissonService</code></td><td>infrastructure/redis/</td></tr>
+    <tr><td>动态配置</td><td><code>DCCService</code></td><td>infrastructure/dcc/</td></tr>
+    <tr><td>MQ 生产 / HTTP 回调</td><td><code>EventPublisher</code> / <code>GroupBuyNotifyService</code></td><td>infrastructure/event/ 与 gateway/</td></tr>
+    <tr><td>定时任务</td><td><code>GroupBuyNotifyJob</code> <code>TimeoutRefundJob</code></td><td>trigger/job/</td></tr>
+    <tr><td>MQ 消费</td><td><code>TeamSuccessTopicListener</code> <code>RefundSuccessTopicListener</code></td><td>trigger/listener/</td></tr>
+  </table></div>
+
+  <h3>十张表的关系</h3>
+<pre class="mermaid">
+erDiagram
+    group_buy_activity ||--|| group_buy_discount : "discount_id"
+    group_buy_activity ||--o{ sc_sku_activity : "activity_id"
+    sc_sku_activity }o--|| sku : "goods_id"
+    group_buy_activity ||--o{ group_buy_order : "activity_id"
+    group_buy_order ||--o{ group_buy_order_list : "team_id"
+    group_buy_order ||--o{ notify_task : "team_id"
+    crowd_tags ||--o{ crowd_tags_detail : "tag_id"
+    crowd_tags ||--o{ crowd_tags_job : "tag_id"
+</pre>
+  <ul>
+    <li><strong>活动配置</strong>：<code>group_buy_activity</code>（目标人数 <code>target</code>、有效时长 <code>valid_time</code>、参与上限 <code>take_limit_count</code>、人群 <code>tag_id</code>）+ <code>group_buy_discount</code>（<code>market_plan</code> 是 ZJ/MJ/ZK/N 四选一，<code>market_expr</code> 是表达式如 "100,10"）+ <code>sc_sku_activity</code>（哪个渠道的哪个商品挂了哪个活动）+ <code>sku</code>（商品原价）。</li>
+    <li><strong>交易</strong>：<code>group_buy_order</code> 是「一个团」，关键字段 <code>team_id</code>、<code>target_count</code>、<code>lock_count</code> 已锁单人数、<code>complete_count</code> 已付款人数、<code>status</code>（0 拼单中 / 1 完成 / 2 失败 / 3 完成含退单）。<code>group_buy_order_list</code> 是「团里每个人的一单」，关键字段 <code>order_id</code>、<code>out_trade_no</code>、<code>status</code>（0 锁定 / 1 完成 / 2 退单）。</li>
+    <li><strong>回调</strong>：<code>notify_task</code> 是本地消息表，记录「通知谁、通知了几次、成功没」。</li>
+    <li><strong>人群</strong>：<code>crowd_tags</code> 标签、<code>crowd_tags_detail</code> 标签下的用户、<code>crowd_tags_job</code> 打标任务。</li>
+  </ul>
+  <div class="callout note"><span class="label">高频问题：三个 ID</span><p><code>team_id</code> 是团编号；<code>order_id</code> 是本系统给每个参团者生成的单号；<code>out_trade_no</code> 是商城传过来的外部单号，用来做幂等。</p></div>
+</section>
+
+<!-- ============ 03 ============ -->
+<section id="ch3">
+  <h2><span class="num">CHAPTER 03</span>四条核心业务流程</h2>
+
+  <h3 id="f1">流程一：营销试算（策略树）</h3>
+  <p><strong>场景</strong>：用户打开商品页，系统要回答「这个人、这个商品，拼团价多少？他能不能看到、能不能参加？」</p>
+  <p><strong>入口</strong>：<code>MarketIndexController#queryGroupBuyMarketConfig</code> → <code>IndexGroupBuyMarketServiceImpl#indexMarketTrial</code></p>
+<pre class="mermaid">
+flowchart LR
+    R[RootNode 参数校验] --> S[SwitchNode 降级开关 / 切量]
+    S --> M[MarketNode 多线程查活动+SKU 按 marketPlan 选策略算价]
+    M -->|配置缺失| E1[ErrorNode 抛 E0002]
+    M -->|正常| T[TagNode 人群标签判可见/可参与]
+    T --> E2[EndNode 组装 TrialBalanceEntity]
+</pre>
+  <ol class="flow">
+    <li><b>RootNode</b>：userId、goodsId、source、channel 任一为空抛 <code>ILLEGAL_PARAMETER</code>。</li>
+    <li><b>SwitchNode</b>：问 <code>DCCService</code> 两件事。降级开关打开抛 <code>E0003</code>（大促时整体关闭拼团）；<code>cutRange</code> 切量，按 <code>userId.hashCode() % 100</code> 决定是否在放量范围，不在抛 <code>E0004</code>（灰度发布用）。</li>
+    <li><b>MarketNode</b>：核心。先执行 <code>multiThread()</code>：线程池同时跑两个 <code>FutureTask</code>，一个查活动 + 折扣配置，一个查 SKU 原价，各最多等 5 秒，结果放进 <code>DynamicContext</code>。再执行 <code>doApply()</code>：拿 <code>marketPlan</code>（"ZJ"/"MJ"/"ZK"/"N"）去 <code>Map&lt;String, IDiscountCalculateService&gt;</code> 取策略，算出支付价，优惠额 = 原价 − 支付价。</li>
+    <li><b>TagNode</b>：活动没配 <code>tagId</code> 全放行。配了就查 Redis 位图看用户在不在人群，结合 <code>tagScope</code>（1 限制可见，2 限制参与）得出 <code>isVisible</code> 和 <code>isEnable</code>。</li>
+    <li><b>EndNode</b>：打包原价、优惠、支付价、目标人数、可见性为 <code>TrialBalanceEntity</code> 返回。</li>
+  </ol>
+  <h4>四种折扣策略</h4>
+  <p>都继承 <code>AbstractDiscountCalculateService</code>，这是模板方法：先做人群过滤，再调子类 <code>doCalculate</code>。折扣的 <code>discountType</code> 是 TAG 时，用户不在人群里就<strong>不打折</strong>直接返回原价。</p>
+  <div class="tablewrap"><table>
+    <tr><th>marketPlan</th><th>类</th><th>表达式示例</th><th>算法</th></tr>
+    <tr><td>ZJ 直减</td><td><code>ZJCalculateService</code></td><td>"10"</td><td>原价 − 10，最低 0.01</td></tr>
+    <tr><td>MJ 满减</td><td><code>MJCalculateService</code></td><td>"100,10"</td><td>原价 ≥ 100 才减 10，否则原价</td></tr>
+    <tr><td>ZK 折扣</td><td><code>ZKCalculateService</code></td><td>"0.85"</td><td>原价 × 0.85，抹掉小数</td></tr>
+    <tr><td>N 元购</td><td><code>NCalculateService</code></td><td>"9.9"</td><td>直接返回 9.9</td></tr>
+  </table></div>
+
+  <h3 id="f2">流程二：锁单（责任链 + Redis 抢库存）</h3>
+  <p><strong>场景</strong>：用户点「参团」，要给他占一个名额，但一个 3 人团绝不能进来第 4 个人。</p>
+  <p><strong>入口</strong>：<code>MarketTradeController#lockMarketPayOrder</code> → <code>TradeLockOrderService#lockMarketPayOrder</code></p>
+<pre class="mermaid">
+flowchart TD
+    A["Controller 按 outTradeNo 查已有未支付单，有则直接返回"] --> B["查团进度 lockCount==targetCount 则 E0006"]
+    B --> C[复用试算 不可见或不可参与则 E0007]
+    C --> D1[ActivityUsabilityRuleFilter 活动状态/时间]
+    D1 --> D2[UserTakeLimitRuleFilter 参与次数上限]
+    D2 --> D3[TeamStockOccupyRuleFilter Redis 抢名额]
+    D3 --> E[TradeRepository#lockMarketPayOrder 事务落库]
+    E -->|异常| F[recoveryTeamStock 把名额还回去]
+</pre>
+  <h4>责任链三个过滤器</h4>
+  <p>在 <code>TradeLockRuleFilterFactory</code> 里用 <code>LinkArmory</code> 串起来，任一节点返回非 null 或抛异常就终止。</p>
+  <ol class="flow">
+    <li><code>ActivityUsabilityRuleFilter</code>：活动状态必须「生效」（<code>E0101</code>），当前时间在起止时间内（<code>E0102</code>）。</li>
+    <li><code>UserTakeLimitRuleFilter</code>：用户在此活动参与次数 ≥ <code>take_limit_count</code> 拒绝（<code>E0103</code>）。</li>
+    <li><code>TeamStockOccupyRuleFilter</code>：<code>teamId</code> 为空是开新团，跳过；否则调 <code>occupyTeamStock</code> 抢 Redis 名额，失败抛 <code>E0008</code>。</li>
+  </ol>
+  <h4>Redis 抢名额算法（面试必问）</h4>
+<pre><code>Long recoveryCount = redisService.getAtomicLong(recoveryTeamStockKey); // 退单恢复量
+long occupy = redisService.incr(teamStockKey) + 1;   // +1 是因为开团人自己占了一个
+if (occupy > target + recoveryCount) {
+    redisService.decr(teamStockKey);                 // 超了，把加的减回去
+    return false;
+}
+// 兜底：给这个序号再上一把 NX 锁，防极端情况 incr 出现重复值
+String lockKey = teamStockKey + "_" + occupy;
+return redisService.setNx(lockKey, validTime + 60, TimeUnit.MINUTES);</code></pre>
+  <p>要点：<code>incr</code> 是 Redis 原子操作，100 个人同时来，每人拿到的数字都不同，超过目标的直接失败，<strong>天然不超卖，且不用加锁</strong>。<code>recoveryTeamStockKey</code> 记录「退单腾出了几个名额」，总容量 = 目标 + 恢复量。</p>
+  <h4>落库</h4>
+  <p><code>TradeRepository#lockMarketPayOrder</code>，<code>@Transactional(timeout=500)</code>：</p>
+  <ul>
+    <li>开新团：生成 8 位随机 <code>teamId</code>，插入 <code>group_buy_order</code>，<code>lock_count=1</code>。</li>
+    <li>参团：<code>update group_buy_order set lock_count = lock_count + 1 where team_id=? and lock_count &lt; target_count</code>，影响行数不为 1 抛 <code>E0005</code>。这是数据库层的第二道防线。</li>
+    <li>插入 <code>group_buy_order_list</code>，<code>order_id</code> 12 位随机，<code>biz_id = activityId_userId_第几次参与</code>。</li>
+    <li>任何异常在 service 层 catch，调 <code>recoveryTeamStock</code> 把 Redis 恢复量 +1，避免名额泄漏。</li>
+  </ul>
+
+  <h3 id="f3">流程三：结算与成团回调（责任链 + 本地消息表）</h3>
+  <p><strong>场景</strong>：商城收到支付成功，通知本系统「这个人付款了」。系统要判断团是否凑齐，凑齐了要通知商城发货，而且<strong>这个通知绝不能丢</strong>。</p>
+  <p><strong>入口</strong>：<code>MarketTradeController#settlementMarketPayOrder</code> → <code>TradeSettlementOrderService#settlementMarketPayOrder</code></p>
+<pre class="mermaid">
+flowchart TD
+    A1[SCRuleFilter 渠道黑名单 E0105] --> A2[OutTradeNoRuleFilter 单号存在且未关闭 E0104]
+    A2 --> A3[SettableRuleFilter 支付时间在团有效期内 E0106]
+    A3 --> A4[EndRuleFilter 组装结果]
+    A4 --> B["TradeRepository 事务：明细改完成，团 complete_count+1"]
+    B --> C{"带条件更新团状态：付款人数 = 目标 且 拼单中，改到 1 行?"}
+    C -->|否，0 行| Z[返回 null]
+    C -->|是，1 行| D["团已改完成，写 notify_task"]
+    D --> E[线程池异步 execNotifyJob]
+    E --> F["TradePort：Redisson 锁 → HTTP 回调 或 发 MQ"]
+    F -->|成功| G["notify_task status=1"]
+    F -->|失败| H["notify_count 大于 4 则失败，否则重试；GroupBuyNotifyJob 每天 0 点兜底"]
+</pre>
+  <p><strong>成团判断</strong>：加完付款人数后，直接执行一条带条件的更新：只有付款人数等于目标人数、并且团还是拼单中，才把团改成完成。改到 1 行说明是这一单凑满的，由它写回调任务；改到 0 行直接返回。判断交给数据库，不再使用事务外提前查出的付款人数（按修复后的写法）。</p>
+  <h4>可靠回调的四层保障</h4>
+  <ol class="flow">
+    <li><b>本地消息表</b>：<code>notify_task</code> 的插入和「团状态改完成」在同一事务。要么都成功要么都失败。</li>
+    <li><b>异步立即执行</b>：事务提交后 <code>threadPoolExecutor.execute()</code> 马上尝试回调，用户不用等。</li>
+    <li><b>定时补偿</b>：<code>GroupBuyNotifyJob</code> 每天 0 点扫 <code>notify_status in (0, 2)</code> 重试。<code>TradeTaskService#execNotifyJob</code> 里失败超过 4 次标记终态失败。</li>
+    <li><b>分布式锁防重</b>：<code>TradePort#groupBuyNotify</code> 先 <code>tryLock("notify_job_lock_key_" + uuid)</code>，多台机器同时跑 Job 也只有一台真的回调。</li>
+  </ol>
+  <p>回调方式由锁单时商城通过 <code>notifyConfigVO</code> 指定：HTTP（OkHttp POST 到 <code>notifyUrl</code>）或 MQ（发到 <code>topic.team_success</code>）。</p>
+
+  <h3 id="f4">流程四：退单（责任链 + 策略 + MQ 最终一致）</h3>
+  <p><strong>场景</strong>：用户退款，或锁单后一直没付款超时了。要把名额还回去，但团可能处于不同状态，处理方式不同。</p>
+  <p><strong>入口</strong>：HTTP <code>MarketTradeController#refundMarketPayOrder</code> 或定时任务 <code>TimeoutRefundJob</code>（每分钟扫超时未支付单）→ <code>TradeRefundOrderService#refundOrder</code></p>
+<pre class="mermaid">
+flowchart TD
+    A1[DataNodeFilter 查订单+团] --> A2[UniqueRefundNodeFilter 已 CLOSE 返回 REPEAT 幂等]
+    A2 --> A3["RefundOrderNodeFilter 按 团状态×订单状态 选策略"]
+    A3 --> S1[Unpaid2RefundStrategy 未支付 lock_count-1]
+    A3 --> S2[Paid2RefundStrategy 已支付未成团 lock-1 complete-1]
+    A3 --> S3[PaidTeam2RefundStrategy 已成团 团改完成含退单或失败]
+    S1 --> M[写 notify_task + 异步发 MQ topic.team_refund]
+    S2 --> M
+    S3 --> M
+    M --> L[RefundSuccessTopicListener 消费]
+    L --> L1[setNx refund_lock_orderId 幂等]
+    L1 --> L2[incr recoveryTeamStockKey 恢复名额]
+</pre>
+  <div class="tablewrap"><table>
+    <tr><th>团状态</th><th>订单状态</th><th>策略</th><th>数据库动作</th></tr>
+    <tr><td>拼单中</td><td>已锁定未支付</td><td><code>Unpaid2RefundStrategy</code></td><td><code>lock_count - 1</code>，订单改退单</td></tr>
+    <tr><td>拼单中</td><td>已支付</td><td><code>Paid2RefundStrategy</code></td><td><code>lock_count - 1</code>，<code>complete_count - 1</code></td></tr>
+    <tr><td>已成团</td><td>已支付</td><td><code>PaidTeam2RefundStrategy</code></td><td>只剩 1 人则团改失败，否则改「完成含退单」；不恢复名额</td></tr>
+  </table></div>
+  <p>三种策略由「团状态 × 订单状态」决定，写在枚举 <code>RefundTypeEnumVO</code> 里，每个枚举值自己实现 <code>matches()</code>。</p>
+  <div class="callout note"><span class="label">为什么恢复名额走 MQ 而不是同步做</span><p>退单的数据库事务和 Redis 是两个系统，同步做会出现「DB 成功 Redis 失败」的不一致。改成事务内写 <code>notify_task</code> + 发 MQ，消费者失败会重投，最终一定恢复。消费者用 <code>refund_lock_{orderId}</code> 的 <code>setNx</code> 保证同一单只恢复一次。</p></div>
+</section>
+
+<!-- ============ 04 ============ -->
+<section id="ch4">
+  <h2><span class="num">CHAPTER 04</span>技术亮点：简历可写的点</h2>
+  <p>每条按「是什么 / 为什么 / 在哪」组织，面试时可以直接展开。</p>
+  <div class="hl">
+    <div class="hl-item"><h4><span class="k">01</span>DDD 分层 + 依赖倒置</h4><p>domain 只定义仓储接口，infrastructure 实现。业务逻辑与技术细节隔离。</p><p class="where">domain/*/adapter/repository/I*Repository 与 infrastructure/adapter/repository/*Repository</p></div>
+    <div class="hl-item"><h4><span class="k">02</span>策略树编排营销试算</h4><p>6 个节点通过 <code>get()</code> 决定下一跳，节点可插拔可重排。基于 wrench 的 <code>AbstractMultiThreadStrategyRouter</code>，固定「multiThread → doApply → router」骨架。</p><p class="where">domain/activity/service/trial/</p></div>
+    <div class="hl-item"><h4><span class="k">03</span>三条责任链</h4><p>锁单 3 节点、结算 4 节点、退单 3 节点，用 <code>LinkArmory</code> 装配成 <code>BusinessLinkedList</code>，任一节点返回非 null 即短路。新增校验只需加一个 Filter 类并注册到工厂。</p><p class="where">domain/trade/service/*/factory/</p></div>
+    <div class="hl-item"><h4><span class="k">04</span>策略模式 + Spring Map 注入</h4><p><code>@Resource Map&lt;String, IDiscountCalculateService&gt;</code>，Spring 自动把所有实现按 Bean 名装进 Map，用 <code>marketPlan</code> 当 key 取策略，零 if-else。退单策略同理。</p></div>
+    <div class="hl-item"><h4><span class="k">05</span>枚举 + 抽象方法替代 if-else</h4><p><code>RefundTypeEnumVO</code> 每个枚举常量实现 <code>matches(团状态, 订单状态)</code>，<code>getRefundStrategy()</code> 用 stream 找第一个匹配的。</p></div>
+    <div class="hl-item"><h4><span class="k">06</span>多线程并行加载</h4><p><code>MarketNode#multiThread</code> 用 <code>FutureTask</code> + 线程池并行查活动和 SKU，5 秒超时。另有 <code>MarketNode2CompletableFuture</code> 用 <code>CompletableFuture.allOf</code> 的对照实现（默认关闭）。线程池：核心 20、最大 50、队列 5000、<code>CallerRunsPolicy</code>。</p></div>
+    <div class="hl-item"><h4><span class="k">07</span>Redis 无锁化抢库存</h4><p><code>incr</code> 原子自增 + 超限 <code>decr</code> 回退 + 恢复量 key + 每序号 <code>setNx</code> 兜底。数据库再加一道 <code>where lock_count &lt; target_count</code>。</p></div>
+    <div class="hl-item"><h4><span class="k">08</span>Redis BitMap 人群标签</h4><p><code>TagRepository</code> 把用户写 DB 并 <code>RBitSet.set(MD5(userId) % Integer.MAX_VALUE, true)</code>；<code>ActivityRepository#isTagCrowdRange</code> 用 <code>bitSet.get(index)</code> 判断。一亿用户约 12MB。</p></div>
+    <div class="hl-item"><h4><span class="k">09</span>本地消息表 + 定时补偿 + 分布式锁 = 可靠回调</h4><p><code>notify_task</code> 与业务同事务 → 线程池异步立即执行 → <code>GroupBuyNotifyJob</code> 兜底 → 最多重试 5 次 → Redisson 锁防多实例重复。</p></div>
+    <div class="hl-item"><h4><span class="k">10</span>MQ 解耦 + 消费幂等</h4><p>退单后发 <code>topic.team_refund</code>，<code>RefundSuccessTopicListener</code> 消费时 <code>setNx</code> 防重，失败抛异常让 MQ 重投。</p></div>
+    <div class="hl-item"><h4><span class="k">11</span>DCC 动态配置热更新</h4><p><code>@DCCValue("downgradeSwitch:0")</code> 等四个开关，通过 Redis 发布订阅广播到所有实例，一个 GET 请求秒级降级、切量、拉黑渠道、关缓存。</p></div>
+    <div class="hl-item"><h4><span class="k">12</span>接口限流与降级</h4><p><code>@RateLimiterAccessInterceptor(key="userId", permitsPerSecond=1.0, blacklistCount=1, fallbackMethod=...)</code>，按用户限流，超限走降级方法返回 <code>RATE_LIMITER</code>。</p></div>
+    <div class="hl-item"><h4><span class="k">13</span>多层幂等</h4><p>锁单按 <code>out_trade_no</code> 查未支付单，外加 <code>order_id</code> 唯一键兜底；结算靠「状态为未付款」的条件更新，重复结算改到 0 行回滚；退单 <code>UniqueRefundNodeFilter</code> 看订单状态；MQ 消费 <code>refund_lock_{orderId}</code>。</p><p class="where">注意：<code>notify_task.uuid</code> 实际建的是普通索引，<code>biz_id</code> 没有唯一索引，这两处不能算幂等保障。</p></div>
+    <div class="hl-item"><h4><span class="k">14</span>可观测与部署</h4><p><code>TraceIdFilter</code> 给每个请求埋 traceId 进 MDC，日志经 Logstash 进 ES；Actuator 暴露 Prometheus 指标；<code>docs/dev-ops</code> 下 Docker Compose 一键环境。</p></div>
+  </div>
+</section>
+
+<!-- ============ 05 ============ -->
+<section id="ch5">
+  <h2><span class="num">CHAPTER 05</span>简历怎么写</h2>
+  <h3>项目名称与一句话</h3>
+  <p><strong>拼团营销系统（Group Buy Market）</strong>：基于 DDD 架构的电商拼团营销中台，为商城提供拼团优惠试算、锁单、结算成团、退单全链路能力。</p>
+
+  <div class="resume">
+    <h4>模板 A：校招 / 实习版（突出理解与基础扎实）</h4>
+    <ul>
+      <li>采用 DDD 四层架构与 Maven 多模块组织代码，领域层通过接口定义仓储，基础设施层实现，做到业务逻辑与技术细节解耦。</li>
+      <li>使用策略树模式编排营销试算流程（参数校验 → 降级切量 → 折扣计算 → 人群标签 → 结果组装），结合策略模式 + Spring Map 注入实现直减、满减、折扣、N 元购四种折扣算法的动态路由。</li>
+      <li>基于责任链模式实现锁单、结算、退单三条校验链，新增规则只需新增节点类，无需改动主流程。</li>
+      <li>利用 Redis <code>incr</code> 原子操作实现拼团名额无锁化抢占，配合数据库条件更新双重防超卖；使用 Redis BitMap 实现人群标签的低成本存储与判断。</li>
+      <li>通过本地消息表 + 线程池异步 + 定时任务补偿 + Redisson 分布式锁，保证成团回调通知的可靠投递；退单后通过 RabbitMQ 异步恢复名额，消费端 <code>setNx</code> 保证幂等。</li>
+    </ul>
+  </div>
+  <div class="resume">
+    <h4>模板 B：1-3 年经验版（突出高并发与一致性设计）</h4>
+    <ul>
+      <li>负责拼团交易域设计与实现，包含锁单、结算、退单全链路，通过 DCC 动态配置实现秒级降级、灰度切量与渠道黑名单。</li>
+      <li>设计 Redis 无锁库存抢占方案：<code>incr</code> 自增 + 超限 <code>decr</code> 回退 + 独立恢复量 key + 序号级 <code>setNx</code> 兜底；数据库 <code>lock_count &lt; target_count</code> 条件更新作为最终防线。</li>
+      <li>采用本地消息表模式解决成团回调的分布式事务问题，通知任务与业务变更同事务落库，异步执行 + 每日定时补偿 + 5 次重试上限 + 分布式锁防多实例重复投递。</li>
+      <li>退单场景基于「团状态 × 订单状态」枚举策略路由三种退单逻辑，通过 RabbitMQ 实现库存恢复的最终一致性，消费幂等基于 Redis <code>setNx</code>。</li>
+      <li>试算链路通过 <code>FutureTask</code> + 自定义线程池并行加载活动配置与商品数据，接口按用户维度限流并提供降级 fallback；接入 ELK 日志链路追踪与 Prometheus/Grafana 监控。</li>
+    </ul>
+  </div>
+  <div class="resume">
+    <h4>模板 C：突出设计模式与工程能力</h4>
+    <ul>
+      <li>在营销试算中落地「规则树 + 模板方法」：抽象路由类固定「异步预加载 → 业务处理 → 路由下一节点」骨架，各节点只关注自身逻辑。</li>
+      <li>在交易域落地「责任链 + 策略 + 工厂」：三条责任链由工厂类统一装配，退单策略由带抽象方法的枚举匹配，消除大量 if-else。</li>
+      <li>折扣计算采用模板方法，父类统一处理人群标签过滤，子类只实现算法；四种折扣类型通过 Spring 按 Bean 名注入的 Map 动态选择。</li>
+      <li>编写覆盖试算、锁单、结算、退单、库存恢复、人群标签的集成测试用例，并提供 Docker Compose 一键部署环境。</li>
+    </ul>
+  </div>
+  <div class="callout"><span class="label">三条红线</span>
+    <p>1. <strong>不写没有的东西</strong>：没有分库分表、xxl-job、Dubbo、RocketMQ、Lua 脚本。<br>2. <strong>不写「参与」两个字</strong>：写「负责 / 设计 / 实现」，然后确保自己真的能讲清楚。<br>3. <strong>每一条都要能回答「为什么这么做」</strong>：见第六章。</p>
+  </div>
+</section>
+
+<!-- ============ 06 ============ -->
+<section id="ch6">
+  <h2><span class="num">CHAPTER 06</span>面试问答（35 题）</h2>
+  <p>每题给「核心答案」（30 秒到 1 分钟能说完）和「可深挖」。点题目展开答案，建议先自己答一遍再看。</p>
+  <div class="qa-tools"><button type="button" id="openAll">全部展开</button><button type="button" id="closeAll">全部收起</button><span>自测模式：收起后逐题作答</span></div>
+
+  <h3 id="qa-a">A. 基础理解</h3>
+  <details class="qa"><summary><span class="qn">Q1</span>这个项目是做什么的？<span class="arrow">›</span></summary><div class="ans"><p>一个拼团营销中台。商城调它算拼团价、锁名额，支付成功后调它结算，人凑齐了它回调商城成团，用户退款它退回名额。本身不管支付，只管「拼团这件事」。</p><span class="tag">可深挖</span><p>为什么拆成中台？营销规则变化快，和交易解耦后可以独立迭代、独立扩容。</p></div></details>
+  <details class="qa"><summary><span class="qn">Q2</span>一次完整的拼团，接口调用顺序是什么？<span class="arrow">›</span></summary><div class="ans"><p>商品页调「试算」拿折后价 → 下单调「锁单」占名额并拿到 <code>orderId</code> → 用户在商城支付 → 商城支付回调后调「结算」→ 若是最后一人，系统通过 HTTP 或 MQ 回调商城成团 → 中途退款调「退单」。</p></div></details>
+  <details class="qa"><summary><span class="qn">Q3</span>为什么要分 DDD 四层？直接 Controller-Service-DAO 不行吗？<span class="arrow">›</span></summary><div class="ans"><p>三层架构里 Service 往往又依赖 DAO 又写业务，改数据库就要动业务代码。DDD 让 domain 只依赖自己定义的接口，infrastructure 去实现，方向倒过来了。业务逻辑集中在 domain，测试时可以 mock 仓储。</p><span class="tag">可深挖</span><p>实体、值对象、聚合的区别。项目里 <code>GroupBuyOrderAggregate</code> 把用户、活动、折扣三个实体打包，作为锁单事务的边界。</p></div></details>
+  <details class="qa"><summary><span class="qn">Q4</span><code>group_buy_order</code> 和 <code>group_buy_order_list</code> 什么关系？<span class="arrow">›</span></summary><div class="ans"><p>前者是「团」，一行一个团，记目标人数、已锁单数、已付款数、团状态。后者是「团里每个人的订单」，一行一个人，用 <code>team_id</code> 关联。</p></div></details>
+  <details class="qa"><summary><span class="qn">Q5</span><code>team_id</code>、<code>order_id</code>、<code>out_trade_no</code> 分别是什么？<span class="arrow">›</span></summary><div class="ans"><p><code>team_id</code> 团编号，锁单开团时 8 位随机生成；<code>order_id</code> 本系统给每个参团者的单号，12 位随机，有唯一索引；<code>out_trade_no</code> 商城的订单号，用来对账和幂等。</p></div></details>
+  <details class="qa"><summary><span class="qn">Q6</span><code>lock_count</code> 和 <code>complete_count</code> 有什么区别？<span class="arrow">›</span></summary><div class="ans"><p><code>lock_count</code> 是占了名额的人数（包括没付款的），<code>complete_count</code> 是付了款的人数。锁单加 <code>lock_count</code>，结算加 <code>complete_count</code>，<code>complete_count</code> 达到 <code>target_count</code> 才算成团。</p></div></details>
+  <details class="qa"><summary><span class="qn">Q7</span>试算时怎么判断用户能不能参加活动？<span class="arrow">›</span></summary><div class="ans"><p>三道关。活动没配人群标签就全放行；配了标签就查 Redis 位图看用户在不在人群里；再看 <code>tag_scope</code> 配置是限制「可见」还是限制「参与」，算出 <code>isVisible</code> 和 <code>isEnable</code>。锁单接口发现任一为 false 就拒绝。</p></div></details>
+  <details class="qa"><summary><span class="qn">Q8</span>定时任务有哪些？为什么需要？<span class="arrow">›</span></summary><div class="ans"><p>两个。<code>GroupBuyNotifyJob</code> 每天 0 点扫描没回调成功的 <code>notify_task</code> 重试，兜底保证通知不丢。<code>TimeoutRefundJob</code> 每分钟扫锁单后超时未支付的订单，自动退单释放名额，避免名额被占死。</p><span class="tag">可深挖</span><p>多实例部署时怎么防止两台机器同时跑？用 Redisson <code>tryLock</code>，拿不到锁的直接跳过。</p></div></details>
+
+  <h3 id="qa-b">B. 设计模式（口语版）</h3>
+  <div class="callout note"><span class="label">怎么用这一组</span>
+    <p>这一组是口语化版本，可以直接说出口。面试里这七题通常会合并成三个大回答：</p>
+    <div class="tablewrap"><table><tr><th>面试官问</th><th>你说哪几段</th></tr>
+      <tr><td>「你项目用了哪些设计模式？」</td><td>第 9 题开头，再带上第 11 题</td></tr>
+      <tr><td>「策略模式怎么用的？」</td><td>第 10 题，结尾接第 13 题</td></tr>
+      <tr><td>「责任链怎么用的？」</td><td>第 9 题的责任链部分，结尾接第 14 题</td></tr>
+    </table></div>
+    <p>第 12 题留着讲退单流程时用，第 15 题留着被追问试算细节时用。第 13、14 题是扩展类题目，一定要练到能脱口而出，最能区分「背过设计模式」和「真用过设计模式」。</p></div>
+  <details class="qa"><summary><span class="qn">Q9</span>策略树和责任链有什么区别？项目里分别用在哪？<span class="arrow">›</span></summary><div class="ans"><p>最本质的区别是能不能分叉。</p><p>责任链是一条直线。几个校验步骤提前排好顺序，挨个往下走，每一步做完就交给下一步，中间哪一步有了结论或者报错，整条链就停了。路线是固定的。</p><p>策略树是每一步自己决定下一步去哪，可以根据情况走不同的分支。比如试算的时候，有一步是查活动配置，查到了就继续去算人群限制，没查到就直接走报错的那条路。</p><p>所以一串按顺序做的检查用责任链，有条件分支的流程用策略树。项目里试算用的是策略树，锁单、结算、退单这三个都用的责任链。</p></div></details>
+  <details class="qa"><summary><span class="qn">Q10</span>系统怎么根据配置找到对应的折扣算法？<span class="arrow">›</span></summary><div class="ans"><p>折扣有四种，直减、满减、打折、N 元购，每种是一个单独的类，但都遵守同一个规范。</p><p>我给每个类起了个短名字，就叫 ZJ、MJ 这种，跟数据库里活动配置填的值一样。</p><p>项目启动的时候，Spring 会自动把这四个类按名字收集到一个字典里。算价格的时候，拿配置里填的值当钥匙，去字典里一取，就拿到对应的算法了，完全不用写一堆判断。</p></div></details>
+  <details class="qa"><summary><span class="qn">Q11</span>模板方法用在哪？<span class="arrow">›</span></summary><div class="ans"><p>模板方法的意思是，父类把做事的步骤顺序定死，子类只负责填其中某一步的具体内容。项目里主要有三处。</p><p>第一处是折扣计算。父类规定先检查用户在不在人群范围里，不在就不打折，在的话再去算价格。四种折扣的子类只管写自己怎么算价格，人群检查这步不用重复写。</p><p>第二处是试算的节点。框架规定每个节点先并行加载数据，再做业务处理。像营销那个节点，就在加载数据那步同时查活动配置和商品信息，查完再去算优惠。</p><p>第三处是查缓存。有个公共方法规定先查缓存，查不到再查数据库，查到了顺手写回缓存。具体查数据库的那段逻辑由调用的地方传进来。</p></div></details>
+  <details class="qa"><summary><span class="qn">Q12</span>退单为什么用枚举来选策略？<span class="arrow">›</span></summary><div class="ans"><p>退单要看两个状态，团的状态和订单的状态，组合出三种情况，每种处理方式不一样。</p><p>如果用判断语句写，就是两个条件交叉嵌套，越写越乱，以后加一种情况还要在中间插一段，很容易改错。</p><p>所以我把三种退单类型做成三个枚举值，每个枚举值自己写一段判断，说明自己负责哪种状态组合。选策略的时候把三个挨个问一遍，谁说是我的就用谁。</p><p>这样每种情况的判断跟它自己的定义放在一起，一眼就能看懂。新加一种情况只要加一个枚举值，选的那段逻辑完全不用动。</p></div></details>
+  <details class="qa"><summary><span class="qn">Q13</span>如果要新增一种「买一送一」折扣，改哪些地方？<span class="arrow">›</span></summary><div class="ans"><p>只要做两件事。</p><p>第一，新写一个折扣计算的类，继承那个折扣父类，给它起个名字，比如叫 BY，然后在里面只写买一送一怎么算价格就行。人群检查那些公共逻辑父类已经做了，不用管。</p><p>第二，在数据库的折扣配置里，把营销方式那一栏填成 BY。</p><p>其他地方一行都不用改。因为项目启动时会自动把新类收集进那个按名字查找的字典里，算价格的地方拿到 BY 就能找到它。这就是开闭原则，对扩展开放，对修改关闭。</p></div></details>
+  <details class="qa"><summary><span class="qn">Q14</span>如果锁单要加一个「黑名单用户拦截」，怎么加？<span class="arrow">›</span></summary><div class="ans"><p>锁单的校验是一条责任链，所以加一个新的校验节点就行。</p><p>第一步，新写一个校验类，按照链上节点的统一规范来写。里面判断这个用户在不在黑名单里，在的话直接报错，不在就交给下一个节点。</p><p>第二步，找到装配锁单这条链的工厂类，把这个新节点加进去。位置我会放在最前面，因为查黑名单最便宜，先把黑名单用户挡掉，后面查活动、查参与次数、抢名额这些操作就都省了。</p><p>黑名单数据可以放在动态配置里，这样运营想拉黑谁，改一下配置就立刻生效，不用发版。</p><p>原来那三个节点完全不用动。</p></div></details>
+  <details class="qa"><summary><span class="qn">Q15</span>试算的 6 个节点之间怎么连起来的？<span class="arrow">›</span></summary><div class="ans"><p>每个节点里都有一个专门的方法，作用就是告诉框架下一个节点是谁。节点之间是互相注入的，比如营销节点里同时持有标签节点和报错节点。</p><p>每个节点干完自己的活，就调用框架提供的一个跳转方法，框架先问这个节点下一个是谁，再去执行下一个节点。</p><p>六个节点依次是：参数校验、开关拦截、营销计算、人群标签、组装结果，还有一个异常节点只在查不到配置时才走。</p><p>这样设计的好处是加节点很方便。比如想在开关后面加一个风控检查，只要改开关节点让它的下一个指向风控节点，风控节点再指向营销节点就行。</p></div></details>
+
+  <h3 id="qa-c">C. 并发与分布式（口语版）</h3>
+  <div class="callout note"><span class="label">怎么用这一组</span>
+    <p>这一组是口语化版本，可以直接说出口。面试里这十题通常会以下面几个大问题的形式出现：</p>
+    <div class="tablewrap"><table><tr><th>面试官问</th><th>你说哪几段</th></tr>
+      <tr><td>「怎么防止超卖？」</td><td>第 16 题，被追问再接 17、18</td></tr>
+      <tr><td>「项目里分布式锁用在哪？」</td><td>第 21 题，被追问再接 20</td></tr>
+      <tr><td>「遇到过什么并发问题？」</td><td>第 19 题</td></tr>
+      <tr><td>「多线程和线程池怎么用的？」</td><td>第 23 题，再接 22</td></tr>
+    </table></div>
+    <p>第 16 和 19 题出现概率最高，一定练熟。第 24、25 题相对少见，第 25 题最后那段「单机限流」是加分点，能说出来说明你真看懂了实现。</p></div>
+  <details class="qa"><summary><span class="qn">Q16</span>用缓存自增抢名额，为什么不会超卖？<span class="arrow">›</span></summary><div class="ans"><p>抢名额用的是 Redis 的自增命令。Redis 处理命令是排队一条一条执行的，自增这个动作一次做完，中间插不进别人。所以一百个人同时来，拿到的数字一定是一到一百各不相同，就像银行叫号机吐号。</p><p>每个人拿到号之后跟团的目标人数比，超了就说明轮不到他，直接拒绝。这样最多只有目标人数那么多人能通过，而且整个过程不用加锁，性能很好。</p><p>被拒的人，我会把刚才加上去的那个数再减回去。不然计数器会一直虚高，后面有人退单腾出位置也进不来。</p></div></details>
+  <details class="qa"><summary><span class="qn">Q17</span>已经用自增了，为什么还要再加一把锁？<span class="arrow">›</span></summary><div class="ans"><p>这是一个兜底设计。理论上自增不会给两个人同一个号，但作者在代码注释里写了，生产上遇到过 Redis 集群配置出问题、或者运营改错数据，导致号码重复的情况。</p><p>所以拿到号之后，再用这个号当名字设一个标记，这个操作的规则是名字不存在才能设成功。万一真有两个人拿到同一个号，第二个人设不成功，就被挡住了。</p><p>标记的有效期是拼团时长再多加一个小时，多留一会儿是为了出问题时方便排查。</p></div></details>
+  <details class="qa"><summary><span class="qn">Q18</span>退单恢复名额，为什么要单独用一个计数器？<span class="arrow">›</span></summary><div class="ans"><p>因为那个号码计数器是只增不减的。每个号上面都挂着刚才说的那个标记，如果退单时直接把计数器减一，下一个人再自增就会拿到一个已经用过的号，撞上还没过期的标记，反而进不来。</p><p>所以退单腾出的名额单独记在另一个计数器里。判断能不能进的时候，上限是目标人数加上恢复的数量，相当于把天花板抬高，号码继续往上走，永远不会重复。</p></div></details>
+  <details class="qa"><summary><span class="qn">Q19</span>结算时判断是不是最后一个付款的人，有什么并发问题？怎么解决？<span class="arrow">›</span></summary><div class="ans"><p>结算时要判断是不是最后一个付款的人。原来的写法是在代码里拿提前查出来的付款人数做减法，两个人同时付最后两单时会都读到旧值，结果人数凑满了团却没成功。</p><p>我把它改成让数据库判断：在同一个事务里，先给付款人数加一，然后执行一条更新团状态的语句，条件是付款人数等于目标人数、并且团还是拼单中。改成功了说明是我这一单凑满的，由我去写回调通知；改到零行就直接返回。</p><p>这样能保证正确，是因为更新语句会锁住这一行，两个人会排队执行，而且排到的人读的是最新值，只有真正把人数凑满的那一次条件成立。</p></div></details>
+  <details class="qa"><summary><span class="qn">Q20</span>分布式锁抢锁时传的几个参数是什么意思？<span class="arrow">›</span></summary><div class="ans"><p>抢锁的时候传了三个参数：最多等多久、拿到锁以后多久自动释放、时间单位。</p><p>每天零点那个回调补偿任务，用的是最多等三秒、自动释放时间填零。填零在我们用的这个 Redis 客户端版本里表示不设固定过期时间，改成开启看门狗：默认三十秒过期，只要任务还在跑就自动续期，跑完主动释放。好处是任务执行多久不确定，锁也不会提前失效。</p><p>每分钟跑的超时退单任务不一样，填的是六十秒，到时间自动释放，不续期。</p></div></details>
+  <details class="qa"><summary><span class="qn">Q21</span>多台机器部署，定时任务怎么保证只跑一次？<span class="arrow">›</span></summary><div class="ans"><p>项目是多实例部署的，每台机器上的定时任务到点都会触发。所以任务一开始先去 Redis 抢一把固定名字的锁，抢到的那台执行，抢不到的直接跳过。</p><p>执行完在最后释放锁。释放之前会先确认这把锁确实是自己当前线程持有的，避免把别的机器的锁给释放了。</p><p>成团回调也是一样的思路，每条通知任务发之前都按任务的唯一标识抢锁，防止几台机器同时捞到同一条，重复通知商城。</p></div></details>
+  <details class="qa"><summary><span class="qn">Q22</span>并行查数据时，某个查询超时了会怎样？<span class="arrow">›</span></summary><div class="ans"><p>试算的时候，活动配置和商品信息是交给线程池同时查的，取结果时每个最多等五秒。</p><p>超过五秒没回来就会抛超时异常，这个异常一路往外抛，接口返回失败。这样一个慢查询不会把整个请求一直挂住、占着服务器的线程不放。</p><p>项目里还留了另一种写法的版本，能把多个异步任务编排在一起、统一处理异常，更灵活。默认没启用，作者在注释里把两种写法的优缺点做了对比。</p></div></details>
+  <details class="qa"><summary><span class="qn">Q23</span>线程池参数怎么配的？拒绝策略选的什么？<span class="arrow">›</span></summary><div class="ans"><p>核心线程二十、最大线程五十、队列长度五千，拒绝策略是让提交任务的那个线程自己去执行。</p><p>选这个拒绝策略，是因为试算和成团回调这些任务都不能丢。线程池和队列都满了的时候，不直接丢弃也不报错，而是让调用方自己跑。调用方被占住了，自然就提交得慢，起到削峰的效果。</p><p>这套配置我觉得有两处可以优化。一是队列五千太大，线程池是先把队列塞满才会扩到最大线程数，所以最大线程五十基本用不上。二是空闲线程的存活时间配的是五千，单位是秒，一个多小时，偏长了，可以按实际情况调小。</p></div></details>
+  <details class="qa"><summary><span class="qn">Q24</span>事务注解里配的超时时间是什么单位？<span class="arrow">›</span></summary><div class="ans"><p>是秒。锁单那个方法写的是五百，结算写的是五千，换算下来一个是八分多钟，一个是一个多小时，其实都很长。</p><p>所以它起不到快速失败的作用，更像是防止事务因为死锁之类的原因无限挂着的兜底。如果真想快速失败，应该配到几秒的级别。</p></div></details>
+  <details class="qa"><summary><span class="qn">Q25</span>试算接口是怎么限流的？<span class="arrow">›</span></summary><div class="ans"><p>试算接口上加了一个限流注解，按用户来限，每个用户每秒只放一个请求。</p><p>底层是给每个用户单独配一个令牌桶，放在本地缓存里。桶里每秒生成一个令牌，请求来了拿得到令牌就放行，拿不到就拦截，走提前写好的降级方法，返回「请求太频繁」。</p><p>另外还有黑名单：一个用户被拦的次数超过设定值，就被拉进黑名单二十四小时，这段时间他的请求直接走降级。限流本身也有总开关，挂在动态配置上，出问题可以一键关掉。</p><p>有一点要注意，令牌桶和黑名单都存在每台机器自己的内存里，所以是单机限流。部署三台机器，一个用户实际每秒能过三次。要做全局限流，得把计数放到 Redis 里。</p></div></details>
+
+  <h3 id="qa-d">D. 可靠性与一致性（口语版）</h3>
+  <div class="callout note"><span class="label">怎么用这一组</span>
+    <p>这一组是口语化版本，可以直接说出口。面试里通常以下面几个大问题的形式出现：</p>
+    <div class="tablewrap"><table><tr><th>面试官问</th><th>你说哪几段</th></tr>
+      <tr><td>「怎么保证通知不丢？」</td><td>第 26 题，再接 27</td></tr>
+      <tr><td>「幂等怎么做的？」</td><td>第 29 题，被追问消息重复再接 28</td></tr>
+      <tr><td>「为什么用消息队列？」</td><td>第 30 题</td></tr>
+      <tr><td>「锁单了不付款怎么办？」</td><td>第 31 题</td></tr>
+    </table></div>
+    <p>第 26、27 题是「通知不丢」的一整套，建议连着说。第 29 题最后那段是你读代码发现的问题，是加分点。</p></div>
+  <details class="qa"><summary><span class="qn">Q26</span>本地消息表为什么要和业务写在同一个事务里？<span class="arrow">›</span></summary><div class="ans"><p>成团的时候要做两件事：把团改成成功，再记一笔「要通知商城」。这笔记录就是本地消息表里的一行。</p><p>如果两件事分开做，可能团已经改成功了，写通知记录那一步却失败了，商城就永远收不到通知。反过来也可能记了要通知，团却没改成功，商城收到一个假的成团消息。</p><p>放在同一个事务里，要么都成功，要么都回滚。只要团成了，通知记录就一定在，后面就算发送失败，也能靠重试把它补上。</p></div></details>
+  <details class="qa"><summary><span class="qn">Q27</span>通知商城失败了怎么办？<span class="arrow">›</span></summary><div class="ans"><p>事务提交后会马上用线程池发一次。成功就把记录标成已完成；失败就把尝试次数加一，标成待重试。</p><p>待重试的记录由一个定时任务捞出来重发，每次最多捞五十条。代码里的规则是：前五次失败都继续重试，第六次还失败就标成最终失败，需要人工处理。</p><p>这里有个可以优化的地方：这个补偿任务每天零点才跑一次，失败一次要等到第二天才重试，五次重试最长要拖好几天。实际项目里应该改成几分钟跑一次，重试间隔再逐步拉长。</p></div></details>
+  <details class="qa"><summary><span class="qn">Q28</span>消息被重复消费了怎么办？<span class="arrow">›</span></summary><div class="ans"><p>消息队列为了保证不丢，可能会把同一条消息投递好几次，所以消费的地方必须做到处理多次和处理一次效果一样。</p><p>退单恢复名额的消费者，处理前先用订单号在 Redis 里设一个标记，规则是不存在才能设成功。设成功说明是第一次，往下恢复名额；设不成功说明处理过了，直接跳过。</p><p>如果处理到一半出错，会先把这个标记删掉再抛异常。这样消息队列重新投递时还能进来，不会因为标记残留而永远被跳过。</p></div></details>
+  <details class="qa"><summary><span class="qn">Q29</span>项目里的幂等是怎么做的？<span class="arrow">›</span></summary><div class="ans"><p>按接口来说。</p><p>锁单：一进来先拿商城的订单号查，已经有一笔没付款的单，就直接把原来的结果返回，不会再占一次名额。本系统生成的订单号上还有唯一索引兜底。</p><p>结算：先查这笔订单，已经关闭的直接拦掉；把订单改成已付款的那条语句带着「状态还是未付款」的条件，重复结算会改到零行，事务回滚。</p><p>退单：责任链第二个节点看订单状态，已经退过的直接返回「重复请求」。消息消费：用订单号在 Redis 里设标记，设过的就跳过。</p><p>有两个地方是我读代码时发现不严谨的。一是通知表的唯一标识，索引名字叫唯一索引，建表时其实建的是普通索引，重复插入拦不住。二是限制用户参与次数的那个业务编号，代码里靠唯一索引冲突来防重，但表上根本没给它建唯一索引。</p></div></details>
+  <details class="qa"><summary><span class="qn">Q30</span>退单为什么不直接同步恢复 Redis 里的名额？<span class="arrow">›</span></summary><div class="ans"><p>因为退单要改两个地方：数据库里的人数和 Redis 里的名额。这是两套系统，没法放在一个事务里。</p><p>如果同步做，可能数据库已经提交了，Redis 那一步网络抖一下失败了，这个名额就永远丢了，后面的人补不进来。</p><p>所以改成在数据库事务里同时写一条待发消息，提交后发到消息队列，由消费者去恢复名额。消费失败消息队列会重投，最终一定能恢复上。代价是有几秒的不一致，这个业务能接受。</p><p>我本地没装消息队列的时候正好看到了这个中间状态：数据库人数减了，Redis 名额没恢复，新用户参不进来，查通知表那条消息是待重试。</p></div></details>
+  <details class="qa"><summary><span class="qn">Q31</span>用户锁单后一直不付款，名额会一直被占着吗？<span class="arrow">›</span></summary><div class="ans"><p>不会。锁单的时候会给这笔订单记一个截止时间，就是锁单时间加上活动配置的有效时长，项目里配的是十五分钟。</p><p>有个定时任务每分钟跑一次，找出还没付款、已经过了截止时间的订单，逐条走退单流程，把占位人数减掉，名额还回去。</p><p>因为是多实例部署，任务开始前会先抢一把分布式锁，抢到的那台才执行。另外它每次最多处理十条，超时订单特别多的时候会积压，可以调大数量或者循环处理到没有为止。</p></div></details>
+
+  <h3 id="qa-e">E. 扩展与追问（口语版）</h3>
+  <div class="callout note"><span class="label">怎么用这一组</span>
+    <p>这一组是开放性问题，考的是你对项目的整体把握。对应的大问题：</p>
+    <div class="tablewrap"><table><tr><th>面试官问</th><th>你说哪几段</th></tr>
+      <tr><td>「并发量上来了怎么办？」</td><td>第 32 题</td></tr>
+      <tr><td>「数据量大了怎么办？」</td><td>第 33 题</td></tr>
+      <tr><td>「缓存怎么用的？」</td><td>第 34 题</td></tr>
+      <tr><td>「这个项目有什么可以改进的？」</td><td>第 35 题</td></tr>
+    </table></div>
+    <p>第 35 题面试收尾时几乎必问，一定准备好。第 32、34 题说出缓存的实际情况，比泛泛地说「加缓存」有说服力得多。</p></div>
+  <details class="qa"><summary><span class="qn">Q32</span>如果访问量上来了，哪里最先扛不住？怎么优化？<span class="arrow">›</span></summary><div class="ans"><p>最先扛不住的是首页试算接口，它流量最大，每打开一次商品页就调一次。</p><p>这个接口里活动和折扣配置已经放了 Redis 缓存，但商品信息、渠道商品配置还是每次查数据库。另外它还要查进行中的团列表和活动统计，统计是对订单表做计数，数据一多会很慢。</p><p>优化的话，商品和渠道配置变动少，也放进缓存；团列表和统计数据不需要实时，可以定时算好放 Redis，接口直接读。</p><p>锁单那边抢名额走 Redis 很快，压力主要在写数据库，量特别大时可以考虑按活动分散热点，或者把落库改成异步。</p></div></details>
+  <details class="qa"><summary><span class="qn">Q33</span>如果要分库分表，按什么来分？<span class="arrow">›</span></summary><div class="ans"><p>项目现在是单库单表，没做分库分表，但代码里有预留。退单相关的几条语句都特意带上了用户编号，注释里写着企业里通常按用户编号做路由。</p><p>按用户编号分的好处是，同一个用户的订单都落在同一个库，查「我的拼团」不用跨库。</p><p>麻烦的是团的维度。一个团里的人会分散在不同的库，按团号查整个团的成员就要跨库。一般的做法是再建一张按团号查的索引表，或者把团的汇总数据冗余一份。</p></div></details>
+  <details class="qa"><summary><span class="qn">Q34</span>缓存在项目里是怎么用的？<span class="arrow">›</span></summary><div class="ans"><p>主要缓存的是活动配置和折扣配置。有一个公共的查询方法，先查 Redis，查不到再查数据库，查到后写回 Redis。</p><p>缓存有个开关挂在动态配置上，Redis 出问题时改一下配置就能直接走数据库，不用发版。</p><p>读代码时我注意到两个问题。一是写缓存时没设过期时间，运营改了活动配置，缓存里还是旧的，得手动删。应该加上过期时间，或者改配置时主动删缓存。二是项目里配了一个本地缓存的组件，但实际上没有任何地方用到它。</p></div></details>
+  <details class="qa"><summary><span class="qn">Q35</span>让你改进这个项目，你会改什么？<span class="arrow">›</span></summary><div class="ans"><p>我挑几个读代码时发现、改了收益比较大的。</p><p>第一个我已经改了：结算时判断最后一个付款的人用的是旧值，两个人同时付款会导致团凑满了却没成功，我改成了让数据库带条件更新来判断。</p><p>第二个是通知补偿任务每天零点才跑一次，失败了要隔天才重试，应该改成分钟级，重试间隔逐步拉长。</p><p>第三个是发 HTTP 回调的客户端没设连接和读取超时，商城那边一卡住，会把我们的线程一直拖着。</p><p>第四个是限流数据存在每台机器自己的内存里，多实例部署时总量会翻倍，要做全局限流得放到 Redis 里。</p><p>还有几个小问题，比如退单防重标记的过期时间单位写错了、业务编号和通知表缺唯一索引，这些改起来都很快。</p></div></details>
+</section>
+
+<!-- ============ 07 ============ -->
+<section id="ch7">
+  <h2><span class="num">CHAPTER 07</span>项目已知的坑与可改进点</h2>
+  <p>面试时主动说出这些，能证明你真读过代码，而不是背了一遍教程。</p>
+  <div class="tablewrap"><table class="pitfall"><tr><th>#</th><th>问题</th><th>位置</th><th>怎么改</th></tr><tr><td class="num-col">1</td><td>成团判断原来用事务外提前查出的付款人数做减法，最后两人同时付款会都读到旧值，人数凑满了团却没成功（重复成团已被条件更新和事务回滚挡住）</td><td><code>TradeRepository#settlementMarketPayOrder</code> 第 3 步</td><td><strong>已修复</strong>：成团更新语句加上 <code>complete_count = target_count</code> 条件，在付款人数加一之后、同一事务里执行，改成功的那一单负责写回调通知</td></tr><tr><td class="num-col">2</td><td>并发重复锁单会占两个名额。接口层靠「先用外部单号查、查不到再插入」防重，两个并发请求都查不到就都会成功；外部单号没有唯一索引，本系统订单号又是随机生成的，数据库也拦不住。同样原因，用户参与次数限制在并发下也能被绕过</td><td><code>MarketTradeController#lockMarketPayOrder</code> 与 <code>group_buy_order_list</code> 建表语句</td><td>给 <code>(user_id, out_trade_no)</code> 建唯一索引，让第二条插入直接失败回滚；或者在接口入口按外部单号抢分布式锁，让同一笔单串行</td></tr><tr><td class="num-col">3</td><td>代码依赖 <code>biz_id</code> 触发 <code>DuplicateKeyException</code> 做限购幂等，但建表语句里 <code>biz_id</code> 没有唯一索引</td><td><code>group_buy_order_list</code> 建表 SQL</td><td>给 <code>biz_id</code> 加唯一索引</td></tr><tr><td class="num-col">4</td><td>退单幂等锁 <code>setNx(lockKey, 30*24*60*60*1000L, TimeUnit.MINUTES)</code>，数值按毫秒算却传了分钟单位</td><td><code>TradeRepository#refund2AddRecovery</code></td><td>改为 <code>30, TimeUnit.DAYS</code></td></tr><tr><td class="num-col">5</td><td><code>isCacheOpenSwitch()</code> 返回 <code>"0".equals(...)</code>，即 0 = 开启缓存，与注释容易误读</td><td><code>DCCService</code></td><td>改名或改语义</td></tr><tr><td class="num-col">6</td><td><code>spring.rabbitmq.port: 15672</code> 是管理台端口，AMQP 应该是 5672</td><td><code>application-dev.yml</code></td><td>改端口</td></tr><tr><td class="num-col">7</td><td><code>application-prod.yml</code> 与 dev 完全相同，生产配置带明文密码和内网 IP</td><td>app 模块 resources</td><td>用环境变量注入</td></tr><tr><td class="num-col">8</td><td><code>OkHttpClient</code> 没有设置连接 / 读写超时，回调方挂了会拖住线程</td><td><code>OKHttpClientConfig</code></td><td>加 <code>connectTimeout</code>、<code>readTimeout</code></td></tr><tr><td class="num-col">9</td><td><code>RabbitMQConfig</code> 的 <code>@Configuration</code> 被注释，交换机和队列靠 Listener 的 <code>@QueueBinding</code> 自动声明</td><td>app 模块 config</td><td>生产环境建议显式声明</td></tr><tr><td class="num-col">10</td><td><code>ZKCalculateService</code> 用 <code>setScale(0, RoundingMode.DOWN)</code> 抹掉小数，注释却写「四舍五入」</td><td>domain 折扣实现</td><td>统一保留两位并用 HALF_UP</td></tr><tr><td class="num-col">11</td><td><code>TimeoutRefundJob</code> 注释写「每 5 分钟」，cron 实际是每分钟</td><td>trigger/job</td><td>改注释或改 cron</td></tr><tr><td class="num-col">12</td><td>线程池队列 5000 太大，最大线程数 50 几乎永远用不上</td><td><code>ThreadPoolConfig</code></td><td>队列改小，视场景而定</td></tr><tr><td class="num-col">13</td><td>人群标签 <code>tag</code> 子域只有测试入口，<code>TagService</code> 里用户列表是硬编码</td><td>domain/tag</td><td>接数仓或加 Job</td></tr></table></div>
+</section>
+
+<!-- ============ 08 ============ -->
+<section id="ch8">
+  <h2><span class="num">CHAPTER 08</span>口语化答题稿（20 题）</h2>
+  <p>第六章是知识点自测，这一章是<strong>可以直接说出口的逐字稿</strong>。所有难念的英文都换成了中文说法，按五个接口分组。标「必背」的六题请一字不差地熟记，其余理解思路即可。</p>
+  <div class="callout note"><span class="label">怎么用</span><p>对着稿子念三遍，然后合上页面复述一遍。能自然说完不卡壳，这题就过了。每段控制在 30 秒到 1 分钟。</p></div>
+
+  <!-- 试算 -->
+  <div class="oral-group" id="o1">
+    <div class="grp-head"><span class="gname">一、试算接口</span><span class="gpath">index/query_group_buy_market_config</span><span class="gcount">4 题</span></div>
+
+    <div class="oral-item">
+      <div class="oral-q"><span class="qnum">01</span>为什么试算要单独做一个接口，锁单里不是也算了一遍吗</div>
+      <div class="script"><span class="slabel">这样说</span><p>因为这是两个不同的时刻。试算是用户刚打开商品页的时候，他就看一眼价格，可能看完就走了，这个接口访问量特别大，而且它不写任何数据，纯查询。锁单是用户真的决定要买了，这时候要往数据库写东西。两者放一起的话，一是流量对不上，商品页的量可能是下单量的几十倍；二是我没法单独给查询这一路做限流和缓存。所以拆开更合适。</p></div>
+    </div>
+
+    <div class="oral-item">
+      <div class="oral-q"><span class="qnum">02</span>试算的价格和锁单时的价格不一致怎么办</div>
+      <div class="script"><span class="slabel">这样说</span><p>以锁单时候重新算的那个价为准，因为那个才是真正写进订单的。用户看到价格到他真正点下单，中间可能隔了很久，这期间活动可能已经过期了，或者运营改了配置。所以锁单接口里我会重新走一遍试算，拿最新的结果。如果这时候发现活动已经失效了，就直接把这单拦掉，告诉商城活动不可用。</p></div>
+    </div>
+
+    <div class="oral-item">
+      <div class="oral-q"><span class="qnum">03</span>为什么只有这个接口做了限流</div>
+      <div class="script"><span class="slabel">这样说</span><p>主要是三个原因。第一，它的流量最大，商品页谁都能刷。第二，它是纯查询，被刷了不会产生脏数据，但会把数据库打满，影响到真正要下单的用户。第三，另外几个接口本身有业务约束，比如锁单必须先有商品有活动，结算必须真的付过款，天然刷不起来。所以我们只在这一个接口上按用户维度做了限流，超了就走降级，直接返回一个提示，不打数据库。</p></div>
+    </div>
+
+    <div class="oral-item">
+      <div class="oral-q"><span class="qnum">04</span>试算里为什么要开多线程</div>
+      <div class="script"><span class="slabel">这样说</span><p>因为试算要拿两份数据，一份是活动和折扣的配置，一份是商品的原价，这两个查询互相不依赖。串行的话要等两次数据库往返，并行只等一次，接口响应能快将近一半。我们是用线程池提交两个任务，然后分别去取结果，每个都设了五秒超时，避免某一个查询卡住把整个请求拖死。</p></div>
+    </div>
+  </div>
+
+  <!-- 锁单 -->
+  <div class="oral-group" id="o2">
+    <div class="grp-head"><span class="gname">二、锁单接口</span><span class="gpath">trade/lock_market_pay_order</span><span class="gcount">5 题</span></div>
+
+    <div class="oral-item">
+      <div class="oral-q"><span class="qnum">05</span>怎么保证一个三人团不会进来第四个人<span class="must">必背</span></div>
+      <div class="script"><span class="slabel">这样说</span><p>这块我们做了两道防线。第一道在缓存上。用户来参团的时候，我先在缓存里对这个团的计数器做一次自增。自增是原子的，所以哪怕一百个人同时点，每个人拿到的数字都不一样，是一二三四这样排下去的。我拿这个数字跟团的目标人数比，超了就说明轮不到他，我把刚才加的再减回去，然后告诉他名额没了。第二道在数据库。就算缓存万一出问题放进来了，我更新数据库的时候会带一个条件，只有当前占位人数小于目标人数才让更新。如果这条更新影响的行数是零，我就直接抛异常回滚。</p></div>
+    </div>
+
+    <div class="oral-item">
+      <div class="oral-q"><span class="qnum">06</span>开团和参团有什么区别<span class="must">必背</span></div>
+      <div class="script"><span class="slabel">这样说</span><p>商城调锁单接口的时候会传一个团号过来。如果传的是空的，说明这个人要自己开一个新团，那我就随机生成一个团号，往数据库插一条新的团记录，占位人数直接记成一。这种情况不用去抢名额，因为团是他开的，第一个位置天然就是他的。如果传过来有值，说明他要加入别人已经开好的团，那就必须先去缓存里抢名额，抢到了才能往下走。</p></div>
+    </div>
+
+    <div class="oral-item">
+      <div class="oral-q"><span class="qnum">07</span>商城超时重试，同一笔订单会不会占两个名额<span class="must">必背</span></div>
+      <div class="script"><span class="slabel">这样说</span><p>商城那边会传一个他们自己的订单号过来。我接口一进来什么都不干，先拿这个订单号去数据库查一下，看看是不是已经有一条还没付款的记录了。如果有，说明这个请求之前已经成功过了，只是商城没收到响应，那我就把上次的结果原样返回给他，不会再占一次名额。另外我给订单号加了唯一索引，万一并发下两条都插进来了，第二条会直接报错，也能兜住。</p></div>
+    </div>
+
+    <div class="oral-item">
+      <div class="oral-q"><span class="qnum">08</span>名额抢到了但数据库写入失败，名额会漏掉吗</div>
+      <div class="script"><span class="slabel">这样说</span><p>不会。业务代码里，抢名额和写数据库这一整段是包在一个异常捕获里的。一旦写库出问题抛异常了，我会在捕获的地方调一个恢复方法，把这个团的恢复量计数器加一。下一个人来抢的时候，可用总数是目标人数加上这个恢复量，所以刚才那个漏掉的位置就又放出来了。</p></div>
+    </div>
+
+    <div class="oral-item">
+      <div class="oral-q"><span class="qnum">09</span>为什么锁单还要再走一次试算</div>
+      <div class="script"><span class="slabel">这样说</span><p>试算不光是算价格，它其实也是一道校验。锁单的时候我要拿到当前真实的折后价写进订单，同时还要确认这个活动现在还有效、没过期，以及这个用户在不在活动限定的人群范围里。有些活动是只给特定人群的，展示的时候能看到但不一定能参加，所以下单这一步必须再确认一遍。</p></div>
+    </div>
+  </div>
+
+  <!-- 结算 -->
+  <div class="oral-group" id="o3">
+    <div class="grp-head"><span class="gname">三、结算接口</span><span class="gpath">trade/settlement_market_pay_order</span><span class="gcount">4 题</span></div>
+
+    <div class="oral-item">
+      <div class="oral-q"><span class="qnum">10</span>怎么判断自己是不是最后一个付款的人<span class="must">必背</span></div>
+      <div class="script"><span class="slabel">这样说</span>
+        <p>结算时要判断是不是最后一个付款的人。原来的写法是在代码里拿提前查出来的付款人数做减法，两个人同时付最后两单时会都读到旧值，结果人数凑满了团却没成功。</p>
+        <p>我把它改成让数据库判断：在同一个事务里，先给付款人数加一，然后执行一条更新团状态的语句，条件是付款人数等于目标人数、并且团还是拼单中。改成功了说明是我这一单凑满的，由我去写回调通知；改到零行就直接返回。</p>
+        <p>这样能保证正确，是因为更新语句会锁住这一行，两个人会排队执行，而且排到的人读的是最新值，只有真正把人数凑满的那一次条件成立。</p>
+      </div>
+    </div>
+
+    <div class="oral-item">
+      <div class="oral-q"><span class="qnum">11</span>通知商城成团的请求失败了，通知会丢吗<span class="must">必背</span></div>
+      <div class="script"><span class="slabel">这样说</span><p>不会丢，我们做了几层保护。首先，这条待通知的记录是跟团的状态一起写进数据库的，在同一个事务里，所以只要团成了，这条记录一定在。然后事务提交完，会用线程池立刻发一次，用户不用等。如果这次发失败了，记录会被标成待重试，有个定时任务会捞出来接着发，最多发五次，五次还不行就标成失败等人工处理。最后因为我们是多台机器部署的，怕几台同时捞到同一条记录重复发，所以发之前会去缓存里抢一把锁，抢到的那台才发。</p></div>
+    </div>
+
+    <div class="oral-item">
+      <div class="oral-q"><span class="qnum">12</span>为什么占位和付款要拆成两个接口</div>
+      <div class="script"><span class="slabel">这样说</span><p>因为中间隔着用户在商城那边付款的过程，这段时间我这边是管不到的。他可能点完参团就去干别的了，半小时后才回来付，也可能压根不付。而且占位和付款本来就是两件事，我用了两个计数器分别记，一个记有多少人占了位，一个记有多少人真掏钱了。判断团有没有成，只看掏钱的那个数。</p></div>
+    </div>
+
+    <div class="oral-item">
+      <div class="oral-q"><span class="qnum">13</span>结算接口被重复调用会怎样</div>
+      <div class="script"><span class="slabel">这样说</span><p>不会重复算。结算这条链路上第二个校验节点，会拿商城传过来的订单号去查这一单的状态。如果发现已经是完成或者已经关闭了，就直接拦下来返回，后面的加人数、发通知都不会执行。所以商城那边就算因为超时重试调了好几次，实际生效的只有第一次。</p></div>
+    </div>
+  </div>
+
+  <!-- 退单 -->
+  <div class="oral-group" id="o4">
+    <div class="grp-head"><span class="gname">四、退单接口</span><span class="gpath">trade/refund_market_pay_order</span><span class="gcount">4 题</span></div>
+
+    <div class="oral-item">
+      <div class="oral-q"><span class="qnum">14</span>退单为什么要分三种情况<span class="must">必背</span></div>
+      <div class="script"><span class="slabel">这样说</span><p>因为退单的时候团可能处在不同阶段，能做的事不一样。第一种，人还没付款就退了，我只要把占位人数减一就行。第二种，人已经付款了但团还没凑齐，那占位人数和付款人数都得减一。第三种，团已经凑齐成功了他才来退，这种我就不能再把名额放出来了，因为团已经成立了，再放人进来会把这个事实搞乱，我只会把团标记成一个「完成但含退单」的状态。</p></div>
+    </div>
+
+    <div class="oral-item">
+      <div class="oral-q"><span class="qnum">15</span>为什么恢复名额要走消息队列，不能同步做</div>
+      <div class="script"><span class="slabel">这样说</span><p>因为退单要动两个地方，一个是数据库里的人数，一个是缓存里的名额，这是两套系统。如果我同步做，很可能数据库改完了，缓存那边网络抖一下失败了，这个名额就永远丢了，后面的人再也进不来。所以我改成数据库事务里只写一条待处理的消息，然后发到队列里，由消费方去恢复缓存。这样万一失败，队列会重新投递，最终一定能恢复上。代价是有一两秒延迟，但这个业务能接受。</p></div>
+    </div>
+
+    <div class="oral-item">
+      <div class="oral-q"><span class="qnum">16</span>消息重复消费，名额被恢复了两次怎么办</div>
+      <div class="script"><span class="slabel">这样说</span><p>消费的时候我会先拿这一单的订单号去缓存里设一个标记，用的是那种「不存在才能设成功」的操作。如果设成功了说明是第一次处理，我就往下走恢复名额。如果设失败了，说明之前已经处理过了，直接返回不做事。另外如果中间处理出错了，我会把这个标记删掉再抛异常，这样队列重新投递过来的时候还能进得来，不会因为标记还在就被永久跳过。</p></div>
+    </div>
+
+    <div class="oral-item">
+      <div class="oral-q"><span class="qnum">17</span>用户锁了名额一直不付款，名额永远被占着吗</div>
+      <div class="script"><span class="slabel">这样说</span><p>不会。锁单的时候会给这笔订单记一个截止时间，就是锁单时间加上活动配置的有效时长，项目里配的是十五分钟。</p><p>有个定时任务每分钟跑一次，找出还没付款、已经过了截止时间的订单，逐条走退单流程，把占位人数减掉，名额还回去。</p><p>因为是多实例部署，任务开始前会先抢一把分布式锁，抢到的那台才执行。另外它每次最多处理十条，超时订单特别多的时候会积压，可以调大数量或者循环处理到没有为止。</p></div>
+    </div>
+  </div>
+
+  <!-- 综合 -->
+  <div class="oral-group" id="o5">
+    <div class="grp-head"><span class="gname">五、综合题</span><span class="gpath">跨接口的设计与扩展</span><span class="gcount">3 题</span></div>
+
+    <div class="oral-item">
+      <div class="oral-q"><span class="qnum">18</span>这几个接口的幂等分别怎么做的</div>
+      <div class="script"><span class="slabel">这样说</span><p>按接口来说。</p><p>锁单：一进来先拿商城的订单号查，已经有一笔没付款的单，就直接把原来的结果返回，不会再占一次名额。本系统生成的订单号上还有唯一索引兜底。</p><p>结算：先查这笔订单，已经关闭的直接拦掉；把订单改成已付款的那条语句带着「状态还是未付款」的条件，重复结算会改到零行，事务回滚。</p><p>退单：责任链第二个节点看订单状态，已经退过的直接返回「重复请求」。消息消费：用订单号在 Redis 里设标记，设过的就跳过。</p><p>有两个地方是我读代码时发现不严谨的。一是通知表的唯一标识，索引名字叫唯一索引，建表时其实建的是普通索引，重复插入拦不住。二是限制用户参与次数的那个业务编号，代码里靠唯一索引冲突来防重，但表上根本没给它建唯一索引。</p></div>
+    </div>
+
+    <div class="oral-item">
+      <div class="oral-q"><span class="qnum">19</span>让你加一个「拼团失败自动退款」，怎么设计</div>
+      <div class="script"><span class="slabel">这样说</span><p>我的思路是加一个定时任务，定期去扫那些已经过了有效期但人数还没凑齐的团。扫到之后把这个团标记成失败，然后拿到团里所有已经付过款的订单，一条条走现有的退单流程。退单流程本身已经写好了，包括减人数、发消息恢复名额，这部分可以直接复用。最后再往通知任务表里写一条记录，告诉商城这个团失败了，让他们那边去发起真正的退款。整个改动主要是加一个定时任务和一种新的通知类型，核心逻辑都是现成的。</p></div>
+    </div>
+
+    <div class="oral-item">
+      <div class="oral-q"><span class="qnum">20</span>哪个接口最容易成为性能瓶颈</div>
+      <div class="script"><span class="slabel">这样说</span><p>最先扛不住的是首页试算接口，它流量最大，每打开一次商品页就调一次。</p><p>这个接口里活动和折扣配置已经放了 Redis 缓存，但商品信息、渠道商品配置还是每次查数据库。另外它还要查进行中的团列表和活动统计，统计是对订单表做计数，数据一多会很慢。</p><p>优化的话，商品和渠道配置变动少，也放进缓存；团列表和统计数据不需要实时，可以定时算好放 Redis，接口直接读。</p><p>锁单那边抢名额走 Redis 很快，压力主要在写数据库，量特别大时可以考虑按活动分散热点，或者把落库改成异步。</p></div>
+    </div>
+  </div>
+
+  <div class="tips">
+    <h4>说的时候注意三点</h4>
+    <p><strong>先给结论再讲细节。</strong>每段的第一句都是结论，说完停半秒，让面试官有机会打断你追问。他不追问你再往下说。</p>
+    <p><strong>用「我」和「我们」，不要用「系统」。</strong>说「我先去缓存里抢名额」比说「系统会去缓存抢名额」更像是你亲手写的。</p>
+    <p><strong>不会的题别硬编。</strong>可以说「这块我当时没有深入看，不过按我的理解应该是」，然后讲你的思路。面试官更在意你有没有分析能力。</p>
+  </div>
+</section>
+
+<!-- ============ 09 ============ -->
+<section id="ch9">
+  <h2><span class="num">CHAPTER 09</span>模拟面试（18 题）</h2>
+  <p>这 7 题是模拟面试题，故意换了问法，还有几道场景题，用来检验是真的理解还是只背下来了。拿到题目先判断它属于哪个环节，再说答案，这样最不容易串题。</p>
+  <h3>先看这张对应表</h3>
+  <div class="tablewrap"><table><tr><th>题目里出现</th><th>属于哪个环节</th><th>核心答案</th></tr><tr><td>参团、抢名额、团满了</td><td>锁单</td><td>Redis 自增抢号，数据库条件更新兜底</td></tr><tr><td>最后一个付款、成团</td><td>结算</td><td>数据库带条件更新团状态</td></tr><tr><td>通知商城、发货</td><td>回调</td><td>本地消息表、立即发送、定时补偿</td></tr><tr><td>重复请求、发了两次</td><td>幂等</td><td>按接口分别防重</td></tr></table></div>
+  <h3>第一轮（7 题）</h3>
+  <div class="oral-item" id="m1">
+    <div class="oral-q"><span class="qnum">1</span>先用两分钟左右介绍一下你这个项目。<span class="topic">项目整体</span></div>
+    <p class="mock-tip"><b>要点</b>　业务一段、技术一段、亮点一段，最后留一个钩子让面试官顺着问。</p>
+    <div class="script"><span class="slabel">这样说</span><p>这是一个拼团营销中台，商城通过接口调用它来实现拼团功能。它只管拼团，不管支付。主要有四个环节：用户看商品时算拼团价，下单时锁名额，付款后结算，人凑齐了通知商城发货，退款时把名额退回去。</p><p>技术上用的是 Spring Boot，按 DDD 分层，数据库是 MySQL，缓存和分布式锁用 Redis，异步通知用消息队列。</p><p>我觉得比较有意思的有三块。第一是抢名额，用 Redis 自增来做，不用加锁也不会超卖。第二是成团通知，用本地消息表加定时补偿保证不丢。第三是设计模式，试算用了策略树，交易环节用了责任链。</p><p>另外我读代码时发现结算有一个并发问题，两个人同时付最后两单会导致团凑满了却没成功，我自己把它修掉了。</p></div>
+  </div>
+  <div class="oral-item" id="m2">
+    <div class="oral-q"><span class="qnum">2</span>你项目里用了哪些设计模式？策略树和责任链有什么区别？<span class="topic">设计模式</span></div>
+    <p class="mock-tip"><b>要点</b>　每个模式都要说出用在哪、解决什么问题，区别要举例子。</p>
+    <div class="script"><span class="slabel">这样说</span><p>主要用了三个。</p><p>责任链用在锁单、结算、退单。比如锁单前要依次检查活动有没有生效、用户参与次数有没有超、名额够不够，我把这几个检查串成一条链，挨个走，哪一步不通过就拦下。新加一个检查只要加一个节点。</p><p>策略模式用在折扣计算。有直减、满减、打折、N 元购四种，每种是一个独立的类，根据活动配置自动选。退单也用了，按团和订单的状态选三种处理方式之一。</p><p>模板方法是配合用的，比如折扣的父类规定先检查人群、再算价格，子类只写怎么算价格。</p><p>策略树和责任链最大的区别是能不能分叉。责任链是提前排好顺序的一条直线；策略树是每个节点自己决定下一步去哪。比如试算的时候，营销节点查到了活动配置就去算人群限制，没查到就直接走报错节点。所以一串顺序检查用责任链，有分支的流程用策略树。</p></div>
+  </div>
+  <div class="oral-item" id="m3">
+    <div class="oral-q"><span class="qnum">3</span>一个三人团只剩最后一个名额，两个用户同时点了参团，系统是怎么保证只进来一个人的？<span class="topic">锁单</span></div>
+    <p class="mock-tip"><b>要点</b>　这题问的是锁单抢名额，不是结算时判断最后一个付款的人，别串题。</p>
+    <span class="ex-label">例子</span>
+    <p class="ex-setup">三人团已有张三（开团，占第 1 个位置）和李四（2 号），Redis 计数器是 1，只剩一个名额。王五和赵六同时点参团。</p>
+    <div class="tablewrap"><table><tr><th>顺序</th><th>王五</th><th>赵六</th><th>计数器</th></tr><tr><td>1</td><td>自增拿到 2，算出自己是第 3 个</td><td></td><td>2</td></tr><tr><td>2</td><td></td><td>自增拿到 3，算出自己是第 4 个</td><td>3</td></tr><tr><td>3</td><td>3 没超过目标 3，通过，登记「3 号已占」</td><td></td><td>3</td></tr><tr><td>4</td><td></td><td>4 超过目标 3，拒绝，把自己加的数减回去</td><td>2</td></tr></table></div>
+    <p class="ex-after">结果：王五进来，赵六收到名额不足。就算 Redis 出问题把赵六也放了进来，数据库「占位人数小于目标人数」的条件也会让他改到 0 行、参团失败。</p>
+    <div class="script"><span class="slabel">这样说</span><p>靠两道防线。</p><p>第一道在 Redis。参团的时候先对这个团的计数器做一次自增，自增是原子的，两个人同时来一定拿到不同的号。拿到号之后跟目标人数比，超了就拒绝，并且把刚才加的数减回去。三人团只剩一个名额，所以只有一个人能通过。</p><p>拿到号之后还会用这个号设一个「不存在才能设成功」的标记，作为兜底，防止极端情况下号码重复。</p><p>第二道在数据库。写库时给团的占位人数加一，条件是占位人数小于目标人数。万一 Redis 放多了人，这条语句会改到零行，直接抛异常。</p></div>
+    <div class="followup">
+      <p class="fq">追问：如果王五退单了，王七进来会怎样？</p>
+      <div class="tablewrap"><table><tr><th>事件</th><th>发生了什么</th><th>计数器</th><th>恢复数</th><th>上限</th></tr><tr><td>王五退单</td><td>数据库占位人数 3 → 2；消息被消费后恢复数加一。计数器不减，「3 号已占」标记还在</td><td>2</td><td>1</td><td>3 + 1 = 4</td></tr><tr><td>王七参团</td><td>自增拿到 3，算出第 4 个，4 没超过 4，登记「4 号已占」，通过</td><td>3</td><td>1</td><td>4</td></tr><tr><td>王八参团</td><td>自增拿到 4，算出第 5 个，超过 4，拒绝并减回</td><td>3</td><td>1</td><td>4</td></tr></table></div>
+      <div class="script"><span class="slabel">这样说</span><p>王五退单后，数据库里他的订单改成已关闭，团的占位人数减一，同时写一条消息。消息被消费后，给这个团的恢复数加一。计数器本身不减，王五那个号的标记也还在。</p><p>王七来参团，自增后算出自己是第 4 个，这时上限是目标人数 3 加上恢复数 1，等于 4，所以能通过，用的是新的 4 号，不会跟王五的标记冲突。</p><p>如果退单时直接把计数器减回去，王七会拿到 3 号，撞上王五还没过期的标记，明明有空位也进不来，所以才单独用一个恢复数。</p><p>注意只有团还没成立时退单才会加恢复数，团已经成立就不恢复。另外如果消息没送到，恢复数暂时没加，王七会暂时进不来，等消息重试送达就好了。</p></div>
+    </div>
+  </div>
+  <div class="oral-item" id="m4">
+    <div class="oral-q"><span class="qnum">4</span>接着上一题：假如抢到名额的那个人，后面写数据库的时候失败了，这个名额会怎样？<span class="topic">锁单</span></div>
+    <p class="mock-tip"><b>要点</b>　名额不是留给这个人，而是还回去给别人。别和通知重发混在一起。</p>
+    <div class="script"><span class="slabel">这样说</span><p>不会丢。抢名额和写数据库这一整段包在一个异常捕获里，写库失败时会调一个恢复方法，给这个团的恢复计数器加一。</p><p>判断能不能进的上限是目标人数加上恢复数，所以上限被抬高了一格，刚才那个位置就重新放出来，下一个人能补进来。</p><p>之所以不直接把号码计数器减回去，是因为这个人拿到号时已经设过标记了，号码往回拨会让下一个人撞上这个标记。</p></div>
+  </div>
+  <div class="oral-item" id="m5">
+    <div class="oral-q"><span class="qnum">5</span>团凑满之后要通知商城发货，你怎么保证这个通知一定能送到？<span class="topic">回调</span></div>
+    <p class="mock-tip"><b>要点</b>　最关键的是第一层：通知记录和团状态在同一个事务里写，没有它后面的重试无从谈起。</p>
+    <div class="script"><span class="slabel">这样说</span><p>靠三层保证。</p><p>第一层是本地消息表。团改成成功和写一条「要通知商城」的记录，放在同一个事务里，要么都成功要么都回滚。只要团成了，通知记录一定在。</p><p>第二层是立即发加定时补偿。事务提交后马上用线程池发一次，成功就标成已完成，失败就把次数加一、标成待重试。定时任务会把待重试的捞出来重发，前五次失败继续重试，第六次还失败标成最终失败，人工处理。</p><p>第三层是防重复。多台机器可能同时捞到同一条记录，所以每条发之前先抢一把分布式锁，抢到的才发。</p><p>这里还有一个可以改进的地方：补偿任务每天零点才跑一次，失败了要隔天才重试，应该改成分钟级。</p></div>
+  </div>
+  <div class="oral-item" id="m6">
+    <div class="oral-q"><span class="qnum">6</span>用户付完款，商城因为网络超时，连续给你发了两次结算请求，系统会发生什么？<span class="topic">幂等</span></div>
+    <p class="mock-tip"><b>要点</b>　要说清楚第二次在哪一步被挡住、为什么付款人数不会加两次。</p>
+    <span class="ex-label">例子</span>
+    <p class="ex-setup">三人团，张三、李四已经付款（付款人数 2）。王五付款后，商城用同一个订单号 M003 连发了两次结算请求。</p>
+    <div class="tablewrap"><table><tr><th>步骤</th><th>第一次请求</th><th>第二次请求</th></tr><tr><td>校验链</td><td>订单存在、未关闭、支付时间有效，通过</td><td>订单存在，已付款不算关闭，也通过</td></tr><tr><td>订单改成已付款（条件：状态还是未付款）</td><td>改 1 行</td><td>状态已经是已付款，改 0 行，抛异常，事务回滚</td></tr><tr><td>付款人数加一</td><td>2 → 3</td><td>没执行</td></tr><tr><td>成团更新</td><td>改 1 行，写一条通知</td><td>没执行</td></tr></table></div>
+    <p class="ex-after">最终：付款人数 3，团已完成，通知记录只有 1 条。两个请求就算真正同时到，改同一笔订单时也会被行锁排队，后面那个一样改到 0 行回滚。</p>
+    <div class="script"><span class="slabel">这样说</span><p>第一次请求正常结算：订单改成已付款，团的付款人数加一，如果凑满了就写一条成团通知。只是响应没回到商城。</p><p>第二次同样的请求进来，校验环节会放过它，因为订单存在、也没关闭。但进到事务里，把订单改成已付款的那条语句带着「状态还是未付款」的条件，这时订单已经是已付款了，改到零行，直接抛异常，整个事务回滚，后面加人数和写通知都不会执行。所以付款人数不会被加两次，也不会重复通知商城。</p><p>就算两个请求同时到，改同一笔订单时数据库行锁会让它们排队，后面那个一样改到零行回滚。</p><p>这里有一点可以改进：第二次返回的是失败，商城可能以为没结算成功还会继续重试。更好的做法是像锁单那样，发现已经结算过就直接返回上次的成功结果。</p></div>
+  </div>
+  <div class="oral-item" id="m7">
+    <div class="oral-q"><span class="qnum">7</span>如果让你改进这个项目，你会改哪些地方？<span class="topic">开放题</span></div>
+    <p class="mock-tip"><b>要点</b>　面试收尾几乎必问，挑三四个说清楚就够，第一个说自己已经动手改过的。</p>
+    <div class="script"><span class="slabel">这样说</span><p>我挑几个读代码时发现、改了收益比较大的。</p><p>第一个我已经改了：结算时判断最后一个付款的人用的是旧值，两个人同时付款会导致团凑满了却没成功，我改成了让数据库带条件更新来判断。</p><p>第二个是通知补偿任务每天零点才跑一次，失败了要隔天才重试，应该改成分钟级，重试间隔逐步拉长。</p><p>第三个是发 HTTP 回调的客户端没设超时，商城那边一卡住，会把我们的线程一直拖着。</p><p>第四个是限流数据存在每台机器自己的内存里，多实例部署时总量会翻倍，要做全局限流得放到 Redis 里。</p></div>
+  </div>
+  <h3 id="round2">第二轮（8 题）</h3>
+  <p>换了角度，加入了人群标签、动态配置、多线程、分层追问等方向，其中第 11 题和第一轮的第 3 题很像，但问的是不同环节。</p>
+  <div class="oral-item" id="m8">
+    <div class="oral-q"><span class="qnum">8</span>用户看到拼团价 90 元，犹豫了半小时才下单。这半小时里运营把活动改成了直减 30，他下单时按哪个价格算？<span class="topic">试算 + 缓存</span></div>
+    <p class="mock-tip"><b>要点</b>　先答「以锁单时重新试算为准」，再说出这个项目缓存没过期的实际问题，这是加分点。</p>
+    <div class="script"><span class="slabel">这样说</span><p>理论上以下单那一刻重新算出来的价格为准。商品页展示的价格只是给用户看的，锁单接口里会再走一次试算，把当时算出来的价格写进订单。</p><p>但这个项目有个实际问题：活动和折扣配置放在 Redis 缓存里，写缓存时没设过期时间，运营改了数据库之后也没有任何地方去删缓存。所以改成直减 30 之后，服务读到的还是缓存里的旧配置，用户下单仍然按 90 算，一直到缓存被手动删掉、服务重启，或者把缓存开关关掉才会变。</p><p>如果运营是把活动改成过期或者失效，那锁单时的校验会拦住，返回活动不可用，这个跟缓存无关。</p><p>要改的话，给配置缓存加一个过期时间，或者在后台改配置时主动把对应的缓存删掉。</p></div>
+  </div>
+  <div class="oral-item" id="m9">
+    <div class="oral-q"><span class="qnum">9</span>假设活动只对新用户开放，系统怎么判断一个用户是不是新用户？为什么不直接查数据库？<span class="topic">人群标签</span></div>
+    <p class="mock-tip"><b>要点</b>　答出位图 + 哈希取下标，再说清为什么不查库；最后补一句位图不存在时放行。</p>
+    <div class="script"><span class="slabel">这样说</span><p>用的是 Redis 的位图。打标任务会把符合条件的用户写进数据库的明细表，同时在位图里把这个用户对应的位置设成 1。判断的时候，把用户 ID 做一次哈希取模得到一个下标，直接取那一位是 0 还是 1。</p><p>不直接查数据库有两个原因。一是快，位图判断就是一次内存操作，数据库要走索引查询，而试算接口每打开一次商品页就调一次，量很大。二是省，一亿用户的位图大概只占十几兆内存，明细表存一亿行要大得多。数据库那份明细还留着，用来对账和排查。</p><p>有个细节：如果这个标签的位图在 Redis 里不存在，代码是直接放行的，属于宽松策略，避免标签数据还没准备好就把所有人挡在外面。</p></div>
+  </div>
+  <div class="oral-item" id="m10">
+    <div class="oral-q"><span class="qnum">10</span>大促当天拼团服务扛不住了，不发版不重启，你有哪些手段能立刻止血？<span class="topic">动态配置</span></div>
+    <p class="mock-tip"><b>要点</b>　按「从重到轻」说：整体降级、切量、渠道黑名单，最后补一句拦截位置的讲究。</p>
+    <div class="script"><span class="slabel">这样说</span><p>项目里有一套动态配置，改完之后通过 Redis 的发布订阅广播到所有实例，秒级生效，不用发版也不用重启。</p><p>最直接的是降级开关，打开之后所有试算在流程第二个节点就被拦掉，请求根本不会打到数据库，相当于临时把拼团功能关掉。</p><p>温和一点的是切量开关，比如从一百调到二十，按用户 ID 哈希取模只放两成用户进来，既保住大部分流量又能降压。</p><p>还有渠道黑名单，如果是某个渠道在刷量，可以单独把这个渠道的结算拦掉。限流开关也挂在动态配置上。</p><p>另外试算接口本身就有限流，按用户每秒一个请求，超了走降级返回提示，被拦多次的用户会进二十四小时黑名单。</p><p>这些开关放的位置也有讲究，降级和切量都在试算流程很靠前的地方、查数据库之前，这样才真的起到保护作用。</p></div>
+  </div>
+  <div class="oral-item" id="m11">
+    <div class="oral-q"><span class="qnum">11</span>两个用户同时付了这个团的最后两单，系统会发生什么？<span class="topic">结算</span></div>
+    <p class="mock-tip"><b>要点</b>　这题问的是结算的成团判断，不是锁单抢名额，注意和第 3 题区分。</p>
+    <div class="script"><span class="slabel">这样说</span><p>这是结算环节。两个人的结算请求各自进一个事务，第一步把自己的订单改成已付款，第二步给团的付款人数加一。加人数这条语句会锁住团的那一行，所以两个人会排队执行。</p><p>加完之后执行一条带条件的更新：付款人数等于目标人数、并且团还是拼单中，才把团改成完成。先执行的那个人加完是 2，条件不成立，改 0 行，直接返回；后执行的加完是 3，条件成立，改 1 行，由他去写回调通知。</p><p>原来的写法是拿事务外提前查出来的付款人数做减法，两个人都会读到旧值，都认为自己不是最后一个，结果人数凑满了团却没成功。这是我自己发现并修掉的问题。</p></div>
+  </div>
+  <div class="oral-item" id="m12">
+    <div class="oral-q"><span class="qnum">12</span>用户已经付过款、但团还没凑齐，这时他申请退款。系统要改哪些数据？<span class="topic">退单</span></div>
+    <p class="mock-tip"><b>要点</b>　三种退单里的第二种。要说清数据库改三处、Redis 走消息异步恢复。</p>
+    <div class="script"><span class="slabel">这样说</span><p>这属于第二种退单：已支付、但团还没成。</p><p>数据库改三处：这个人的订单状态改成已退单；团的占位人数减一；团的付款人数也减一，因为他的钱之前已经算进去过了。</p><p>同时在这个事务里写一条待发消息，提交后发到消息队列。消费者收到后先用订单号设一个防重标记，然后给这个团的 Redis 恢复数加一，把名额放出来。</p><p>Redis 里的号码计数器不减，因为他的号已经登记过标记了，减回去会让下一个人撞上这个标记。</p></div>
+  </div>
+  <div class="oral-item" id="m13">
+    <div class="oral-q"><span class="qnum">13</span>试算为什么要用多线程？如果其中一个查询很慢会发生什么？<span class="topic">试算</span></div>
+    <p class="mock-tip"><b>要点</b>　说清并行的收益，再说超时保护，最后可以带出线程池参数。</p>
+    <div class="script"><span class="slabel">这样说</span><p>试算要拿两份数据，一份是活动加折扣的配置，一份是商品信息。这两个查询互相不依赖，所以交给线程池同时查。串行要等两次数据库往返，并行只等一次。</p><p>取结果时每个最多等五秒。超过五秒会抛超时异常，一路往外抛，接口返回失败。这样是为了不让一个慢查询把请求一直挂住、占着服务器的线程不放。</p><p>线程池是全局共用的，核心二十、最大五十、队列五千，拒绝策略是让提交任务的线程自己执行，保证任务不丢。</p></div>
+  </div>
+  <div class="oral-item" id="m14">
+    <div class="oral-q"><span class="qnum">14</span>你说 domain 层不依赖 infrastructure 层，那 domain 层怎么拿到数据库里的数据？<span class="topic">DDD</span></div>
+    <p class="mock-tip"><b>要点</b>　关键词是接口加依赖注入，一定要说出「编译期不依赖、运行期由容器注入」。</p>
+    <div class="script"><span class="slabel">这样说</span><p>靠接口和依赖注入。查团、更新人数这些方法的定义写在 domain 层，是一组接口；具体怎么连数据库、怎么拼 SQL 写在 infrastructure 层，那边有实现类。</p><p>运行的时候 Spring 把实现类注入进来，domain 层拿到的是接口，根本不知道背后是 MySQL 还是别的存储。编译期 domain 不依赖 infrastructure，方向是反过来的，所以叫依赖倒置。</p><p>好处是换存储只改实现层，业务代码一行不用动；写测试的时候也可以塞一个假的实现进去，不用真连数据库。</p></div>
+  </div>
+  <div class="oral-item" id="m15">
+    <div class="oral-q"><span class="qnum">15</span>这个项目是单体还是微服务？多实例部署时哪些地方要特别注意？<span class="topic">部署</span></div>
+    <p class="mock-tip"><b>要点</b>　先定性，再按「互斥、共享状态、配置同步」三类说注意点，最后带一个自己踩过的坑。</p>
+    <div class="script"><span class="slabel">这样说</span><p>是单体应用，对外只暴露 HTTP 接口，没有用微服务那一套。不过是多实例部署的，前面有 Nginx 做负载均衡，演示环境起了两个实例。</p><p>多实例要注意几点。定时任务每台机器到点都会触发，所以任务开始前要抢分布式锁，抢到的那台才执行；成团回调也一样，每条通知发之前按唯一标识抢锁，防止重复通知商城。</p><p>抢名额这种计数必须放在 Redis 里，不能用本地变量，否则每台机器各算各的，肯定超卖。</p><p>配置变更要广播，项目是用 Redis 的发布订阅把变更推给所有实例的。</p><p>还有两个坑。一是限流数据存在每台机器自己的内存里，三台机器的话同一个用户每秒实际能过三次，要做全局限流得放到 Redis。二是中间件重启之后，应用连接池里会留着失效连接，我本地遇到过，表现是端口通、命令却发不出去，需要重启应用或者配置连接探活。</p></div>
+  </div>
+  <h3 id="round3">第三轮 · 幂等专题（3 题）</h3>
+  <p>这一轮专门考幂等，三题分别对应「并发重复请求」「消息重复消费」「幂等返回值设计」。幂等类问题面试官几乎一定会追问并发和失败场景，把这两个追问当成固定动作。</p>
+  <div class="oral-item" id="m16">
+    <div class="oral-q"><span class="qnum">16</span>商城因为超时重试，对同一笔订单同时发了两个锁单请求（并发到达），系统会发生什么？两个请求都会占到名额吗？<span class="topic">幂等 · 锁单</span></div>
+    <p class="mock-tip"><b>要点</b>　题目强调「同时」。接口层的先查后写在并发下会失效，能说出数据库为什么也挡不住才是重点。</p>
+    <span class="ex-label">例子</span>
+    <p class="ex-setup">商城用同一个外部单号 M001 并发发了两个锁单请求 A 和 B。</p>
+    <div class="tablewrap"><table><tr><th>时刻</th><th>请求 A</th><th>请求 B</th></tr><tr><td>1</td><td>用 M001 查，没查到已有的单</td><td></td></tr><tr><td>2</td><td></td><td>用 M001 查，也没查到（A 还没插入）</td></tr><tr><td>3</td><td>抢名额拿到 2 号，通过</td><td></td></tr><tr><td>4</td><td></td><td>抢名额拿到 3 号，也通过</td></tr><tr><td>5</td><td>插入明细，订单号是随机的 12 位</td><td></td></tr><tr><td>6</td><td></td><td>插入明细，订单号是另一个随机的 12 位</td></tr></table></div>
+    <p class="ex-after">两条明细都插进去了，同一笔商城订单占了两个名额。唯一索引挡不住，因为本系统的订单号是每次随机生成的；外部单号和业务编号都没有建唯一索引。</p>
+    <div class="script"><span class="slabel">这样说</span><p>如果是一前一后发两次，第二次会被接口层的查重挡住：拿外部单号加用户 ID 查到已有的未支付单，直接返回原来的结果，不会重复占名额。</p><p>但如果是并发同时到达就挡不住了。两个请求几乎同时查，都查不到已有的单，于是都往下走，各自抢到一个名额，各自插入一条明细，同一笔商城订单就占了两个位置。</p><p>数据库也救不了。本系统的订单号是每次随机生成的 12 位数字，两条记录不一样，唯一索引不冲突；外部单号和业务编号这两个字段都没有建唯一索引。同样的原因，用户参与次数的限制在并发下也能被绕过，两个请求都查到参与 0 次，都通过校验。</p><p>这是我读代码时发现的一个真实缺陷。要修有两个办法：一是给外部单号加用户 ID 建一个唯一索引，让第二条插入直接失败回滚；二是在接口入口按外部单号抢一把分布式锁，让同一笔单串行处理。我倾向于加唯一索引，因为不依赖 Redis，也没有锁失效的问题。</p></div>
+  </div>
+  <div class="oral-item" id="m17">
+    <div class="oral-q"><span class="qnum">17</span>退单成功后发的消息被重复投递了，怎么保证名额只恢复一次？如果消费到一半失败，会不会导致名额永远恢复不了？<span class="topic">幂等 · 消息</span></div>
+    <p class="mock-tip"><b>要点</b>　两问都要答。第二问的关键是失败时要把标记删掉，不然重投的消息会被自己挡住。</p>
+    <div class="script"><span class="slabel">这样说</span><p>消费者处理前先用订单号在 Redis 里设一个标记，规则是不存在才能设成功。第一次设成功就往下恢复名额；重复投递过来设不成功，直接跳过，什么都不做。</p><p>如果处理到一半失败，比如加恢复数时 Redis 出错了，代码会先把这个标记删掉再抛异常。消息队列看到消费失败会重新投递，这时候标记已经没了，能重新处理一次。</p><p>所以不会出现名额恢复不了的情况。反过来说，如果失败时不删标记，重投的消息会被自己刚才设的标记挡住，那才是真的恢复不了。</p></div>
+  </div>
+  <div class="oral-item" id="m18">
+    <div class="oral-q"><span class="qnum">18</span>结算接口重复调用时现在返回的是失败。如果让你改成「重复调用也返回上次的成功结果」，你会怎么设计？<span class="topic">幂等 · 设计</span></div>
+    <p class="mock-tip"><b>要点</b>　先说清现在为什么不好，再给方案，最后一定要补上并发情况怎么处理。</p>
+    <div class="script"><span class="slabel">这样说</span><p>现在重复调用返回的是失败，商城分不清是真失败还是已经成功过，可能会一直重试，甚至触发告警。</p><p>我会改成：结算一进来先用外部单号查订单，如果状态已经是已付款完成，说明之前结算成功过，直接把用户、团号、活动、外部单号组装成成功结果返回，不再走后面的加人数和成团判断。这跟锁单接口的做法是一致的，锁单就是查到已有的未支付单就直接返回原结果。</p><p>并发的情况要额外处理。两个请求同时进来，都查到未付款，都往下走，这时靠那条带「状态还是未付款」条件的更新语句，只有一个能改成功。改到零行的那个不要直接抛异常，而是重新查一次订单，确认已经是完成状态就返回成功。</p><p>这样改之后，不管调用方重试多少次，拿到的都是同一个成功结果，而加人数、写通知这些副作用只发生一次。</p></div>
+  </div>
+</section>
+
+<!-- ============ 附录 ============ -->
+<section id="appx">
+  <h2><span class="num">APPENDIX</span>附录</h2>
+
+  <h3>A. 接口请求示例</h3>
+  <h4>锁单</h4>
+<pre><code>POST /api/v1/gbm/trade/lock_market_pay_order
+{
+  "userId": "xiaofuge",
+  "teamId": null,
+  "activityId": 100123,
+  "goodsId": "9890001",
+  "source": "s01",
+  "channel": "c01",
+  "outTradeNo": "1234567890",
+  "notifyConfigVO": { "notifyType": "HTTP", "notifyUrl": "http://127.0.0.1:8091/api/v1/test/group_buy_notify" }
+}</code></pre>
+  <p>响应：<code>{ "code": "0000", "data": { "orderId", "teamId", "originalPrice": 100, "deductionPrice": 10, "payPrice": 90, "tradeOrderStatus": 0 } }</code>。<code>teamId</code> 传 null 是开新团，传已有值是参团。<code>notifyType</code> 可选 <code>HTTP</code> 或 <code>MQ</code>。</p>
+  <h4>结算</h4>
+<pre><code>POST /api/v1/gbm/trade/settlement_market_pay_order
+{ "source": "s01", "channel": "c01", "userId": "xiaofuge", "outTradeNo": "1234567890", "outTradeTime": "2025-01-01 12:00:00" }</code></pre>
+  <h4>退单</h4>
+<pre><code>POST /api/v1/gbm/trade/refund_market_pay_order
+{ "userId": "xiaofuge", "outTradeNo": "1234567890", "source": "s01", "channel": "c01" }</code></pre>
+  <h4>动态配置</h4>
+<pre><code>GET /api/v1/gbm/dcc/update_config?key=downgradeSwitch&amp;value=1   开降级
+GET /api/v1/gbm/dcc/update_config?key=cutRange&amp;value=50          放量 50%</code></pre>
+
+  <h3>B. Redis key 与 DB 唯一键速查</h3>
+  <div class="tablewrap"><table>
+    <tr><th>key / 键</th><th>用途</th></tr>
+    <tr><td><code>group_buy_market_team_stock_key_{activityId}_{teamId}</code></td><td>团名额计数器（<code>incr</code>）</td></tr>
+    <tr><td>上面 + <code>_recovery</code></td><td>退单恢复量</td></tr>
+    <tr><td>上面 + <code>_{序号}</code></td><td>每个占用序号的 NX 兜底锁</td></tr>
+    <tr><td><code>refund_lock_{orderId}</code></td><td>退单恢复库存的幂等锁</td></tr>
+    <tr><td><code>notify_job_lock_key_{uuid}</code></td><td>单条回调任务防重锁</td></tr>
+    <tr><td><code>group_buy_market_notify_job_exec</code> / <code>group_buy_market_timeout_refund_job_exec</code></td><td>两个定时任务的多实例互斥锁</td></tr>
+    <tr><td><code>{tagId}</code>（RBitSet）</td><td>人群标签位图</td></tr>
+    <tr><td>DB <code>group_buy_order.team_id</code>、<code>group_buy_order_list.order_id</code>、<code>crowd_tags_detail(tag_id,user_id)</code></td><td>唯一索引</td></tr>
+  </table></div>
+
+  <h3>C. 错误码速查</h3>
+  <div class="tablewrap"><table>
+    <tr><th>码</th><th>含义</th><th>抛出位置</th></tr>
+    <tr><td><code>E0001</code></td><td>不存在的折扣计算服务</td><td><code>MarketNode</code></td></tr>
+    <tr><td><code>E0002</code></td><td>商品无拼团营销配置</td><td><code>ErrorNode</code></td></tr>
+    <tr><td><code>E0003</code> / <code>E0004</code></td><td>降级拦截 / 切量拦截</td><td><code>SwitchNode</code></td></tr>
+    <tr><td><code>E0005</code></td><td>拼团组队失败（<code>lock_count</code> 更新 0 行）</td><td><code>TradeRepository#lockMarketPayOrder</code></td></tr>
+    <tr><td><code>E0006</code></td><td>锁单量已达目标</td><td><code>MarketTradeController</code></td></tr>
+    <tr><td><code>E0007</code></td><td>人群限定不可参与</td><td><code>MarketTradeController</code></td></tr>
+    <tr><td><code>E0008</code></td><td>Redis 名额不足</td><td><code>TeamStockOccupyRuleFilter</code></td></tr>
+    <tr><td><code>E0101</code> / <code>E0102</code></td><td>活动未生效 / 不在有效期</td><td><code>ActivityUsabilityRuleFilter</code></td></tr>
+    <tr><td><code>E0103</code></td><td>参与次数达上限</td><td><code>UserTakeLimitRuleFilter</code></td></tr>
+    <tr><td><code>E0104</code></td><td>外部单号不存在或已退单</td><td><code>OutTradeNoRuleFilter</code></td></tr>
+    <tr><td><code>E0105</code></td><td>渠道黑名单</td><td><code>SCRuleFilter</code></td></tr>
+    <tr><td><code>E0106</code></td><td>支付时间不在团有效期内</td><td><code>SettableRuleFilter</code></td></tr>
+  </table></div>
+
+  <h3>D. 本地启动步骤</h3>
+  <ol class="flow">
+    <li>进入 <code>docs/dev-ops</code>，执行 <code>docker-compose -f docker-compose-environment.yml up -d</code>，拉起 MySQL（13306）、Redis（16379）、RabbitMQ（5672 / 15672）。MySQL 会自动执行 <code>mysql/sql</code> 下的建表脚本。</li>
+    <li>修改 <code>application-dev.yml</code>：数据库地址改为 <code>127.0.0.1:13306</code>，Redis 和 <code>xfg.wrench.config.register</code> 改为本机 <code>16379</code>，RabbitMQ 地址改为本机且端口改为 <code>5672</code>。</li>
+    <li>根目录执行 <code>mvn clean install -DskipTests</code>。</li>
+    <li>运行 <code>group-buy-market-app</code> 下的 <code>Application</code> 主类，端口 8091。</li>
+    <li>用测试目录下的 <code>MarketTradeControllerTest</code> 或 Postman 按「锁单 → 结算」顺序调用验证。</li>
+  </ol>
+
+  <h3>E. 建议的学习路径</h3>
+  <ol class="flow">
+    <li>先跑起来，用测试用例走一遍锁单和结算，看日志里每个节点打印的内容。</li>
+    <li>从 <code>MarketNode</code> 开始读策略树，再读 <code>TradeLockOrderService</code> 的责任链。</li>
+    <li>精读 <code>TradeRepository</code> 的 <code>occupyTeamStock</code> 和 <code>settlementMarketPayOrder</code>，这两个方法承载了并发和一致性的全部面试点。</li>
+    <li>对照第七章，自己动手改一两个坑，改完能讲出来就是加分项。</li>
+  </ol>
+</section>
+
+<footer>本指南基于 group-buy-market 源码整理，所有类名、方法名、表名均可在项目中检索到。项目原作者：小傅哥 bugstack.cn。</footer>
+</article>
+</main>
+</div>
+
+<script>
+(function () {
+  var open = document.getElementById('openAll');
+  var close = document.getElementById('closeAll');
+  var all = document.querySelectorAll('details.qa');
+  open.addEventListener('click', function () { all.forEach(function (d) { d.open = true; }); });
+  close.addEventListener('click', function () { all.forEach(function (d) { d.open = false; }); });
+
+  var links = document.querySelectorAll('nav.toc a');
+  var targets = [];
+  links.forEach(function (a) {
+    var el = document.querySelector(a.getAttribute('href'));
+    if (el) targets.push({ a: a, el: el });
+  });
+  function mark() {
+    var y = window.scrollY + 120, cur = null;
+    targets.forEach(function (t) { if (t.el.offsetTop <= y) cur = t; });
+    links.forEach(function (a) { a.classList.remove('active'); });
+    if (cur) cur.a.classList.add('active');
+  }
+  window.addEventListener('scroll', mark, { passive: true });
+  mark();
+})();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+<script>
+(function () {
+  if (!window.mermaid) return;
+  var dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  mermaid.initialize({ startOnLoad: false, theme: dark ? 'dark' : 'neutral', securityLevel: 'loose', flowchart: { useMaxWidth: true } });
+  mermaid.run({ querySelector: 'pre.mermaid' });
+})();
+</script>
+</body>
+</html>
