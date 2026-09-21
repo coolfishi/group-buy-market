@@ -97,7 +97,7 @@ onMounted(load)
 
 <template>
   <div class="toolbar">
-    <p class="muted">商品的价格和拼团活动在这里维护；商品图片和介绍在前端商品配置里。商品 ID 需与前端配置一致（例如 TS-2001）。</p>
+    <p class="muted">商品的价格和拼团活动在这里维护；商品图片和介绍在前端商品配置里。商品 ID 需与前端配置一致（例如 JJ-01）。</p>
     <span class="spacer" />
     <button type="button" class="btn btn-primary" @click="create">新增商品</button>
   </div>
@@ -142,7 +142,7 @@ onMounted(load)
     <form id="sku-form" class="stack" @submit.prevent="save">
       <label class="field">
         <span>商品 ID</span>
-        <input v-model="form.goodsId" class="input" :disabled="!!editing" maxlength="16" placeholder="例如 TS-2001" required />
+        <input v-model="form.goodsId" class="input" :disabled="!!editing" maxlength="16" placeholder="例如 JJ-01" required />
         <small>字母、数字、横线，最多 16 位；创建后不能修改。</small>
       </label>
       <label class="field">

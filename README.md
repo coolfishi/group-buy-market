@@ -18,7 +18,7 @@
 ```bash
 curl -X POST https://shop.openrelayx.cc/api/v1/gbm/index/query_group_buy_market_config \
   -H 'Content-Type: application/json' \
-  -d '{"userId":"u001","source":"s01","channel":"c01","goodsId":"TS-2001"}'
+  -d '{"userId":"u001","source":"s01","channel":"c01","goodsId":"JJ-01"}'
 ```
 
 ## 功能
