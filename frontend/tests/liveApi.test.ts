@@ -179,6 +179,20 @@ describe('支付表单适配器', () => {
     expect(() => parsePayForm('<p>no form</p>', ['https://openapi.alipay.com'])).toThrow()
   })
 
+  it('下单返回订单号；复用的旧订单按订单号确认付款结果', async () => {
+    mockFetch(() => ({ code: '0000', data: { form, orderId: '116229990525' } }))
+    const api = createLiveApi(config, async () => {})
+    const res = await api.checkout(user, { productId: 'TS-2001', type: 'single' })
+    expect(res).toMatchObject({ kind: 'redirect', orderId: '116229990525' })
+    // 订单创建时间早于本次下单（复用），按时间找不到，按订单号能找到
+    mockFetch(() => ({
+      code: '0000',
+      data: { orderList: [{ orderId: '116229990525', productId: '7001', status: 'PAY_SUCCESS', orderTime: Date.now() - 13 * 60_000, payAmount: 99 }], hasMore: false, lastId: 1 },
+    }))
+    expect(await api.findRecentOrder(user, 'TS-2001', Date.now())).toBeNull()
+    expect(await api.findRecentOrder(user, 'TS-2001', Date.now(), '116229990525')).toMatchObject({ status: 'PAY_SUCCESS' })
+  })
+
   it('下单时解析支付表单', async () => {
     const fetch = mockFetch(() => ({ code: '0000', data: form }))
     const api = createLiveApi(config, async () => {})

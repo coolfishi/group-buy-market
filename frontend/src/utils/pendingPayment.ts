@@ -2,6 +2,7 @@
 export interface PendingPayment {
   productId: string
   since: number
+  orderId?: string
 }
 
 const KEY = 'toyspace.pendingPay'

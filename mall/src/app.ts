@@ -114,13 +114,14 @@ export function buildApp(deps: AppDeps) {
     const marketType = Number(b.marketType) === 1 ? 1 : 0
     const teamId = b.teamId ? String(b.teamId) : null
     if (teamId && !/^\d{1,8}$/.test(teamId)) throw new MallError('0002', '拼团队伍不正确。', 400)
-    const form = await orders.createPayOrder(userId, {
+    // 返回订单号，前端据此确认付款结果（复用未付款订单时订单号不变）
+    const { form, orderId } = await orders.createPayOrder(userId, {
       productId,
       marketType,
       activityId: b.activityId === undefined || b.activityId === null ? null : Number(b.activityId),
       teamId,
     })
-    return ok(form)
+    return ok({ form, orderId })
   })
 
   app.post('/api/v1/alipay/query_user_order_list', async (req) => {

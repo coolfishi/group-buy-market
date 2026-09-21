@@ -85,7 +85,10 @@ async function refreshLoaded(): Promise<boolean> {
   if (pendingPay.value) {
     const since = pendingPay.value.since - 60_000
     const paid = page.orders.find(
-      (o) => o.productId === pendingPay.value?.productId && o.orderTime >= since && o.status !== 'PAY_WAIT' && o.status !== 'CREATE',
+      (o) =>
+        (pendingPay.value?.orderId ? o.orderId === pendingPay.value.orderId : o.productId === pendingPay.value?.productId && o.orderTime >= since) &&
+        o.status !== 'PAY_WAIT' &&
+        o.status !== 'CREATE',
     )
     if (paid) {
       clearPendingPayment()

@@ -30,8 +30,8 @@ export interface ShopApi {
   checkout(user: User, req: PurchaseRequest): Promise<CheckoutResult>
   /** 仅演示模式：模拟收银台确认或取消 */
   settleDemoPayment(user: User, orderId: string, action: 'confirm' | 'cancel'): Promise<Order>
-  /** 付款结果以订单查询为准：查找 since 之后创建的该商品订单 */
-  findRecentOrder(user: User, productId: string, since: number): Promise<Order | null>
+  /** 付款结果以订单查询为准：有订单号时按订单号查找，否则查找 since 之后创建的该商品订单 */
+  findRecentOrder(user: User, productId: string, since: number, orderId?: string): Promise<Order | null>
 
   // 订单
   listOrders(user: User, lastId: string | null, pageSize: number): Promise<OrderPage>

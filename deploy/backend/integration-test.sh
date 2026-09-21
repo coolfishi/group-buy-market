@@ -43,7 +43,7 @@ TA=$(token "$UA"); TB=$(token "$UB")
 echo "1. 用户 A 发起拼团（星轨旅人，2 人团）"
 R=$(post /api/v1/alipay/create_pay_order "$TA" '{"productId":"TS-2001","marketType":1,"activityId":200103}')
 [ "$(echo "$R" | json "d['code']")" = "0000" ] || fail "开团下单 $R"
-echo "$R" | json "d['data']" | grep -q '<form' || fail "没有返回支付表单"
+echo "$R" | json "d['data']['form']" | grep -q '<form' || fail "没有返回支付表单"
 L=$(latest "$TA"); OA=$(echo "$L" | json "d['data']['orderList'][0]['orderId']"); TEAM=$(echo "$L" | json "d['data']['orderList'][0]['teamId']")
 echo "   订单 $OA，队伍 $TEAM，实付 $(echo "$L" | json "d['data']['orderList'][0]['payAmount']")"
 

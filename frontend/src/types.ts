@@ -87,7 +87,7 @@ export interface PayForm {
 
 export type CheckoutResult =
   | { kind: 'demo'; order: Order }
-  | { kind: 'redirect'; form: PayForm; startedAt: number }
+  | { kind: 'redirect'; form: PayForm; startedAt: number; /** 商城返回的订单号（复用未付款订单时是旧单号） */ orderId?: string }
 
 export interface User {
   userId: string

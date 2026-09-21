@@ -32,8 +32,9 @@ describe('订单号', () => {
 describe('拼团下单与支付', () => {
   it('锁单 → 付款 → 结算 → 成团回调 → 拼团成功', async () => {
     const { store, gbm, pay, service } = setup()
-    const form = await service.createPayOrder('oUserA', { productId: 'TS-1002', marketType: 1, activityId: 200102 })
+    const { form, orderId } = await service.createPayOrder('oUserA', { productId: 'TS-1002', marketType: 1, activityId: 200102 })
     expect(form).toContain('<form')
+    expect(orderId).toBe(store.all[0].orderId)
     const order = store.all[0]
     expect(order).toMatchObject({ status: 'PAY_WAIT', payAmount: 139, marketDeduction: 30, teamId: expect.any(String) })
 
@@ -58,11 +59,11 @@ describe('拼团下单与支付', () => {
     expect(gbm.calls.filter((c) => c.op === 'settle')).toHaveLength(1)
   })
 
-  it('未支付的同款订单复用，不重复锁单', async () => {
+  it('未支付的同款订单复用，订单号不变、不重复锁单', async () => {
     const { gbm, service } = setup()
     const a = await service.createPayOrder('oUserA', { productId: 'TS-1002', marketType: 1, activityId: 1 })
     const b = await service.createPayOrder('oUserA', { productId: 'TS-1002', marketType: 1, activityId: 1 })
-    expect(a).toBe(b)
+    expect(b.orderId).toBe(a.orderId)
     expect(gbm.calls.filter((c) => c.op === 'lock')).toHaveLength(1)
   })
 

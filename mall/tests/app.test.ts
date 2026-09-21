@@ -14,6 +14,7 @@ function config(overrides: Partial<MallConfig> = {}): MallConfig {
     port: 0,
     sessionSecret: secret,
     publicBaseUrl: 'https://shop.example.com',
+    payNotifyUrl: '',
     gbmBaseUrl: 'http://gbm',
     internalBaseUrl: 'http://mall:3100',
     source: 's01',
@@ -62,7 +63,8 @@ describe('商城接口', () => {
       headers: { authorization: `Bearer ${userToken}` },
       payload: { userId: 'someone-else', productId: 'TS-2001', marketType: 0 },
     })
-    expect(res.json()).toMatchObject({ code: '0000' })
+    expect(res.json()).toMatchObject({ code: '0000', data: { orderId: store.all[0].orderId } })
+    expect(res.json().data.form).toContain('<form')
     expect(store.all[0].userId).toBe('oUserA')
   })
 

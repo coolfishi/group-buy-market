@@ -26,6 +26,7 @@ const error = ref('')
 const order = ref<Order | null>(null)
 const result = ref<Result | null>(null)
 const payStartedAt = ref(0)
+const payOrderId = ref<string | undefined>()
 const checking = ref(false)
 
 const PAY_WINDOW = 'toyspace-pay'
@@ -97,13 +98,14 @@ async function confirm() {
       emit('changed')
     } else {
       payStartedAt.value = res.startedAt
+      payOrderId.value = res.orderId
       if (payWindow && !payWindow.closed) {
         submitPayForm(res.form, PAY_WINDOW)
         phase.value = 'waiting'
         poller.start()
       } else {
         // 弹窗被拦截：当前页跳转支付，回来后在订单页确认结果
-        savePendingPayment({ productId: props.product.id, since: res.startedAt })
+        savePendingPayment({ productId: props.product.id, since: res.startedAt, orderId: res.orderId })
         submitPayForm(res.form)
       }
     }
@@ -162,7 +164,7 @@ function describe(o: Order, cancelled = false): Result {
 async function checkPayment(): Promise<boolean> {
   checking.value = true
   try {
-    const found = await api.findRecentOrder(props.user, props.product.id, payStartedAt.value)
+    const found = await api.findRecentOrder(props.user, props.product.id, payStartedAt.value, payOrderId.value)
     if (found && ['PAY_SUCCESS', 'DEAL_DONE', 'CLOSE', 'WAIT_REFUND'].includes(found.status)) {
       result.value = describe(found)
       phase.value = 'result'

@@ -203,7 +203,7 @@ export function createLiveApi(config: AppConfig, fetchDelay = (ms: number) => ne
       if (req.type !== 'single' && !req.activityId) {
         throw new ApiError('business', '拼团活动信息缺失，请刷新页面后重试。', 'NO_ACTIVITY')
       }
-      const html = await request<string>(mallUrl('/api/v1/alipay/create_pay_order'), {
+      const data = await request<string | { form: string; orderId: string }>(mallUrl('/api/v1/alipay/create_pay_order'), {
         body:
           req.type === 'single'
             ? { userId: user.userId, productId, marketType: 0 }
@@ -217,15 +217,20 @@ export function createLiveApi(config: AppConfig, fetchDelay = (ms: number) => ne
         headers: auth(user),
         timeoutMs: config.timeoutMs,
       })
-      return { kind: 'redirect', form: parsePayForm(html, config.payAllowedOrigins), startedAt: Date.now() }
+      // 新接口返回 { form, orderId }；兼容只返回表单 HTML 的旧支付商城
+      const html = typeof data === 'string' ? data : data?.form
+      const orderId = typeof data === 'string' ? undefined : data?.orderId
+      return { kind: 'redirect', form: parsePayForm(html, config.payAllowedOrigins), startedAt: Date.now(), orderId }
     },
 
     async settleDemoPayment() {
       throw new ApiError('config', '真实模式的付款结果以订单查询为准。')
     },
 
-    async findRecentOrder(user, productId, since) {
+    async findRecentOrder(user, productId, since, orderId) {
       const page = await listOrders(user, null, 10)
+      // 有订单号时精确匹配：复用的未付款订单创建时间可能早于本次下单
+      if (orderId) return page.orders.find((o) => o.orderId === orderId) ?? null
       // 允许少量客户端与服务端时钟偏差
       return page.orders.find((o) => o.productId === productId && o.orderTime >= since - 60_000) ?? null
     },

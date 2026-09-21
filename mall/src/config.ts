@@ -4,6 +4,8 @@ export interface MallConfig {
   sessionSecret: string
   /** 对外访问地址，用于支付回调与跳转，例如 http://40.160.139.154:8898 */
   publicBaseUrl: string
+  /** 支付宝异步通知地址；不填时用 PUBLIC_BASE_URL 拼接。建议用 80/443 端口 */
+  payNotifyUrl: string
   /** 拼团服务内部地址，例如 http://app:8091 */
   gbmBaseUrl: string
   /** 商城服务在内部网络的地址，拼团服务回调用，例如 http://mall:3100 */
@@ -58,6 +60,7 @@ export function loadConfig(): MallConfig {
     port: Number(env('PORT', '3100')),
     sessionSecret: env('SESSION_SECRET'),
     publicBaseUrl: env('PUBLIC_BASE_URL').replace(/\/+$/, ''),
+    payNotifyUrl: env('ALIPAY_NOTIFY_URL'),
     gbmBaseUrl: env('GBM_BASE_URL', 'http://127.0.0.1:8091').replace(/\/+$/, ''),
     internalBaseUrl: env('INTERNAL_BASE_URL', 'http://127.0.0.1:3100').replace(/\/+$/, ''),
     source: env('GBM_SOURCE', 's01'),

@@ -60,6 +60,8 @@ export interface OrderServiceDeps {
   pay: PayProvider
   publicBaseUrl: string
   internalBaseUrl: string
+  /** 支付宝异步通知地址，不填时由 publicBaseUrl 拼接 */
+  payNotifyUrl?: string
   payTimeoutMinutes: number
   now?: () => Date
   log?: { info(obj: unknown, msg?: string): void; error(obj: unknown, msg?: string): void }
@@ -80,7 +82,7 @@ export function createOrderService(deps: OrderServiceDeps) {
   const inflight = new Set<string>()
 
   const notifyUrl = `${deps.internalBaseUrl}/api/v1/alipay/group_buy_notify`
-  const payNotifyUrl = `${deps.publicBaseUrl}/api/v1/alipay/alipay_notify_url`
+  const payNotifyUrl = deps.payNotifyUrl || `${deps.publicBaseUrl}/api/v1/alipay/alipay_notify_url`
   const returnUrl = `${deps.publicBaseUrl}/orders`
 
   async function guard<T>(key: string, fn: () => Promise<T>): Promise<T> {
@@ -96,7 +98,7 @@ export function createOrderService(deps: OrderServiceDeps) {
   async function createPayOrder(
     userId: string,
     req: { productId: string; marketType: 0 | 1; activityId?: number | null; teamId?: string | null },
-  ): Promise<string> {
+  ): Promise<{ form: string; orderId: string }> {
     return guard(`create:${userId}:${req.productId}`, async () => {
       const product = await store.findProduct(req.productId)
       if (!product) throw new MallError('NOT_FOUND', '商品不存在或已下架。')
@@ -116,7 +118,7 @@ export function createOrderService(deps: OrderServiceDeps) {
             timeoutMinutes: deps.payTimeoutMinutes,
           })
           await store.update(reusable.orderId, { payForm: form })
-          return form
+          return { form, orderId: reusable.orderId }
         } catch (e) {
           log.error({ err: e, orderId: reusable.orderId }, '重新生成支付单失败')
           throw new MallError('PAY_UNAVAILABLE', '支付服务暂时不可用，请稍后再试。')
@@ -177,7 +179,7 @@ export function createOrderService(deps: OrderServiceDeps) {
         })
         await store.update(orderId, { status: 'PAY_WAIT', payForm: form })
         log.info({ orderId, userId, marketType: req.marketType, teamId: order.teamId }, '创建支付订单')
-        return form
+        return { form, orderId }
       } catch (e) {
         await store.update(orderId, { status: 'CLOSE', closeReason: '创建支付失败' })
         if (order.marketType === 1) await gbm.refund({ userId, outTradeNo: orderId }).catch(() => undefined)

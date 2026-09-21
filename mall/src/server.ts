@@ -35,6 +35,7 @@ const orders = createOrderService({
   pay,
   publicBaseUrl: config.publicBaseUrl,
   internalBaseUrl: config.internalBaseUrl,
+  payNotifyUrl: config.payNotifyUrl,
   payTimeoutMinutes: config.payTimeoutMinutes,
   log: { info: (o, m) => logger?.info(o, m), error: (o, m) => logger?.error(o, m) },
 })
