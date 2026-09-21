@@ -103,8 +103,25 @@ export function createOrderService(deps: OrderServiceDeps) {
       if (req.marketType === 1 && !req.activityId) throw new MallError('0002', '缺少拼团活动信息。')
 
       // 同一商品、同一拼团方式的未支付订单直接复用，避免重复锁单
+      // 复用时重新生成支付表单（同一订单号，新的时间戳与签名），不直接返回旧表单
       const reusable = await store.findReusable(userId, product.goodsId, req.marketType, req.teamId ?? null)
-      if (reusable?.payForm && reusable.status === 'PAY_WAIT') return reusable.payForm
+      if (reusable && reusable.status === 'PAY_WAIT') {
+        try {
+          const form = await pay.pagePay({
+            orderId: reusable.orderId,
+            amount: reusable.payAmount,
+            subject: reusable.productName,
+            notifyUrl: payNotifyUrl,
+            returnUrl,
+            timeoutMinutes: deps.payTimeoutMinutes,
+          })
+          await store.update(reusable.orderId, { payForm: form })
+          return form
+        } catch (e) {
+          log.error({ err: e, orderId: reusable.orderId }, '重新生成支付单失败')
+          throw new MallError('PAY_UNAVAILABLE', '支付服务暂时不可用，请稍后再试。')
+        }
+      }
 
       const orderId = newOrderId(now().getTime())
       const order: PayOrder = {

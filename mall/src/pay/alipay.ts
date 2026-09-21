@@ -10,6 +10,20 @@ function parseTime(v: unknown): Date | undefined {
   return Number.isNaN(d.getTime()) ? undefined : d
 }
 
+const escapeAttr = (s: string) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+
+/**
+ * 把带签名的支付网址转成 GET 表单：action 只保留网关地址，参数全部放进隐藏字段。
+ * 浏览器提交 GET 表单时会用这些字段重新拼出查询串，签名参数保持不变。
+ */
+export function urlToGetForm(url: string): string {
+  const u = new URL(url)
+  const inputs = [...u.searchParams]
+    .map(([k, v]) => `<input type="hidden" name="${escapeAttr(k)}" value="${escapeAttr(v)}">`)
+    .join('\n')
+  return `<form name="punchout_form" method="get" action="${escapeAttr(u.origin + u.pathname)}">\n${inputs}\n</form>`
+}
+
 /** 支付宝电脑网站支付（沙箱或正式环境由 ALIPAY_GATEWAY 决定） */
 export function createAlipayProvider(config: MallConfig['pay']['alipay']): PayProvider {
   const sdk = new AlipaySdk({
@@ -27,7 +41,9 @@ export function createAlipayProvider(config: MallConfig['pay']['alipay']): PayPr
     name: 'alipay',
 
     async pagePay(req) {
-      return sdk.pageExecute('alipay.trade.page.pay', 'POST', {
+      // 用 GET 跳转而不是 POST 表单：浏览器跨站 POST 会带 Origin 头，
+      // 支付宝网关对带商城 Origin 的请求返回 404；GET 页面跳转不带 Origin
+      const url = sdk.pageExecute('alipay.trade.page.pay', 'GET', {
         bizContent: {
           out_trade_no: req.orderId,
           total_amount: req.amount.toFixed(2),
@@ -38,6 +54,7 @@ export function createAlipayProvider(config: MallConfig['pay']['alipay']): PayPr
         notifyUrl: req.notifyUrl,
         returnUrl: req.returnUrl,
       })
+      return urlToGetForm(url)
     },
 
     async query(orderId) {
