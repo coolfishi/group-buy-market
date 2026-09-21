@@ -1,8 +1,6 @@
 # 玩集 TOYSPACE 前端
 
-潮玩与手办拼团商城的独立前端，基于 Vue 3、TypeScript、Vite、Vue Router 和 Pinia，请求使用原生 Fetch，样式为自定义 CSS。
-
-它和仓库里原有的静态页面（`docs/dev-ops/nginx/html`、`docs/tag/*`）互相独立：旧页面和历史版本原样保留，本前端单独构建、单独部署，也不改动任何 Java 业务代码。
+玩集 TOYSPACE 的商城前端，基于 Vue 3、TypeScript、Vite、Vue Router 和 Pinia，请求使用原生 Fetch，样式为自定义 CSS。前端单独构建、单独部署，通过接口对接拼团营销服务和支付商城。
 
 ## 页面
 
