@@ -1,0 +1,218 @@
+:root {
+  /* 色彩：展厅白 / 展台米 / 炭黑 / 石墨 / 电光紫 */
+  --paper: #faf7f2;
+  --plinth: #efe8dd;
+  --plinth-deep: #e3d9ca;
+  --line: #e0d7c9;
+  --ink: #22201e;
+  --graphite: #6b6560;
+  --violet: #6a2bff;
+  --violet-press: #5114e0;
+  --violet-mist: #eee7ff;
+  --ok: #1d7550;
+  --ok-bg: #e2f1e8;
+  --warn: #8f5500;
+  --warn-bg: #fbeed6;
+  --danger: #b0301b;
+  --danger-bg: #fbe5df;
+
+  --font-display: 'Bricolage Grotesque Variable', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-body: 'PingFang SC', 'Noto Sans SC', 'Source Han Sans SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, sans-serif;
+
+  /* 字号阶梯 */
+  --t-xs: 0.8125rem;
+  --t-sm: 0.875rem;
+  --t-md: 1rem;
+  --t-lg: 1.1875rem;
+  --t-xl: 1.5rem;
+  --t-2xl: 2rem;
+  --t-3xl: clamp(2.25rem, 4.5vw, 3.25rem);
+
+  --r-plinth: 20px;
+  --r-dialog: 24px;
+  --r-field: 12px;
+  --gutter: clamp(16px, 4vw, 40px);
+  --maxw: 1240px;
+  --header-h: 64px;
+
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--t-md);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--violet);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding-inline: var(--gutter);
+}
+
+.num {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* 按钮：胶囊形，主按钮电光紫，次按钮炭黑描边 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 22px;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  font-weight: 700;
+  font-size: var(--t-md);
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.btn:disabled,
+.btn[aria-disabled='true'] {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.btn-primary {
+  background: var(--violet);
+  color: #fff;
+}
+
+.btn-primary:not(:disabled):hover {
+  background: var(--violet-press);
+}
+
+.btn-secondary {
+  background: transparent;
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.btn-secondary:not(:disabled):hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.btn-quiet {
+  background: transparent;
+  color: var(--ink);
+  min-height: 40px;
+  padding: 0 14px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+}
+
+.btn-quiet:not(:disabled):hover {
+  color: var(--violet);
+}
+
+.btn-small {
+  min-height: 38px;
+  padding: 0 16px;
+  font-size: var(--t-sm);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

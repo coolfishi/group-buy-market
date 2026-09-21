@@ -8,3 +8,7 @@
   - [DDD 架构设计](https://bugstack.cn/md/road-map/ddd.html)
   - [DDD 建模案例](https://bugstack.cn/md/road-map/ddd-model.html)
 
+
+## 潮玩拼团前端（frontend/）
+
+`frontend/` 是独立的 Vue 3 + TypeScript 前端“玩集 TOYSPACE”，默认演示模式无需后端即可运行，真实模式对接拼团服务和外部支付商城。启动、环境变量和部署说明见 [frontend/README.md](frontend/README.md)。原有的静态页面和各版本文档保持不变。
