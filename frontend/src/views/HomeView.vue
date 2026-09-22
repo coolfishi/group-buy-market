@@ -248,21 +248,21 @@ onMounted(loadTeams)
   padding-top: clamp(40px, 6vw, 88px);
 }
 
-/* 描边字标：只作背景纹样，海报压在上面也不影响阅读 */
+/* 背景字标：浅紫实心的窄体大字，海报压在下半部分；实心字交叠处自然融合 */
 .wordmark {
   position: absolute;
   inset: 0 0 auto 0;
   font-family: var(--font-display);
   font-weight: 800;
+  font-stretch: 75%;
+  font-variation-settings: 'wdth' 75;
   /* 按展柜宽度缩放，始终占满一行不溢出 */
-  font-size: 18.5cqi;
-  line-height: 0.9;
-  letter-spacing: -0.04em;
+  font-size: 23cqi;
+  line-height: 0.82;
+  letter-spacing: -0.02em;
   text-align: center;
   white-space: nowrap;
-  color: transparent;
-  -webkit-text-stroke: 2px var(--ink);
-  opacity: 0.18;
+  color: #e4d8ff;
   user-select: none;
 }
 
