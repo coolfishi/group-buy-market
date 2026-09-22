@@ -46,6 +46,19 @@ describe('演示模式完整流程', () => {
     expect((await again.getMarket('NR-01', user)).teams.some((t) => t.isMine)).toBe(false)
   })
 
+  it('稍后再付：从订单继续付款，拼团到期后不能再付', async () => {
+    const { api, advance } = setup()
+    const market = await api.getMarket('NR-01', user)
+    const res = await api.checkout(user, { productId: 'NR-01', type: 'open', activityId: market.activityId })
+    if (res.kind !== 'demo') throw new Error('expected demo')
+    const again = await api.repay(user, res.order.orderId)
+    expect(again).toMatchObject({ kind: 'demo', order: { orderId: res.order.orderId, status: 'PAY_WAIT' } })
+    await expect(api.repay({ userId: 'someone', displayName: 'x' }, res.order.orderId)).rejects.toMatchObject({ kind: 'business' })
+
+    advance(3 * 24 * 3600_000)
+    await expect(api.repay(user, res.order.orderId)).rejects.toMatchObject({ code: 'TEAM_ENDED' })
+  })
+
   it('参团补齐最后一人即拼团成功', async () => {
     const { api } = setup()
     const market = await api.getMarket('JJ-01', user)

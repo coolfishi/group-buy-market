@@ -265,6 +265,15 @@ export function createLiveApi(config: AppConfig, fetchDelay = (ms: number) => ne
       return { kind: 'redirect', form: parsePayForm(html, config.payAllowedOrigins), startedAt: Date.now(), orderId }
     },
 
+    async repay(user, orderId) {
+      const data = await request<{ form: string; orderId: string }>(mallUrl('/api/v1/alipay/repay_order'), {
+        body: { orderId },
+        headers: auth(user),
+        timeoutMs: config.timeoutMs,
+      })
+      return { kind: 'redirect', form: parsePayForm(data?.form, config.payAllowedOrigins), startedAt: Date.now(), orderId }
+    },
+
     async settleDemoPayment() {
       throw new ApiError('config', '真实模式的付款结果以订单查询为准。')
     },

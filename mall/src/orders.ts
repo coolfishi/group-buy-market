@@ -109,6 +109,57 @@ export function createOrderService(deps: OrderServiceDeps) {
     }
   }
 
+  /** 距离超时关单还剩的整分钟数；支付宝那边的付款时限不超过它，避免关单后仍能付款 */
+  function payMinutesLeft(order: PayOrder) {
+    const deadline = order.orderTime.getTime() + deps.payTimeoutMinutes * 60_000
+    return Math.floor((deadline - now().getTime()) / 60_000)
+  }
+
+  async function renderPayForm(order: PayOrder, minutes: number) {
+    try {
+      const form = await pay.pagePay({
+        orderId: order.orderId,
+        amount: order.payAmount,
+        subject: order.productName,
+        notifyUrl: payNotifyUrl,
+        returnUrl,
+        timeoutMinutes: minutes,
+      })
+      await store.update(order.orderId, { payForm: form })
+      return { form, orderId: order.orderId }
+    } catch (e) {
+      log.error({ err: e, orderId: order.orderId }, '重新生成支付单失败')
+      throw new MallError('PAY_UNAVAILABLE', '支付服务暂时不可用，请稍后再试。')
+    }
+  }
+
+  /** 从“我的订单”继续付款：为本人未超时的待支付订单重新生成支付表单 */
+  async function repayOrder(userId: string, orderId: string): Promise<{ form: string; orderId: string }> {
+    return guard(`repay:${orderId}`, async () => {
+      const order = await store.get(orderId)
+      if (!order || order.userId !== userId) throw new MallError('NOT_FOUND', '订单不存在。')
+      if (order.status === 'PAY_SUCCESS' || order.status === 'DEAL_DONE') {
+        throw new MallError('ORDER_PAID', '这笔订单已经付款，刷新订单列表即可看到。')
+      }
+      if (order.status !== 'PAY_WAIT') throw new MallError('ORDER_CLOSED', '订单已关闭，请重新下单。')
+      // 付款前先查一次：可能已付款但通知还没到
+      const trade = await pay.query(order.orderId).catch(() => null)
+      if (trade && (trade.status === 'TRADE_SUCCESS' || trade.status === 'TRADE_FINISHED')) {
+        await markPaid(order.orderId, trade.tradeNo, trade.paidAt)
+        throw new MallError('ORDER_PAID', '这笔订单已经付款，刷新订单列表即可看到。')
+      }
+      const minutes = payMinutesLeft(order)
+      if (minutes < 1) throw new MallError('ORDER_CLOSED', '订单已超过付款时限，请重新下单。')
+      if (order.marketType === 1 && order.teamId && store.teamsByIds) {
+        const [team] = await store.teamsByIds([order.teamId], userId).catch(() => [])
+        if (team && (team.status === 2 || team.validEndTime <= now().getTime())) {
+          throw new MallError('TEAM_ENDED', '这个拼团已经结束，付款也无法成团，请取消后重新下单。')
+        }
+      }
+      return renderPayForm(order, minutes)
+    })
+  }
+
   async function createPayOrder(
     userId: string,
     req: { productId: string; marketType: 0 | 1; activityId?: number | null; teamId?: string | null },
@@ -121,22 +172,8 @@ export function createOrderService(deps: OrderServiceDeps) {
       // 同一商品、同一拼团方式的未支付订单直接复用，避免重复锁单
       // 复用时重新生成支付表单（同一订单号，新的时间戳与签名），不直接返回旧表单
       const reusable = await store.findReusable(userId, product.goodsId, req.marketType, req.teamId ?? null)
-      if (reusable && reusable.status === 'PAY_WAIT') {
-        try {
-          const form = await pay.pagePay({
-            orderId: reusable.orderId,
-            amount: reusable.payAmount,
-            subject: reusable.productName,
-            notifyUrl: payNotifyUrl,
-            returnUrl,
-            timeoutMinutes: deps.payTimeoutMinutes,
-          })
-          await store.update(reusable.orderId, { payForm: form })
-          return { form, orderId: reusable.orderId }
-        } catch (e) {
-          log.error({ err: e, orderId: reusable.orderId }, '重新生成支付单失败')
-          throw new MallError('PAY_UNAVAILABLE', '支付服务暂时不可用，请稍后再试。')
-        }
+      if (reusable && reusable.status === 'PAY_WAIT' && payMinutesLeft(reusable) >= 1) {
+        return renderPayForm(reusable, payMinutesLeft(reusable))
       }
 
       const orderId = newOrderId(now().getTime())
@@ -364,7 +401,7 @@ export function createOrderService(deps: OrderServiceDeps) {
     }
   }
 
-  return { createPayOrder, markPaid, onTeamComplete, refund, sync, listOrders }
+  return { createPayOrder, repayOrder, markPaid, onTeamComplete, refund, sync, listOrders }
 }
 
 export type OrderService = ReturnType<typeof createOrderService>

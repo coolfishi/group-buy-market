@@ -8,12 +8,13 @@ import StateBlock from '@/components/StateBlock.vue'
 import { usePolling } from '@/composables/usePolling'
 import { findProduct } from '@/data/products'
 import { api, errorMessage, isApiError } from '@/services'
+import { submitPayForm } from '@/services/live/payForm'
 import { maskUserId } from '@/services/demo/demoApi'
 import { useSessionStore } from '@/stores/session'
 import { useToastStore } from '@/stores/toast'
 import type { Order } from '@/types'
 import { canRefund, formatDateTime, orderStatusView } from '@/utils/format'
-import { clearPendingPayment, readPendingPayment } from '@/utils/pendingPayment'
+import { clearPendingPayment, readPendingPayment, savePendingPayment } from '@/utils/pendingPayment'
 
 const PAGE_SIZE = 5
 
@@ -34,6 +35,71 @@ const refunding = ref(false)
 const refundError = ref('')
 
 const pendingPay = ref(readPendingPayment())
+
+// 继续付款
+const PAY_WINDOW = 'toyspace-pay'
+const paying = ref<string | null>(null)
+const cashier = ref<Order | null>(null)
+const cashierBusy = ref(false)
+const cashierError = ref('')
+
+function isUnpaid(o: Order) {
+  return o.status === 'PAY_WAIT' || o.status === 'CREATE'
+}
+
+async function payOrder(o: Order) {
+  if (!session.user || paying.value) return
+  paying.value = o.orderId
+  // 真实模式：在点击当下打开支付窗口，避免被浏览器拦截
+  const payWindow = api.mode === 'live' ? window.open('', PAY_WINDOW) : null
+  try {
+    const res = await api.repay(session.user, o.orderId)
+    if (res.kind === 'demo') {
+      cashierError.value = ''
+      cashier.value = res.order
+      return
+    }
+    const pending = { productId: o.productId ?? '', since: res.startedAt, orderId: o.orderId }
+    savePendingPayment(pending)
+    if (payWindow && !payWindow.closed) {
+      submitPayForm(res.form, PAY_WINDOW)
+      pendingPay.value = pending
+    } else {
+      // 弹窗被拦截：当前页跳转支付，付款后支付宝会跳回订单页
+      submitPayForm(res.form)
+    }
+  } catch (e) {
+    payWindow?.close()
+    if (isApiError(e) && e.kind === 'unauthorized') return onUnauthorized()
+    toast.show(errorMessage(e), 'error')
+    // 订单状态可能已经变化（已付款、已超时关闭），刷新一次
+    await refreshLoaded().catch(() => undefined)
+  } finally {
+    paying.value = null
+  }
+}
+
+async function settleCashier(action: 'confirm' | 'cancel') {
+  const target = cashier.value
+  if (!target || !session.user || cashierBusy.value) return
+  cashierBusy.value = true
+  cashierError.value = ''
+  try {
+    const settled = await api.settleDemoPayment(session.user, target.orderId, action)
+    orders.value = orders.value.map((o) => (o.orderId === settled.orderId ? settled : o))
+    cashier.value = null
+    if (settled.status === 'CLOSE') toast.show(settled.closeReason ?? '订单已关闭', 'info')
+    else toast.show('付款完成', 'success')
+  } catch (e) {
+    if (isApiError(e) && e.kind === 'unauthorized') {
+      cashier.value = null
+      return onUnauthorized()
+    }
+    cashierError.value = errorMessage(e)
+  } finally {
+    cashierBusy.value = false
+  }
+}
 
 // 拼团进度面板：拼团中的订单默认展开，其余按需点开
 const toggled = ref(new Set<string>())
@@ -174,7 +240,7 @@ onMounted(async () => {
 
     <div v-if="pendingPay" class="pending" role="status">
       <span class="spinner" aria-hidden="true" />
-      <p>正在确认刚才的付款结果，确认后订单状态会自动更新。</p>
+      <p>请在支付页完成付款，付款结果确认后订单状态会自动更新。</p>
       <button type="button" class="btn btn-quiet" @click="clearPendingPayment(); pendingPay = null">不再等待</button>
     </div>
 
@@ -230,6 +296,16 @@ onMounted(async () => {
           <div class="side">
             <PriceTag :value="o.payAmount" />
             <button
+              v-if="isUnpaid(o)"
+              type="button"
+              class="btn btn-primary btn-small"
+              :disabled="!!paying"
+              @click="payOrder(o)"
+            >
+              <span v-if="paying === o.orderId" class="spinner" aria-hidden="true" />
+              {{ paying === o.orderId ? '正在打开' : '去付款' }}
+            </button>
+            <button
               v-if="canRefund(o)"
               type="button"
               class="btn btn-secondary btn-small"
@@ -257,6 +333,20 @@ onMounted(async () => {
         <p v-else class="end">已显示全部订单</p>
       </div>
     </template>
+
+    <BaseModal :open="!!cashier" title="模拟收银台" :locked="cashierBusy" @close="cashier = null">
+      <p v-if="cashier">
+        {{ cashier.productName }}，¥{{ cashier.payAmount }}。这是模拟收银台，不会产生真实扣款。
+      </p>
+      <p v-if="cashierError" class="refund-error" role="alert">{{ cashierError }}</p>
+      <template #actions>
+        <button type="button" class="btn btn-secondary" :disabled="cashierBusy" @click="settleCashier('cancel')">取消支付</button>
+        <button type="button" class="btn btn-primary" :disabled="cashierBusy" data-autofocus @click="settleCashier('confirm')">
+          <span v-if="cashierBusy" class="spinner" aria-hidden="true" />
+          {{ cashierBusy ? '正在支付' : `确认支付 ¥${cashier?.payAmount ?? ''}` }}
+        </button>
+      </template>
+    </BaseModal>
 
     <BaseModal
       :open="!!refundTarget"
@@ -485,8 +575,12 @@ h1 {
   .side {
     grid-column: 2;
     display: flex;
-    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
     align-items: center;
+  }
+  .side > :first-child {
+    margin-right: auto;
   }
 }
 </style>

@@ -31,7 +31,7 @@ export function orderStatusView(order: Order): StatusView {
   switch (order.status) {
     case 'CREATE':
     case 'PAY_WAIT':
-      return { label: '待支付', tone: 'wait', note: '支付未完成，可以取消订单' }
+      return { label: '待支付', tone: 'wait', note: '还没付款，可以继续付款或取消订单' }
     case 'PAY_SUCCESS':
       if (order.team?.state === 'failed') {
         return { label: '支付完成', tone: 'paid', note: '拼团到期未凑齐，可以申请退单' }

@@ -139,6 +139,13 @@ export function buildApp(deps: AppDeps) {
     return ok(await orders.listOrders(userId, b.lastId === null || b.lastId === undefined ? null : String(b.lastId), Number(b.pageSize)))
   })
 
+  app.post('/api/v1/alipay/repay_order', async (req) => {
+    const userId = requireUser(req)
+    const { orderId } = (req.body ?? {}) as { orderId?: string }
+    if (!orderId || !/^\d{12}$/.test(String(orderId))) throw new MallError('0002', '订单号不正确。', 400)
+    return ok(await orders.repayOrder(userId, String(orderId)))
+  })
+
   app.post('/api/v1/alipay/refund_order', async (req) => {
     const userId = requireUser(req)
     const { orderId } = (req.body ?? {}) as { orderId?: string }

@@ -50,9 +50,16 @@ WIN=$(sql "SELECT CONCAT(TIMESTAMPDIFF(MINUTE, o.valid_start_time, o.valid_end_t
 [ "${WIN% *}" = "${WIN#* }" ] || fail "队伍有效期应为活动 valid_time 分钟（实际 ${WIN% *}，配置 ${WIN#* }）"
 echo "   队伍有效期 ${WIN% *} 分钟"
 
+echo "   稍后再付：从订单继续付款"
+R=$(post /api/v1/alipay/repay_order "$TA" "{\"orderId\":\"$OA\"}")
+[ "$(echo "$R" | json "d['data']['orderId']")" = "$OA" ] || fail "继续付款 $R"
+echo "$R" | json "d['data']['form']" | grep -q "$OA" || fail "继续付款没有返回该订单的支付表单"
+[ "$(post /api/v1/alipay/repay_order "$TB" "{\"orderId\":\"$OA\"}" | json "d['code']")" = "NOT_FOUND" ] || fail "不能为别人的订单付款"
+
 echo "2. A 付款 → 拼团结算"
 post /api/v1/alipay/mock_paid "$TA" "{\"orderId\":\"$OA\"}" >/dev/null
 ST=$(latest "$TA" | json "d['data']['orderList'][0]['status']"); echo "   A 状态：$ST"; [ "$ST" = "PAY_SUCCESS" ] || fail "A 应为 PAY_SUCCESS"
+[ "$(post /api/v1/alipay/repay_order "$TA" "{\"orderId\":\"$OA\"}" | json "d['code']")" = "ORDER_PAID" ] || fail "已付款订单不能再付"
 [ "$(sql "SELECT complete_count FROM group_buy_market.group_buy_order WHERE team_id='$TEAM'")" = "1" ] || fail "拼团侧完成数应为 1"
 
 echo "3. 用户 B 参团并付款"

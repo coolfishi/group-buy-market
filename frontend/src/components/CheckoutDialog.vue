@@ -216,6 +216,7 @@ const locked = computed(() => busy.value || phase.value === 'cashier')
 
     <template v-else-if="phase === 'waiting'">
       <p class="note">请在新打开的页面完成付款。付款结果以订单查询为准，这里会自动刷新。</p>
+      <p class="hint">暂时不付也可以，稍后在“我的订单”里点“去付款”继续；超时未付的订单会自动关闭。</p>
       <p class="checking" aria-live="polite">
         <span class="spinner" aria-hidden="true" /> {{ checking ? '正在查询订单…' : '等待付款中' }}
       </p>

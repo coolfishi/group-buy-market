@@ -365,6 +365,18 @@ export function createDemoApi(options: DemoOptions): ShopApi & { reset(): void }
       }
     },
 
+    async repay(user, orderId) {
+      await wait()
+      const state = load()
+      const order = findOwnOrder(state, user, orderId)
+      if (order.status !== 'PAY_WAIT') throw new ApiError('business', '这笔订单已经不是待支付状态。', 'ORDER_CLOSED')
+      const team = order.teamId ? state.teams.find((t) => t.teamId === order.teamId) : undefined
+      if (team && team.validEndTime <= now()) {
+        throw new ApiError('business', '这个拼团已经结束，付款也无法成团，请取消后重新下单。', 'TEAM_ENDED')
+      }
+      return { kind: 'demo', order: toOrder(state, order) }
+    },
+
     async settleDemoPayment(user, orderId, action) {
       await wait()
       const state = load()

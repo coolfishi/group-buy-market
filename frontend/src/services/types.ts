@@ -36,4 +36,6 @@ export interface ShopApi {
   // 订单
   listOrders(user: User, lastId: string | null, pageSize: number): Promise<OrderPage>
   refund(user: User, orderId: string): Promise<Order['status']>
+  /** 继续支付待支付订单：演示模式返回订单（走模拟收银台），真实模式返回支付表单 */
+  repay(user: User, orderId: string): Promise<CheckoutResult>
 }

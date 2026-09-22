@@ -158,6 +158,40 @@ describe('退单', () => {
   })
 })
 
+describe('从订单继续付款', () => {
+  it('为本人的待支付订单重新生成支付单，付款时限不超过剩余时间', async () => {
+    const { service, store, advance } = setup()
+    const { orderId } = await service.createPayOrder('oUserA', { productId: 'TS-1002', marketType: 1, activityId: 200102 })
+    advance(10 * 60_000)
+    const res = await service.repayOrder('oUserA', orderId)
+    expect(res.orderId).toBe(orderId)
+    expect(res.form).toContain(orderId)
+    expect(store.all).toHaveLength(1)
+    await expect(service.repayOrder('oUserB', orderId)).rejects.toMatchObject({ code: 'NOT_FOUND' })
+  })
+
+  it('已付款、已关闭、超时或拼团已结束时拒绝', async () => {
+    const { service, store, pay, advance } = setup()
+    const { orderId: paid } = await service.createPayOrder('oUserA', { productId: 'TS-1002', marketType: 0 })
+    pay.markPaid(paid)
+    // 通知未到时也能识别已付款
+    await expect(service.repayOrder('oUserA', paid)).rejects.toMatchObject({ code: 'ORDER_PAID' })
+    expect(store.all[0].status).toBe('PAY_SUCCESS')
+
+    const { orderId: team } = await service.createPayOrder('oUserA', { productId: 'TS-1002', marketType: 1, activityId: 200102 })
+    store.teamsByIds = async (ids) => [
+      { teamId: ids[0], status: 0, targetCount: 2, lockCount: 1, completeCount: 0, validEndTime: 0, members: [] },
+    ]
+    await expect(service.repayOrder('oUserA', team)).rejects.toMatchObject({ code: 'TEAM_ENDED' })
+    delete store.teamsByIds
+
+    advance(29.5 * 60_000)
+    await expect(service.repayOrder('oUserA', team)).rejects.toMatchObject({ code: 'ORDER_CLOSED' })
+    await service.refund('oUserA', team)
+    await expect(service.repayOrder('oUserA', team)).rejects.toMatchObject({ code: 'ORDER_CLOSED' })
+  })
+})
+
 describe('订单列表', () => {
   it('按 id 游标分页', async () => {
     const { service, pay, store } = setup()

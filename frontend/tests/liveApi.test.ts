@@ -218,6 +218,24 @@ describe('订单里的拼团队伍', () => {
   })
 })
 
+describe('继续付款', () => {
+  it('带令牌请求重新生成支付单，并校验支付地址', async () => {
+    const fetch = mockFetch(() => ({
+      code: '0000',
+      data: { orderId: '100000000001', form: '<form action="https://openapi.alipay.com/gateway.do" method="get"><input name="a" value="1"></form>' },
+    }))
+    const api = createLiveApi(config, async () => {})
+    const res = await api.repay(user, '100000000001')
+    expect(res).toMatchObject({ kind: 'redirect', orderId: '100000000001', form: { method: 'GET', fields: [['a', '1']] } })
+    const [url, init] = fetch.mock.calls[0]
+    expect(url).toBe('https://mall.example.com/api/v1/alipay/repay_order')
+    expect((init.headers as Record<string, string>).Authorization).toBe('Bearer signed.token')
+
+    mockFetch(() => ({ code: '0000', data: { orderId: '1', form: '<form action="https://evil.example.com/pay"></form>' } }))
+    await expect(api.repay(user, '100000000001')).rejects.toMatchObject({ code: 'PAY_FORM_ORIGIN' })
+  })
+})
+
 describe('支付表单适配器', () => {
   const form = `<form name="punchout_form" method="post" action="https://openapi.alipay.com/gateway.do?charset=utf-8&amp;method=alipay.trade.page.pay">
     <input type="hidden" name="biz_content" value="{&quot;out_trade_no&quot;:&quot;123&quot;}">
