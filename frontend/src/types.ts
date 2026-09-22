@@ -69,6 +69,26 @@ export interface PurchaseRequest {
 
 export type OrderStatus = 'CREATE' | 'PAY_WAIT' | 'PAY_SUCCESS' | 'DEAL_DONE' | 'WAIT_REFUND' | 'CLOSE'
 
+export interface OrderTeamMember {
+  /** 脱敏后的用户名 */
+  label: string
+  paid: boolean
+  isMe: boolean
+  isLeader: boolean
+}
+
+/** 订单所在的拼团队伍 */
+export interface OrderTeam {
+  teamId: string
+  /** open 拼团中、done 已成团、failed 到期未凑齐 */
+  state: 'open' | 'done' | 'failed'
+  targetCount: number
+  lockCount: number
+  completeCount: number
+  validEndTime: number
+  members: OrderTeamMember[]
+}
+
 export interface Order {
   orderId: string
   productId?: string
@@ -78,6 +98,7 @@ export interface Order {
   status: OrderStatus
   purchaseType?: PurchaseType
   teamProgress?: { target: number; complete: number }
+  team?: OrderTeam
   closeReason?: string
 }
 

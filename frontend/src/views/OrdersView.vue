@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import BaseModal from '@/components/BaseModal.vue'
+import OrderTeamPanel from '@/components/OrderTeamPanel.vue'
 import PriceTag from '@/components/PriceTag.vue'
 import StateBlock from '@/components/StateBlock.vue'
 import { usePolling } from '@/composables/usePolling'
@@ -33,6 +34,21 @@ const refunding = ref(false)
 const refundError = ref('')
 
 const pendingPay = ref(readPendingPayment())
+
+// 拼团进度面板：拼团中的订单默认展开，其余按需点开
+const toggled = ref(new Set<string>())
+function teamOpenByDefault(o: Order) {
+  return o.team?.state === 'open' && o.status !== 'CLOSE'
+}
+function isTeamShown(o: Order) {
+  return teamOpenByDefault(o) !== toggled.value.has(o.orderId)
+}
+function toggleTeam(o: Order) {
+  const next = new Set(toggled.value)
+  if (next.has(o.orderId)) next.delete(o.orderId)
+  else next.add(o.orderId)
+  toggled.value = next
+}
 
 function onUnauthorized() {
   session.logout()
@@ -99,7 +115,11 @@ async function refreshLoaded(): Promise<boolean> {
   return !needsWatching.value
 }
 
-const needsWatching = computed(() => !!pendingPay.value || orders.value.some((o) => o.status === 'WAIT_REFUND'))
+const needsWatching = computed(
+  () =>
+    !!pendingPay.value ||
+    orders.value.some((o) => o.status === 'WAIT_REFUND' || (o.status === 'PAY_SUCCESS' && o.team?.state === 'open')),
+)
 const watcher = usePolling(refreshLoaded, api.mode === 'demo' ? 3000 : 8000, 10 * 60_000)
 watch(needsWatching, (v) => (v ? watcher.start() : watcher.stop()))
 
@@ -195,6 +215,16 @@ onMounted(async () => {
             <p class="status">
               <span class="badge">{{ orderStatusView(o).label }}</span>
               <span v-if="orderStatusView(o).note" class="note">{{ orderStatusView(o).note }}</span>
+              <button
+                v-if="o.team"
+                type="button"
+                class="team-toggle"
+                :aria-expanded="isTeamShown(o)"
+                :aria-controls="`team-${o.orderId}`"
+                @click="toggleTeam(o)"
+              >
+                {{ isTeamShown(o) ? '收起拼团' : '查看拼团' }}
+              </button>
             </p>
           </div>
           <div class="side">
@@ -208,6 +238,13 @@ onMounted(async () => {
               {{ o.status === 'PAY_WAIT' || o.status === 'CREATE' ? '取消订单' : '申请退单' }}
             </button>
           </div>
+          <OrderTeamPanel
+            v-if="o.team && isTeamShown(o)"
+            :id="`team-${o.orderId}`"
+            class="team"
+            :team="o.team"
+            :product-id="o.productId"
+          />
         </li>
       </ul>
 
@@ -385,6 +422,25 @@ h1 {
   opacity: 0.55;
 }
 
+.team-toggle {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--violet);
+  font: inherit;
+  font-size: var(--t-xs);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.team-toggle:hover {
+  text-decoration: underline;
+}
+
+.team {
+  grid-column: 2 / -1;
+}
+
 .side {
   display: grid;
   justify-items: end;
@@ -422,6 +478,9 @@ h1 {
   .thumb {
     width: 72px;
     height: 72px;
+  }
+  .team {
+    grid-column: 1 / -1;
   }
   .side {
     grid-column: 2;

@@ -1,6 +1,6 @@
 import type { Pool, ResultSetHeader } from 'mysql2/promise'
 import type { Row } from './db.js'
-import type { OrderStatus, OrderStore, PayOrder } from './orders.js'
+import type { OrderStatus, OrderStore, PayOrder, TeamSnapshot } from './orders.js'
 
 const columns: Record<keyof Omit<PayOrder, 'id'>, string> = {
   orderId: 'order_id',
@@ -45,6 +45,11 @@ export function rowToOrder(r: Row): PayOrder {
     closeReason: (r.close_reason as string | null) ?? null,
     refundTime: r.refund_time ? new Date(r.refund_time as Date) : null,
   }
+}
+
+export function maskUser(id: string) {
+  if (id.length <= 4) return id
+  return `${id.slice(0, 2)}${'*'.repeat(Math.min(id.length - 4, 4))}${id.slice(-2)}`
 }
 
 export function createMysqlStore(mall: Pool, gbm: Pool): OrderStore {
@@ -113,6 +118,38 @@ export function createMysqlStore(mall: Pool, gbm: Pool): OrderStore {
         [limit],
       )
       return rows.map(rowToOrder)
+    },
+
+    async teamsByIds(teamIds, userId) {
+      if (!teamIds.length) return []
+      const [teams] = await gbm.query<Row[]>(
+        `SELECT team_id, status, target_count, lock_count, complete_count, valid_end_time
+         FROM group_buy_order WHERE team_id IN (?)`,
+        [teamIds],
+      )
+      // 成员：排除已退单（status=2）；status=1 已付款，0 已锁单待付款
+      const [members] = await gbm.query<Row[]>(
+        `SELECT team_id, user_id, status FROM group_buy_order_list
+         WHERE team_id IN (?) AND status IN (0, 1) ORDER BY id`,
+        [teamIds],
+      )
+      return teams.map((t): TeamSnapshot => {
+        const list = members.filter((m) => String(m.team_id) === String(t.team_id))
+        return {
+          teamId: String(t.team_id),
+          status: Number(t.status),
+          targetCount: Number(t.target_count),
+          lockCount: Number(t.lock_count),
+          completeCount: Number(t.complete_count),
+          validEndTime: new Date(t.valid_end_time as Date).getTime(),
+          members: list.map((m, i) => ({
+            label: maskUser(String(m.user_id)),
+            paid: Number(m.status) === 1,
+            isMe: String(m.user_id) === userId,
+            isLeader: i === 0,
+          })),
+        }
+      })
     },
   }
 }

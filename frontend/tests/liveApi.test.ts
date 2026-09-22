@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { readConfig } from '@/config/env'
-import { createLiveApi } from '@/services/live/liveApi'
+import { createLiveApi, mapOrderTeam } from '@/services/live/liveApi'
 import { parsePayForm } from '@/services/live/payForm'
 
 const config = readConfig({
@@ -174,6 +174,47 @@ describe('订单', () => {
     mockFetch(() => new Response('', { status: 401 }))
     const api = createLiveApi(config, async () => {})
     await expect(api.listOrders(user, null, 10)).rejects.toMatchObject({ kind: 'unauthorized' })
+  })
+})
+
+describe('订单里的拼团队伍', () => {
+  const now = 1_000_000
+  const raw = { teamId: '12345678', status: 0, targetCount: 3, lockCount: 2, completeCount: 1, validEndTime: now + 60_000 }
+
+  it('按队伍状态和到期时间归类', () => {
+    expect(mapOrderTeam(raw, now).state).toBe('open')
+    expect(mapOrderTeam({ ...raw, validEndTime: now - 1 }, now).state).toBe('failed')
+    expect(mapOrderTeam({ ...raw, status: 1 }, now).state).toBe('done')
+    expect(mapOrderTeam({ ...raw, status: 3 }, now).state).toBe('done')
+    expect(mapOrderTeam({ ...raw, status: 2 }, now).state).toBe('failed')
+  })
+
+  it('订单列表带出队伍进度与成员', async () => {
+    mockFetch(() => ({
+      code: '0000',
+      data: {
+        orderList: [
+          {
+            orderId: '100000000001',
+            productId: '7001',
+            status: 'PAY_SUCCESS',
+            orderTime: now,
+            payAmount: 139,
+            marketType: 1,
+            team: { ...raw, validEndTime: Date.now() + 60_000, members: [{ label: 'sa**27', paid: true, isMe: false, isLeader: true }] },
+          },
+          { orderId: '100000000002', productId: '7001', status: 'DEAL_DONE', orderTime: now, payAmount: 169, marketType: 0, team: null },
+        ],
+        hasMore: false,
+        lastId: '1',
+      },
+    }))
+    const api = createLiveApi(config, async () => {})
+    const [group, single] = (await api.listOrders(user, null, 10)).orders
+    expect(group.team).toMatchObject({ teamId: '12345678', state: 'open', members: [{ label: 'sa**27', isLeader: true }] })
+    expect(group.teamProgress).toEqual({ target: 3, complete: 1 })
+    expect(single.team).toBeUndefined()
+    expect(single.purchaseType).toBe('single')
   })
 })
 

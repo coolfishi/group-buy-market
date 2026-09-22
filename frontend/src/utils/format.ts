@@ -33,6 +33,9 @@ export function orderStatusView(order: Order): StatusView {
     case 'PAY_WAIT':
       return { label: '待支付', tone: 'wait', note: '支付未完成，可以取消订单' }
     case 'PAY_SUCCESS':
+      if (order.team?.state === 'failed') {
+        return { label: '支付完成', tone: 'paid', note: '拼团到期未凑齐，可以申请退单' }
+      }
       if (order.teamProgress) {
         const { complete, target } = order.teamProgress
         return { label: '支付完成', tone: 'paid', note: `拼团中，已有 ${complete}/${target} 人付款` }

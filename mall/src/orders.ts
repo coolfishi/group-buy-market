@@ -33,6 +33,18 @@ export interface Product {
   originalPrice: number
 }
 
+/** 订单页展示的拼团队伍快照 */
+export interface TeamSnapshot {
+  teamId: string
+  /** 0 拼团中、1 已成团、2 已失败、3 成团含退单 */
+  status: number
+  targetCount: number
+  lockCount: number
+  completeCount: number
+  validEndTime: number
+  members: { label: string; paid: boolean; isMe: boolean; isLeader: boolean }[]
+}
+
 export interface OrderStore {
   findProduct(goodsId: string): Promise<Product | null>
   insert(order: PayOrder): Promise<void>
@@ -42,6 +54,8 @@ export interface OrderStore {
   listByUser(userId: string, beforeId: number | null, size: number): Promise<PayOrder[]>
   listByStatus(status: OrderStatus, limit: number): Promise<PayOrder[]>
   listUnsettled(limit: number): Promise<PayOrder[]>
+  /** 查询订单所在队伍的进度与成员（可选，测试替身可不实现） */
+  teamsByIds?(teamIds: string[], userId: string): Promise<TeamSnapshot[]>
 }
 
 export class MallError extends Error {
@@ -321,6 +335,16 @@ export function createOrderService(deps: OrderServiceDeps) {
     let rows = await store.listByUser(userId, before, size + 1)
     if (before === null && (await refreshRecent(rows))) rows = await store.listByUser(userId, before, size + 1)
     const page = rows.slice(0, size)
+    const teamIds = [...new Set(page.filter((o) => o.marketType === 1 && o.teamId).map((o) => o.teamId as string))]
+    const teams = new Map<string, TeamSnapshot>()
+    if (teamIds.length && store.teamsByIds) {
+      try {
+        for (const t of await store.teamsByIds(teamIds, userId)) teams.set(t.teamId, t)
+      } catch (e) {
+        // 队伍信息只是展示用，查询失败时照常返回订单
+        log.error({ err: e }, '查询拼团队伍失败')
+      }
+    }
     return {
       orderList: page.map((o) => ({
         orderId: o.orderId,
@@ -333,6 +357,7 @@ export function createOrderService(deps: OrderServiceDeps) {
         marketType: o.marketType,
         teamId: o.teamId,
         closeReason: o.closeReason,
+        team: o.teamId ? (teams.get(o.teamId) ?? null) : null,
       })),
       hasMore: rows.length > size,
       lastId: page.length ? String(page[page.length - 1].id) : lastId,

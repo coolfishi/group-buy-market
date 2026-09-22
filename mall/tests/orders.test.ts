@@ -173,4 +173,35 @@ describe('订单列表', () => {
     expect(p2.orderList).toHaveLength(1)
     expect(p2.hasMore).toBe(false)
   })
+  it('拼团订单附带队伍进度；查询失败时照常返回订单', async () => {
+    const { service, store } = setup()
+    await service.createPayOrder('oUserA', { productId: 'TS-1002', marketType: 1, activityId: 200102 })
+    await service.createPayOrder('oUserA', { productId: 'TS-1002', marketType: 0 })
+    const teamId = store.all[0].teamId!
+    const snapshot = {
+      teamId,
+      status: 0,
+      targetCount: 3,
+      lockCount: 2,
+      completeCount: 1,
+      validEndTime: 1,
+      members: [{ label: 'sa**27', paid: true, isMe: false, isLeader: true }],
+    }
+    let asked: string[] = []
+    store.teamsByIds = async (ids) => {
+      asked = ids
+      return [snapshot]
+    }
+    const page = await service.listOrders('oUserA', null, 10)
+    expect(asked).toEqual([teamId])
+    expect(page.orderList.find((o) => o.teamId === teamId)?.team).toEqual(snapshot)
+    expect(page.orderList.find((o) => o.teamId === null)?.team).toBeNull()
+
+    store.teamsByIds = async () => {
+      throw new Error('db down')
+    }
+    const again = await service.listOrders('oUserA', null, 10)
+    expect(again.orderList).toHaveLength(2)
+    expect(again.orderList.every((o) => o.team === null)).toBe(true)
+  })
 })

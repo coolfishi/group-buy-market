@@ -182,6 +182,24 @@ export function createDemoApi(options: DemoOptions): ShopApi & { reset(): void }
       status: o.status,
       purchaseType: o.type,
       teamProgress: team ? { target: team.targetCount, complete: team.completeCount } : undefined,
+      team: team
+        ? {
+            teamId: team.teamId,
+            state:
+              team.completeCount >= team.targetCount ? 'done' : team.validEndTime <= now() ? 'failed' : 'open',
+            targetCount: team.targetCount,
+            lockCount: team.lockCount,
+            completeCount: team.completeCount,
+            validEndTime: team.validEndTime,
+            members: team.members.map((m, i) => ({
+              label: maskUserId(m),
+              // 演示数据只记录名单：自己的待付款订单视为未付款，其余成员都已付款
+              paid: m === o.userId ? o.status !== 'PAY_WAIT' && o.status !== 'CREATE' : true,
+              isMe: m === o.userId,
+              isLeader: i === 0,
+            })),
+          }
+        : undefined,
       closeReason: o.closeReason,
     }
   }

@@ -1,6 +1,6 @@
 import type { AppConfig } from '@/config/env'
 import { findProduct, products } from '@/data/products'
-import type { ActiveTeam, MarketInfo, Order, OrderPage, OrderStatus, Team, User } from '@/types'
+import type { ActiveTeam, MarketInfo, Order, OrderPage, OrderStatus, OrderTeam, Team, User } from '@/types'
 import { maskUserId } from '../demo/demoApi'
 import { ApiError, request } from '../http'
 import type { ShopApi } from '../types'
@@ -31,9 +31,37 @@ interface OrderListResponse {
     orderTime?: string | number
     payAmount?: number
     totalAmount?: number
+    marketType?: number
+    team?: RawOrderTeam | null
   }[]
   hasMore?: boolean
   lastId?: string | number | null
+}
+
+interface RawOrderTeam {
+  teamId: string
+  /** 0 拼团中、1 已成团、2 失败、3 成团含退单 */
+  status: number
+  targetCount: number
+  lockCount: number
+  completeCount: number
+  validEndTime: number
+  members?: { label: string; paid: boolean; isMe: boolean; isLeader: boolean }[]
+}
+
+export function mapOrderTeam(raw: RawOrderTeam, now = Date.now()): OrderTeam {
+  const validEndTime = Number(raw.validEndTime)
+  const state =
+    raw.status === 1 || raw.status === 3 ? 'done' : raw.status === 2 || validEndTime <= now ? 'failed' : 'open'
+  return {
+    teamId: String(raw.teamId),
+    state,
+    targetCount: Number(raw.targetCount),
+    lockCount: Number(raw.lockCount),
+    completeCount: Number(raw.completeCount),
+    validEndTime,
+    members: raw.members ?? [],
+  }
 }
 
 interface RefundResponse {
@@ -85,6 +113,7 @@ export function createLiveApi(config: AppConfig, fetchDelay = (ms: number) => ne
   function mapOrder(raw: NonNullable<OrderListResponse['orderList']>[number]): Order {
     const localId = raw.productId ? reverseSku.get(String(raw.productId)) : undefined
     const product = localId ? findProduct(localId) : products.find((p) => p.name === raw.productName)
+    const team = raw.team ? mapOrderTeam(raw.team) : undefined
     return {
       orderId: String(raw.orderId),
       productId: product?.id,
@@ -92,6 +121,9 @@ export function createLiveApi(config: AppConfig, fetchDelay = (ms: number) => ne
       payAmount: Number(raw.payAmount ?? raw.totalAmount ?? 0),
       orderTime: parseTime(raw.orderTime),
       status: (knownStatus.includes(raw.status as OrderStatus) ? raw.status : 'CREATE') as OrderStatus,
+      purchaseType: raw.marketType === 0 ? 'single' : raw.marketType === 1 ? 'open' : undefined,
+      team,
+      teamProgress: team ? { target: team.targetCount, complete: team.completeCount } : undefined,
     }
   }
 
