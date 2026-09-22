@@ -102,6 +102,13 @@ public class TradeRepository implements ITradeRepository {
             // 使用 RandomStringUtils.randomNumeric 替代公司里使用的雪花算法UUID
             teamId = RandomStringUtils.randomNumeric(8);
 
+            // 拼团有效期：从开团起算活动配置的 valid_time 分钟，且不超过活动结束时间
+            Date teamStartTime = new Date();
+            Date teamEndTime = new Date(teamStartTime.getTime() + payActivityEntity.getValidTime() * 60_000L);
+            if (payActivityEntity.getEndTime() != null && teamEndTime.after(payActivityEntity.getEndTime())) {
+                teamEndTime = payActivityEntity.getEndTime();
+            }
+
             // 构建拼团订单
             GroupBuyOrder groupBuyOrder = GroupBuyOrder.builder()
                     .teamId(teamId)
@@ -114,8 +121,8 @@ public class TradeRepository implements ITradeRepository {
                     .targetCount(payActivityEntity.getTargetCount())
                     .completeCount(0)
                     .lockCount(1)
-                    .validStartTime(payActivityEntity.getStartTime())
-                    .validEndTime(payActivityEntity.getEndTime())
+                    .validStartTime(teamStartTime)
+                    .validEndTime(teamEndTime)
                     .notifyType(notifyConfigVO.getNotifyType().getCode())
                     .notifyUrl(notifyConfigVO.getNotifyUrl())
                     .build();

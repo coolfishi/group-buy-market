@@ -46,6 +46,9 @@ R=$(post /api/v1/alipay/create_pay_order "$TA" '{"productId":"JJ-01","marketType
 echo "$R" | json "d['data']['form']" | grep -q '<form' || fail "没有返回支付表单"
 L=$(latest "$TA"); OA=$(echo "$L" | json "d['data']['orderList'][0]['orderId']"); TEAM=$(echo "$L" | json "d['data']['orderList'][0]['teamId']")
 echo "   订单 $OA，队伍 $TEAM，实付 $(echo "$L" | json "d['data']['orderList'][0]['payAmount']")"
+WIN=$(sql "SELECT CONCAT(TIMESTAMPDIFF(MINUTE, o.valid_start_time, o.valid_end_time), ' ', a.valid_time) FROM group_buy_market.group_buy_order o JOIN group_buy_market.group_buy_activity a ON a.activity_id = o.activity_id WHERE o.team_id='$TEAM'")
+[ "${WIN% *}" = "${WIN#* }" ] || fail "队伍有效期应为活动 valid_time 分钟（实际 ${WIN% *}，配置 ${WIN#* }）"
+echo "   队伍有效期 ${WIN% *} 分钟"
 
 echo "2. A 付款 → 拼团结算"
 post /api/v1/alipay/mock_paid "$TA" "{\"orderId\":\"$OA\"}" >/dev/null
