@@ -56,7 +56,7 @@ const heroPosters = (
   ] as const
 ).map(([id, pos]) => {
   const p = findProduct(id)!
-  return { id, pos, src: p.images[0].src, alt: p.images[0].alt }
+  return { id, pos, name: p.name, src: p.images[0].src, alt: p.images[0].alt }
 })
 
 const liveTeams = computed(() => (teams.value ?? []).filter((t) => t.validEndTime > now.value))
@@ -65,24 +65,31 @@ onMounted(loadTeams)
 </script>
 
 <template>
-  <section class="window" aria-labelledby="hero-title">
-    <div class="container stage">
-      <p class="wordmark" aria-hidden="true">TOYSPACE</p>
-      <div class="posters">
-        <RouterLink v-for="p in heroPosters" :key="p.id" :to="`/products/${p.id}`" class="poster" :class="p.pos">
-          <img :src="p.src" :alt="p.alt" width="550" height="800" fetchpriority="high" />
-        </RouterLink>
-      </div>
-    </div>
-    <div class="floor">
-      <div class="container intro">
-        <div class="intro-copy">
-          <h1 id="hero-title">忍者与咒术师上展台</h1>
-          <p>《火影忍者》和《咒术回战》六款手办。约上朋友一起拼，人齐就按拼团价成交。</p>
-        </div>
-        <div class="intro-actions">
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <h1 id="hero-title">忍者与咒术师<br />上展台</h1>
+        <p>《火影忍者》和《咒术回战》六款手办。约上朋友一起拼，人齐就按拼团价成交。</p>
+        <div class="hero-actions">
           <a href="#shelf" class="btn btn-primary">看全部新品</a>
           <a href="#teams" class="btn btn-secondary">加入正在进行的拼团</a>
+        </div>
+      </div>
+
+      <!-- 展柜：描边字标作背景纹样，三张海报错落摆在台面上 -->
+      <div class="showcase">
+        <p class="wordmark" aria-hidden="true">TOYSPACE</p>
+        <div class="posters">
+          <RouterLink
+            v-for="p in heroPosters"
+            :key="p.id"
+            :to="`/products/${p.id}`"
+            class="poster"
+            :class="p.pos"
+            :aria-label="p.name"
+          >
+            <img :src="p.src" :alt="p.alt" width="550" height="800" fetchpriority="high" />
+          </RouterLink>
         </div>
       </div>
     </div>
@@ -186,34 +193,77 @@ onMounted(loadTeams)
 </template>
 
 <style scoped>
-/* 橱窗：巨大字标在后，三张手办海报压在字标下半部分 */
-.window {
+/* 主视觉：左侧文案，右侧展柜。台面是贯穿整屏的米色带，托住三张海报的下部 */
+.hero {
+  position: relative;
   overflow: hidden;
-  padding-top: clamp(20px, 4vw, 48px);
+  padding-top: clamp(28px, 5vw, 64px);
 }
 
-.stage {
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: clamp(96px, 11vw, 150px);
+  background: var(--plinth);
+  z-index: 0;
+}
+
+.hero-grid {
   position: relative;
   z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  align-items: center;
+  gap: clamp(24px, 4vw, 56px);
 }
 
-/* 展台地面：海报底部落在地面上 */
-.floor {
-  margin-top: clamp(-120px, -9vw, -36px);
-  padding-top: clamp(48px, 8vw, 120px);
-  background: var(--plinth);
+.hero-copy {
+  padding-bottom: clamp(110px, 12vw, 170px);
 }
 
+.hero-copy h1 {
+  font-size: clamp(2.5rem, 5vw, 4.25rem);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+}
+
+.hero-copy p {
+  margin-top: 18px;
+  max-width: 24em;
+  color: var(--graphite);
+  font-size: var(--t-lg);
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.showcase {
+  position: relative;
+  container-type: inline-size;
+  padding-top: clamp(40px, 6vw, 88px);
+}
+
+/* 描边字标：只作背景纹样，海报压在上面也不影响阅读 */
 .wordmark {
+  position: absolute;
+  inset: 0 0 auto 0;
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: clamp(3.9rem, 17.2vw, 14.25rem);
-  line-height: 0.82;
-  letter-spacing: -0.045em;
+  /* 按展柜宽度缩放，始终占满一行不溢出 */
+  font-size: 18.5cqi;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
   text-align: center;
-  color: var(--ink);
-  user-select: none;
   white-space: nowrap;
+  color: transparent;
+  -webkit-text-stroke: 2px var(--ink);
+  opacity: 0.18;
+  user-select: none;
 }
 
 .posters {
@@ -221,14 +271,14 @@ onMounted(loadTeams)
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  gap: clamp(10px, 2vw, 24px);
-  margin-top: clamp(-120px, -9vw, -34px);
+  padding-bottom: clamp(24px, 3vw, 40px);
   animation: rise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
 .poster {
+  position: relative;
   display: block;
-  width: clamp(92px, 20vw, 250px);
+  width: 31%;
   aspect-ratio: 11 / 16;
   border-radius: var(--r-plinth);
   overflow: hidden;
@@ -236,8 +286,20 @@ onMounted(loadTeams)
   outline: 6px solid var(--paper);
 }
 
+/* 两侧海报略矮、向中间收，与中间一张交叠 */
+.poster.left {
+  margin-right: -5%;
+  transform: translateY(-4%) rotate(-3deg);
+}
+
+.poster.right {
+  margin-left: -5%;
+  transform: translateY(-4%) rotate(3deg);
+}
+
 .poster.center {
-  width: clamp(116px, 25vw, 310px);
+  z-index: 1;
+  width: 38%;
 }
 
 .poster img {
@@ -251,41 +313,16 @@ onMounted(loadTeams)
   transform: scale(1.04);
 }
 
+.poster:focus-visible {
+  outline: 3px solid var(--violet);
+  outline-offset: 3px;
+}
+
 @keyframes rise {
   from {
     opacity: 0;
     transform: translateY(28px);
   }
-}
-
-.intro {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 20px 40px;
-  padding-block: clamp(20px, 3vw, 36px) 44px;
-}
-
-.intro-copy {
-  max-width: 34em;
-}
-
-.intro h1 {
-  font-size: var(--t-3xl);
-  letter-spacing: -0.02em;
-}
-
-.intro p {
-  margin-top: 10px;
-  color: var(--graphite);
-  font-size: var(--t-lg);
-}
-
-.intro-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
 }
 
 .shelf {
@@ -505,15 +542,30 @@ h2 {
   }
 }
 
+/* 窄屏：文案在上，展柜在下；台面只衬在海报下部 */
+@media (max-width: 860px) {
+  .hero-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .hero-copy {
+    padding-bottom: 0;
+  }
+  .hero::after {
+    height: clamp(90px, 22vw, 150px);
+  }
+  .showcase {
+    width: min(100%, 560px);
+    margin-inline: auto;
+  }
+}
+
 @media (max-width: 720px) {
   .team-strip,
   .steps {
     grid-template-columns: 1fr;
   }
-  .intro-actions {
-    width: 100%;
-  }
-  .intro-actions .btn {
+  .hero-actions .btn {
     flex: 1 1 auto;
   }
 }
