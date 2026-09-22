@@ -17,7 +17,7 @@ export interface ShopApi {
   // 商品
   purchasability(productId: string): Purchasability
   getMarket(productId: string, user: User | null): Promise<MarketInfo>
-  /** 首页“正在拼团”；真实模式没有跨商品查询接口，返回 null */
+  /** 首页“正在拼团”：跨商品列出进行中、未满员的队伍；接口不可用时返回 null */
   listActiveTeams(limit: number): Promise<ActiveTeam[] | null>
 
   // 登录

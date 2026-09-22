@@ -103,6 +103,24 @@ describe('拼团配置', () => {
   })
 })
 
+describe('首页正在拼团', () => {
+  it('把后端 SKU 映射回前端商品，丢弃前端没有资料的商品', async () => {
+    const fetch = mockFetch(() => ({
+      code: '0000',
+      data: [
+        { teamId: '11112222', productId: '7001', activityId: 1, targetCount: 3, lockCount: 2, completeCount: 2, validEndTime: 1893456000000, ownerLabel: 'sa****27' },
+        { teamId: '33334444', productId: '9890001', activityId: 2, targetCount: 3, lockCount: 1, completeCount: 1, validEndTime: 1893456000000, ownerLabel: 'ka****11' },
+      ],
+    }))
+    const api = createLiveApi(config, async () => {})
+    const teams = await api.listActiveTeams(4)
+    expect(fetch.mock.calls[0][0]).toBe('https://mall.example.com/api/v1/mall/active_teams?limit=4')
+    expect(teams).toEqual([
+      { teamId: '11112222', productId: 'JJ-01', activityId: 1, targetCount: 3, lockCount: 2, completeCount: 2, validEndTime: 1893456000000, ownerLabel: 'sa****27', isMine: false },
+    ])
+  })
+})
+
 describe('订单', () => {
   it('分页透传 lastId，并映射商品与状态', async () => {
     const fetch = mockFetch((_url, body) =>

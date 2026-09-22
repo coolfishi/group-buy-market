@@ -1,6 +1,7 @@
 import formbody from '@fastify/formbody'
 import Fastify, { type FastifyReply, type FastifyRequest } from 'fastify'
 import type { AdminService } from './admin/adminService.js'
+import type { DemoTeamKeeper } from './demoTeams.js'
 import { alipayConfigured, wechatConfigured, type MallConfig } from './config.js'
 import { MallError, type OrderService } from './orders.js'
 import type { PayProvider } from './pay/types.js'
@@ -19,6 +20,7 @@ export interface AppDeps {
   pay: PayProvider
   admin: AdminService
   wechat: WechatLike | null
+  teams?: Pick<DemoTeamKeeper, 'listOpen'>
 }
 
 const USER_TOKEN_TTL = 7 * 24 * 3600_000
@@ -59,6 +61,13 @@ export function buildApp(deps: AppDeps) {
   }
 
   app.get('/healthz', async () => ({ ok: true }))
+
+  // 首页“正在拼团”：跨商品列出进行中、未满员的队伍（公开，只读）
+  app.get('/api/v1/mall/active_teams', async (req, reply) => {
+    const { limit } = req.query as { limit?: string }
+    reply.header('Cache-Control', 'public, max-age=15')
+    return ok(deps.teams ? await deps.teams.listOpen(Number(limit) || 6) : [])
+  })
 
   // ---------------- 登录 ----------------
   app.get('/api/v1/login/weixin_qrcode_ticket_scene', async (req) => {

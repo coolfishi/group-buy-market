@@ -4,7 +4,10 @@ import type { PayProvider } from './types.js'
  * 仅用于自动化测试（PAY_PROVIDER=mock），生产环境不启用。
  * 通过 markPaid 模拟支付宝异步通知到账。
  */
-export function createMockProvider(gatewayUrl: string): PayProvider & { markPaid(orderId: string): void } {
+export function createMockProvider(
+  gatewayUrl: string,
+  now: () => Date = () => new Date(),
+): PayProvider & { markPaid(orderId: string): void } {
   const trades = new Map<string, { amount: number; status: string; tradeNo?: string; paidAt?: Date }>()
 
   return {
@@ -41,7 +44,7 @@ export function createMockProvider(gatewayUrl: string): PayProvider & { markPaid
 
     markPaid(orderId) {
       const t = trades.get(orderId)
-      if (t) Object.assign(t, { status: 'TRADE_SUCCESS', tradeNo: `MOCK${orderId}`, paidAt: new Date() })
+      if (t) Object.assign(t, { status: 'TRADE_SUCCESS', tradeNo: `MOCK${orderId}`, paidAt: now() })
     },
   }
 }

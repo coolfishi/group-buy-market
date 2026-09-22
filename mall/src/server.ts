@@ -1,5 +1,6 @@
 import { Redis } from 'ioredis'
 import { createAdminService } from './admin/adminService.js'
+import { createDemoTeamKeeper } from './demoTeams.js'
 import { buildApp } from './app.js'
 import { alipayConfigured, assertStartable, loadConfig, wechatConfigured } from './config.js'
 import { createPool, openMallDb } from './db.js'
@@ -40,11 +41,22 @@ const orders = createOrderService({
   log: { info: (o, m) => logger?.info(o, m), error: (o, m) => logger?.error(o, m) },
 })
 
+const teams = createDemoTeamKeeper({
+  gbmDb,
+  redis,
+  source: config.source,
+  channel: config.channel,
+  internalBaseUrl: config.internalBaseUrl,
+  minOpen: config.demoTeamsMin,
+  log: { info: (o, m) => logger?.info(o, m), error: (o, m) => logger?.error(o, m) },
+})
+
 const app = buildApp({
   config,
   pay,
   wechat,
   orders,
+  teams,
   admin: createAdminService({
     gbmDb,
     mallDb,
@@ -69,12 +81,19 @@ logger = app.log
 
 // 定时同步：补单、超时关单、结算与退款重试
 let syncing = false
+let lastCleanup = 0
 const timer = setInterval(async () => {
   if (syncing) return
   syncing = true
   try {
     await orders.sync()
     await wechat?.cleanup()
+    await teams.ensure()
+    // 每小时清理一次过期的演示拼团
+    if (Date.now() - lastCleanup > 3600_000) {
+      lastCleanup = Date.now()
+      await teams.cleanup()
+    }
   } catch (e) {
     app.log.error({ err: e }, '定时同步失败')
   } finally {

@@ -27,6 +27,7 @@ function config(overrides: Partial<MallConfig> = {}): MallConfig {
     wechat: { appId: '', appSecret: '', token: '' },
     devLogin: false,
     payTimeoutMinutes: 30,
+    demoTeamsMin: 0,
     ...overrides,
   }
 }

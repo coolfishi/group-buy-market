@@ -9,8 +9,9 @@ const product = { goodsId: 'TS-1002', goodsName: '夜航猫船长', originalPric
 function setup() {
   const store = memoryStore([product])
   const gbm = fakeGbm()
-  const pay = createMockProvider('https://pay.example.com/gateway')
   let t = new Date('2026-09-22T10:00:00+08:00').getTime()
+  // 模拟支付宝与订单服务共用同一个测试时钟
+  const pay = createMockProvider('https://pay.example.com/gateway', () => new Date(t))
   const service = createOrderService({
     store,
     gbm: gbm.client,

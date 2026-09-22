@@ -1,6 +1,6 @@
 import type { AppConfig } from '@/config/env'
 import { findProduct, products } from '@/data/products'
-import type { MarketInfo, Order, OrderPage, OrderStatus, Team, User } from '@/types'
+import type { ActiveTeam, MarketInfo, Order, OrderPage, OrderStatus, Team, User } from '@/types'
 import { maskUserId } from '../demo/demoApi'
 import { ApiError, request } from '../http'
 import type { ShopApi } from '../types'
@@ -165,8 +165,18 @@ export function createLiveApi(config: AppConfig, fetchDelay = (ms: number) => ne
       }
     },
 
-    async listActiveTeams() {
-      return null
+    async listActiveTeams(limit) {
+      const data = await request<
+        { teamId: string; productId: string; activityId: number; targetCount: number; lockCount: number; completeCount: number; validEndTime: number; ownerLabel: string }[]
+      >(mallUrl('/api/v1/mall/active_teams'), { method: 'GET', query: { limit: String(limit) }, timeoutMs: config.timeoutMs })
+      // 只展示前端有商品资料的队伍；后端 SKU 映射回前端商品 ID
+      return (data ?? [])
+        .map((t): ActiveTeam | null => {
+          const productId = reverseSku.get(String(t.productId))
+          if (!productId || !findProduct(productId)) return null
+          return { ...t, productId, validEndTime: Number(t.validEndTime), isMine: false }
+        })
+        .filter((t): t is ActiveTeam => t !== null)
     },
 
     async demoLogin() {

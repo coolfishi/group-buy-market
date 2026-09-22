@@ -31,6 +31,8 @@ export interface MallConfig {
   devLogin: boolean
   /** 未支付订单超时关闭（分钟） */
   payTimeoutMinutes: number
+  /** 进行中的可参团队伍少于这个数时自动补充演示拼团；0 表示关闭 */
+  demoTeamsMin: number
 }
 
 export interface DbConfig {
@@ -82,6 +84,7 @@ export function loadConfig(): MallConfig {
     wechat: { appId: env('WECHAT_APP_ID'), appSecret: env('WECHAT_APP_SECRET'), token: env('WECHAT_TOKEN') },
     devLogin: env('DEV_LOGIN') === 'true',
     payTimeoutMinutes: Number(env('PAY_TIMEOUT_MINUTES', '30')),
+    demoTeamsMin: Math.max(0, Math.min(20, Number(env('DEMO_TEAMS_MIN', '0')) || 0)),
   }
 }
 
