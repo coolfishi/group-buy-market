@@ -240,7 +240,10 @@ onMounted(async () => {
 
     <div v-if="pendingPay" class="pending" role="status">
       <span class="spinner" aria-hidden="true" />
-      <p>请在支付页完成付款，付款结果确认后订单状态会自动更新。</p>
+      <p>
+        请在支付页完成付款，付款结果确认后订单状态会自动更新。<br />
+        <small>支付宝页面提示“用户未登录”时，关掉那个页面，在下面的订单上重新点“去付款”即可。</small>
+      </p>
       <button type="button" class="btn btn-quiet" @click="clearPendingPayment(); pendingPay = null">不再等待</button>
     </div>
 

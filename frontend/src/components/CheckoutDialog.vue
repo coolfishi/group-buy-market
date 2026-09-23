@@ -117,6 +117,30 @@ async function confirm() {
   }
 }
 
+/** 支付页出错（如支付宝提示用户未登录）时，为同一笔订单重新生成支付页 */
+async function reopenPay() {
+  if (!payOrderId.value || busy.value) return
+  busy.value = true
+  error.value = ''
+  const payWindow = window.open('', PAY_WINDOW)
+  try {
+    const res = await api.repay(props.user, payOrderId.value)
+    if (res.kind !== 'redirect') return
+    if (payWindow && !payWindow.closed) submitPayForm(res.form, PAY_WINDOW)
+    else {
+      savePendingPayment({ productId: props.product.id, since: payStartedAt.value, orderId: payOrderId.value })
+      submitPayForm(res.form)
+    }
+  } catch (e) {
+    payWindow?.close()
+    handleError(e)
+    // 可能已经付款或订单已关闭，查一次结果
+    await checkPayment()
+  } finally {
+    busy.value = false
+  }
+}
+
 async function settle(action: 'confirm' | 'cancel') {
   if (!order.value || busy.value) return
   busy.value = true
@@ -217,6 +241,7 @@ const locked = computed(() => busy.value || phase.value === 'cashier')
     <template v-else-if="phase === 'waiting'">
       <p class="note">请在新打开的页面完成付款。付款结果以订单查询为准，这里会自动刷新。</p>
       <p class="hint">暂时不付也可以，稍后在“我的订单”里点“去付款”继续；超时未付的订单会自动关闭。</p>
+      <p class="hint">支付宝页面提示“用户未登录”时，关掉那个页面，点下面的“重新打开支付页”即可，不会重复下单。</p>
       <p class="checking" aria-live="polite">
         <span class="spinner" aria-hidden="true" /> {{ checking ? '正在查询订单…' : '等待付款中' }}
       </p>
@@ -255,6 +280,9 @@ const locked = computed(() => busy.value || phase.value === 'cashier')
       </template>
       <template v-else-if="phase === 'waiting'">
         <button type="button" class="btn btn-secondary" @click="emit('close')">稍后再付</button>
+        <button v-if="payOrderId" type="button" class="btn btn-secondary" :disabled="busy" @click="reopenPay">
+          {{ busy ? '正在打开' : '重新打开支付页' }}
+        </button>
         <button type="button" class="btn btn-primary" :disabled="checking" data-autofocus @click="checkNow">我已付款，查询结果</button>
       </template>
       <template v-else>
