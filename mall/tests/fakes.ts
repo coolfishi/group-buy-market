@@ -46,6 +46,9 @@ export function memoryStore(products: Product[]): OrderStore & { all: PayOrder[]
     async listByStatus(status, limit) {
       return all.filter((o) => o.status === status).slice(0, limit).map((o) => ({ ...o }))
     },
+    async listPaidGroupOrders(limit) {
+      return all.filter((o) => o.marketType === 1 && o.status === 'PAY_SUCCESS' && o.teamId).slice(0, limit).map((o) => ({ ...o }))
+    },
     async listUnsettled(limit) {
       return all.filter((o) => o.marketType === 1 && o.settleStatus === 0 && o.status === 'PAY_SUCCESS').slice(0, limit)
     },

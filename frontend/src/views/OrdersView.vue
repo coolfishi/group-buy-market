@@ -184,7 +184,7 @@ async function refreshLoaded(): Promise<boolean> {
 const needsWatching = computed(
   () =>
     !!pendingPay.value ||
-    orders.value.some((o) => o.status === 'WAIT_REFUND' || (o.status === 'PAY_SUCCESS' && o.team?.state === 'open')),
+    orders.value.some((o) => o.status === 'WAIT_REFUND' || (o.status === 'PAY_SUCCESS' && !!o.team && o.team.state !== 'done')),
 )
 const watcher = usePolling(refreshLoaded, api.mode === 'demo' ? 3000 : 8000, 10 * 60_000)
 watch(needsWatching, (v) => (v ? watcher.start() : watcher.stop()))

@@ -120,6 +120,14 @@ export function createMysqlStore(mall: Pool, gbm: Pool): OrderStore {
       return rows.map(rowToOrder)
     },
 
+    async listPaidGroupOrders(limit) {
+      const [rows] = await mall.query<Row[]>(
+        `SELECT * FROM pay_order WHERE market_type = 1 AND status = 'PAY_SUCCESS' AND team_id IS NOT NULL ORDER BY id LIMIT ?`,
+        [limit],
+      )
+      return rows.map(rowToOrder)
+    },
+
     async teamsByIds(teamIds, userId) {
       if (!teamIds.length) return []
       const [teams] = await gbm.query<Row[]>(

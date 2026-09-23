@@ -192,6 +192,46 @@ describe('从订单继续付款', () => {
   })
 })
 
+describe('拼团到期未成团', () => {
+  it('已付款成员自动退单退款；未到期、已成团的不动', async () => {
+    const { service, store, pay, gbm, advance } = setup()
+    const { orderId } = await service.createPayOrder('oUserA', { productId: 'TS-1002', marketType: 1, activityId: 200102 })
+    pay.markPaid(orderId)
+    await service.sync()
+    const teamId = store.all[0].teamId!
+    let team = { teamId, status: 0, targetCount: 2, lockCount: 1, completeCount: 1, validEndTime: Date.now() + 3600_000, members: [] }
+    store.teamsByIds = async () => [team]
+
+    // 未到期：不退
+    team = { ...team, validEndTime: new Date('2026-09-22T11:00:00+08:00').getTime() }
+    await service.sync()
+    expect(store.all[0].status).toBe('PAY_SUCCESS')
+
+    // 到期但仍在宽限期内：不退
+    advance(60 * 60_000 + 30_000)
+    await service.sync()
+    expect(store.all[0].status).toBe('PAY_SUCCESS')
+
+    // 过了宽限期：拼团侧退单 + 支付退款
+    advance(60_000)
+    await service.sync()
+    expect(gbm.calls.some((c) => c.op === 'refund')).toBe(true)
+    expect(store.all[0]).toMatchObject({ status: 'CLOSE', closeReason: '拼团到期未成团，已自动退款' })
+    expect((await pay.query(orderId)).status).toBe('TRADE_CLOSED')
+  })
+
+  it('已成团的队伍不退', async () => {
+    const { service, store, pay, advance } = setup()
+    const { orderId } = await service.createPayOrder('oUserA', { productId: 'TS-1002', marketType: 1, activityId: 200102 })
+    pay.markPaid(orderId)
+    await service.sync()
+    store.teamsByIds = async (ids) => [{ teamId: ids[0], status: 1, targetCount: 2, lockCount: 2, completeCount: 2, validEndTime: 0, members: [] }]
+    advance(5 * 60_000)
+    await service.sync()
+    expect(store.all[0].status).toBe('PAY_SUCCESS')
+  })
+})
+
 describe('订单列表', () => {
   it('按 id 游标分页', async () => {
     const { service, pay, store } = setup()

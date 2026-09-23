@@ -59,6 +59,18 @@ describe('演示模式完整流程', () => {
     await expect(api.repay(user, res.order.orderId)).rejects.toMatchObject({ code: 'TEAM_ENDED' })
   })
 
+  it('拼团到期没凑齐：已付款订单自动退款', async () => {
+    const { api, advance } = setup()
+    const market = await api.getMarket('NR-01', user)
+    const res = await api.checkout(user, { productId: 'NR-01', type: 'open', activityId: market.activityId })
+    if (res.kind !== 'demo') throw new Error('expected demo')
+    await api.settleDemoPayment(user, res.order.orderId, 'confirm')
+    advance(25 * 3600_000)
+    expect((await api.listOrders(user, null, 10)).orders[0]).toMatchObject({ status: 'WAIT_REFUND' })
+    advance(9_000)
+    expect((await api.listOrders(user, null, 10)).orders[0]).toMatchObject({ status: 'CLOSE', closeReason: '拼团到期未成团，已自动退款' })
+  })
+
   it('参团补齐最后一人即拼团成功', async () => {
     const { api } = setup()
     const market = await api.getMarket('JJ-01', user)

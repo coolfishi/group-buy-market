@@ -95,7 +95,21 @@ post /api/v1/alipay/create_pay_order "$TA" '{"productId":"NR-01","marketType":0}
 OS=$(latest "$TA" | json "d['data']['orderList'][0]['orderId']")
 R=$(post /api/v1/alipay/refund_order "$TA" "{\"orderId\":\"$OS\"}"); echo "   $(echo "$R" | json "d['data']['message']")"
 
-echo "8. 管理接口"
+echo "8. 拼团到期未成团 → 自动退款"
+post /api/v1/alipay/create_pay_order "$TA" '{"productId":"NR-01","marketType":1,"activityId":200201}' >/dev/null
+L=$(latest "$TA"); OE=$(echo "$L" | json "d['data']['orderList'][0]['orderId']"); TE=$(echo "$L" | json "d['data']['orderList'][0]['teamId']")
+post /api/v1/alipay/mock_paid "$TA" "{\"orderId\":\"$OE\"}" >/dev/null
+[ "$(latest "$TA" | json "d['data']['orderList'][0]['status']")" = "PAY_SUCCESS" ] || fail "到期测试订单应已付款"
+sql "UPDATE group_buy_market.group_buy_order SET valid_end_time = DATE_SUB(NOW(), INTERVAL 5 MINUTE) WHERE team_id='$TE'"
+for i in $(seq 1 20); do
+  ST=$(latest "$TA" | json "d['data']['orderList'][0]['status'] + ' ' + str(d['data']['orderList'][0]['closeReason'])")
+  [ "${ST%% *}" = "CLOSE" ] && break; sleep 3
+done
+echo "   $ST"
+[ "$ST" = "CLOSE 拼团到期未成团，已自动退款" ] || fail "到期未成团应自动退款"
+[ "$(sql "SELECT status FROM group_buy_market.group_buy_order_list WHERE out_trade_no='$OE'")" = "2" ] || fail "拼团侧应已退单"
+
+echo "9. 管理接口"
 AT=$(curl -s -X POST $B/api/admin/login -H 'Content-Type: application/json' -d "{\"username\":\"admin\",\"password\":\"$ADMIN_PW\"}" | json "d['data']['token']")
 curl -s $B/api/admin/overview -H "Authorization: Bearer $AT" | json "'活动 %s 个，进行中队伍 %s，DCC %s 项' % (d['data']['activeActivityCount'], d['data']['teams']['ongoing'], len(d['data']['dcc']))"
 curl -s "$B/api/admin/teams?keyword=$TEAM" -H "Authorization: Bearer $AT" | json "'队伍查询 %s 条' % d['data']['total']"

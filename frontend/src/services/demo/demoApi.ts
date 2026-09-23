@@ -163,9 +163,18 @@ export function createDemoApi(options: DemoOptions): ShopApi & { reset(): void }
   /** 推进基于时间的状态：退款到账 */
   function advance(state: DemoState) {
     for (const o of state.orders) {
+      // 拼团到期没凑齐：已付款的自动退款
+      if (o.status === 'PAY_SUCCESS' && o.teamId) {
+        const team = state.teams.find((t) => t.teamId === o.teamId)
+        if (team && team.completeCount < team.targetCount && team.validEndTime <= now()) {
+          o.status = 'WAIT_REFUND'
+          o.closeReason = '拼团到期未成团，已自动退款'
+          o.refundDoneAt = now() + REFUND_PROCESS_MS
+        }
+      }
       if (o.status === 'WAIT_REFUND' && o.refundDoneAt && now() >= o.refundDoneAt) {
         o.status = 'CLOSE'
-        o.closeReason = '已退款'
+        o.closeReason = o.closeReason ?? '已退款'
       }
     }
   }

@@ -54,6 +54,8 @@ export interface OrderStore {
   listByUser(userId: string, beforeId: number | null, size: number): Promise<PayOrder[]>
   listByStatus(status: OrderStatus, limit: number): Promise<PayOrder[]>
   listUnsettled(limit: number): Promise<PayOrder[]>
+  /** 已付款、还在等成团的拼团订单 */
+  listPaidGroupOrders(limit: number): Promise<PayOrder[]>
   /** 查询订单所在队伍的进度与成员（可选，测试替身可不实现） */
   teamsByIds?(teamIds: string[], userId: string): Promise<TeamSnapshot[]>
 }
@@ -80,6 +82,10 @@ export interface OrderServiceDeps {
   now?: () => Date
   log?: { info(obj: unknown, msg?: string): void; error(obj: unknown, msg?: string): void }
 }
+
+/** 到期后留出的宽限时间，避免和临界时刻的成团结算撞车 */
+const TEAM_EXPIRE_GRACE_MS = 60_000
+export const EXPIRED_REFUND_REASON = '拼团到期未成团，已自动退款'
 
 /** 拼团侧认为订单已不可结算（拼团已结束、已退单等），付款需要原路退回 */
 const SETTLE_REJECTED = new Set(['E0101', 'E0102', 'E0104', 'E0105', 'E0106'])
@@ -349,8 +355,38 @@ export function createOrderService(deps: OrderServiceDeps) {
     for (const order of await store.listUnsettled(20)) {
       if (now().getTime() - (order.payTime?.getTime() ?? 0) > 30_000) await settle(order)
     }
+    await refundExpiredTeams()
     for (const order of await store.listByStatus('WAIT_REFUND', 20)) {
       await refundMoney(order, order.closeReason ?? '已退款')
+    }
+  }
+
+  /** 拼团到期没凑齐：已付款的成员自动退单退款 */
+  async function refundExpiredTeams() {
+    if (!store.teamsByIds) return
+    const paid = await store.listPaidGroupOrders(200)
+    const teamIds = [...new Set(paid.map((o) => o.teamId as string))]
+    if (!teamIds.length) return
+    const failed = new Set(
+      (await store.teamsByIds(teamIds, ''))
+        .filter((t) => t.status === 2 || (t.status === 0 && t.validEndTime + TEAM_EXPIRE_GRACE_MS < now().getTime()))
+        .map((t) => t.teamId),
+    )
+    for (const order of paid.filter((o) => failed.has(o.teamId as string))) {
+      await guard(`refund:${order.orderId}`, async () => {
+        try {
+          await gbm.refund({ userId: order.userId, outTradeNo: order.orderId })
+        } catch (e) {
+          // E0104：拼团侧已退过；其它错误下一轮重试
+          if (!(e instanceof GbmError && e.code === 'E0104')) {
+            log.error({ err: e, orderId: order.orderId }, '到期拼团退单失败，稍后重试')
+            return
+          }
+        }
+        if (!(await store.update(order.orderId, { status: 'WAIT_REFUND', closeReason: EXPIRED_REFUND_REASON }, ['PAY_SUCCESS']))) return
+        log.info({ orderId: order.orderId, teamId: order.teamId }, '拼团到期未成团，自动退款')
+        await refundMoney({ ...order, status: 'WAIT_REFUND' }, EXPIRED_REFUND_REASON)
+      }).catch((e) => log.error({ err: e, orderId: order.orderId }, '到期拼团退款失败'))
     }
   }
 

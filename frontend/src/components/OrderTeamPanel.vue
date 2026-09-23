@@ -21,7 +21,7 @@ const empty = computed(() => Math.max(0, props.team.targetCount - props.team.mem
         <strong>已成团</strong>，{{ team.targetCount }} 人全部付款
       </template>
       <template v-else-if="state === 'failed'">
-        <strong>拼团已结束</strong>，到期未凑齐 {{ team.targetCount }} 人
+        <strong>拼团已结束</strong>，到期未凑齐 {{ team.targetCount }} 人，已付款的会自动原路退款
       </template>
       <template v-else>
         <strong>拼团中</strong>，已付款 {{ team.completeCount }}/{{ team.targetCount }}，还差
