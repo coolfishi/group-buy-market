@@ -6,7 +6,7 @@
 | --- | --- |
 | https://shop.openrelayx.cc/ | 商城（真实模式：微信登录、支付宝付款、真实拼团） |
 | https://shop.openrelayx.cc/demo/ | 演示站（本地模拟数据，不需要登录和付款） |
-| https://shop.openrelayx.cc/admin/ | 管理台 |
+| https://shop.openrelayx.cc/admin | 管理台 |
 
 同样的内容也可以用 `http://40.160.139.154:8898/` 直接访问。
 
@@ -14,7 +14,7 @@
 浏览器 ──▶ Cloudflare ──▶ Nginx :443 shop.openrelayx.cc（Let's Encrypt 证书，:80 跳转 HTTPS）
 浏览器 ──▶ Nginx :8898（IP 直连）
             两者共用 snippets/toyspace-site.conf：
-            ├── /  /demo/  /admin/          静态页面（SPA 回退）
+            ├── /  /demo/  /admin           静态页面（SPA 回退）
             ├── /api/v1/gbm/index/           拼团查询 → 127.0.0.1:18091（仅 POST）
             ├── /api/v1/login/ /api/v1/alipay/  商城服务 → 127.0.0.1:13100
             ├── /api/admin/                  管理接口 → 127.0.0.1:13100
@@ -67,7 +67,7 @@ cd /opt/toyspace-backend && sudo docker compose up -d mall   # 修改后重启�
 
 ## 管理台
 
-地址：https://shop.openrelayx.cc/admin/ ，用户名 `admin`。密码在服务器上查看：
+地址：https://shop.openrelayx.cc/admin ，用户名 `admin`。密码在服务器上查看：
 
 ```bash
 sudo grep ADMIN_PASSWORD /opt/toyspace-backend/mall.env

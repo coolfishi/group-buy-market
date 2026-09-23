@@ -6,7 +6,7 @@ import App from './App.vue'
 import './styles/base.css'
 
 const router = createRouter({
-  history: createWebHistory('/admin/'),
+  history: createWebHistory('/admin'),
   routes: [
     { path: '/login', name: 'login', component: () => import('./views/LoginView.vue'), meta: { title: '登录', public: true } },
     { path: '/', name: 'overview', component: () => import('./views/OverviewView.vue'), meta: { title: '概览' } },
@@ -21,10 +21,14 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
-  if (!to.meta.public && !session.token) return { name: 'login', query: { redirect: to.fullPath } }
+  if (!to.meta.public && !session.token) return { name: 'login', query: to.fullPath === '/' ? {} : { redirect: to.fullPath } }
   if (to.name === 'login' && session.token) return '/'
 })
 router.afterEach((to) => {
+  // 首页地址统一为 /admin（不带结尾斜杠）
+  if (window.location.pathname === '/admin/') {
+    window.history.replaceState(window.history.state, '', '/admin' + window.location.search + window.location.hash)
+  }
   document.title = `${String(to.meta.title ?? '')} | 玩集管理台`
 })
 
