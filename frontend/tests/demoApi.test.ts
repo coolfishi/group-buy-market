@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { filterProducts, products } from '@/data/products'
 import { createDemoApi, DEMO_STORAGE_KEY } from '@/services/demo/demoApi'
+import { characterName } from '@/utils/format'
 
 const user = { userId: 'demo_player', displayName: '体验玩家' }
 
@@ -17,6 +18,12 @@ describe('商品筛选', () => {
     expect(filterProducts(products, '五条悟', 'all').map((p) => p.id)).toEqual(['JJ-01'])
     expect(filterProducts(products, '不存在的东西', 'all')).toEqual([])
     expect(filterProducts(products, '粘土人', 'jjk')).toEqual([])
+  })
+})
+
+describe('角色名', () => {
+  it('去掉系列前缀', () => {
+    expect(products.map(characterName)).toEqual(['漩涡鸣人', '宇智波佐助', '旗木卡卡西', '五条悟', '虎杖悠仁', '伏黑惠'])
   })
 })
 

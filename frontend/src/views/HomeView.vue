@@ -7,7 +7,7 @@ import { useNow } from '@/composables/useNow'
 import { categories, filterProducts, findProduct, products } from '@/data/products'
 import { api, errorMessage } from '@/services'
 import type { ActiveTeam, CategoryId } from '@/types'
-import { formatCountdown } from '@/utils/format'
+import { characterName, formatCountdown } from '@/utils/format'
 
 const route = useRoute()
 const router = useRouter()
@@ -47,17 +47,8 @@ async function loadTeams() {
   }
 }
 
-// 主视觉三张海报：左鸣人、中五条悟、右虎杖
-const heroPosters = (
-  [
-    ['NR-01', 'left'],
-    ['JJ-01', 'center'],
-    ['JJ-02', 'right'],
-  ] as const
-).map(([id, pos]) => {
-  const p = findProduct(id)!
-  return { id, pos, name: p.name, src: p.images[0].src, alt: p.images[0].alt }
-})
+// 主视觉：搁板上并排的三盒，左鸣人、中五条悟、右虎杖
+const heroProducts = ['NR-01', 'JJ-01', 'JJ-02'].map((id) => findProduct(id)!)
 
 const liveTeams = computed(() => (teams.value ?? []).filter((t) => t.validEndTime > now.value))
 
@@ -68,28 +59,17 @@ onMounted(loadTeams)
   <section class="hero" aria-labelledby="hero-title">
     <div class="container hero-grid">
       <div class="hero-copy">
-        <h1 id="hero-title">忍者与咒术师<br />上展台</h1>
-        <p>《火影忍者》和《咒术回战》六款手办。约上朋友一起拼，人齐就按拼团价成交。</p>
+        <h1 id="hero-title"><span>拉上朋友</span><span>拼团开盒</span></h1>
+        <p>《火影忍者》和《咒术回战》六款正版手办。两三个人拼一团，每人都按拼团价买；到期没凑齐，付的钱原路退回。</p>
         <div class="hero-actions">
           <a href="#shelf" class="btn btn-primary">看全部新品</a>
           <a href="#teams" class="btn btn-secondary">加入正在进行的拼团</a>
         </div>
       </div>
 
-      <!-- 展柜：描边字标作背景纹样，三张海报错落摆在台面上 -->
-      <div class="showcase">
-        <p class="wordmark" aria-hidden="true">TOYSPACE</p>
-        <div class="posters">
-          <RouterLink
-            v-for="p in heroPosters"
-            :key="p.id"
-            :to="`/products/${p.id}`"
-            class="poster"
-            :class="p.pos"
-            :aria-label="p.name"
-          >
-            <img :src="p.src" :alt="p.alt" width="550" height="800" fetchpriority="high" />
-          </RouterLink>
+      <div class="hero-shelf">
+        <div v-for="p in heroProducts" :key="p.id" class="hero-slot">
+          <ProductCard :product="p" />
         </div>
       </div>
     </div>
@@ -97,7 +77,7 @@ onMounted(loadTeams)
 
   <section id="shelf" class="container shelf" aria-labelledby="shelf-title">
     <div class="shelf-head">
-      <h2 id="shelf-title">本季展品</h2>
+      <h2 id="shelf-title">货架上的全部</h2>
       <div class="filters">
         <div class="search">
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
@@ -124,7 +104,9 @@ onMounted(loadTeams)
     <p class="count" aria-live="polite">共 {{ results.length }} 件</p>
 
     <div v-if="results.length" class="grid">
-      <ProductCard v-for="p in results" :key="p.id" :product="p" />
+      <div v-for="p in results" :key="p.id" class="slot">
+        <ProductCard :product="p" />
+      </div>
     </div>
     <StateBlock
       v-else
@@ -136,41 +118,53 @@ onMounted(loadTeams)
     />
   </section>
 
-  <section id="teams" class="container teams" aria-labelledby="teams-title">
-    <h2 id="teams-title">正在拼团</h2>
-    <StateBlock v-if="teamsState === 'loading'" kind="loading" title="正在加载拼团" />
-    <StateBlock
-      v-else-if="teamsState === 'error'"
-      kind="error"
-      title="拼团列表没有加载出来"
-      :detail="teamsError"
-      action-label="重新加载"
-      @action="loadTeams"
-    />
-    <p v-else-if="teams === null" class="teams-note">
-      实时拼团按商品查询。打开任意商品页，就能看到这件商品正在进行的拼团。
-    </p>
-    <StateBlock
-      v-else-if="liveTeams.length === 0"
-      kind="empty"
-      title="现在没有可以加入的拼团"
-      detail="挑一件喜欢的展品，自己发起一个吧。"
-    />
-    <ul v-else class="team-strip">
-      <li v-for="t in liveTeams" :key="t.teamId">
-        <RouterLink :to="{ path: `/products/${t.productId}`, hash: '#teams' }" class="team-card">
-          <img :src="findProduct(t.productId)?.images[0].src" alt="" width="96" height="96" loading="lazy" />
-          <span class="team-body">
-            <span class="team-name">{{ findProduct(t.productId)?.name }}</span>
-            <span class="team-meta">
-              还差 {{ t.targetCount - t.lockCount }} 人，剩余
-              <span class="num">{{ formatCountdown(t.validEndTime - now) }}</span>
+  <section id="teams" class="teams" aria-labelledby="teams-title">
+    <div class="container">
+      <div class="teams-head">
+        <h2 id="teams-title">正在拼团</h2>
+        <p>补上最后一个名额，马上成团。</p>
+      </div>
+      <StateBlock v-if="teamsState === 'loading'" kind="loading" title="正在加载拼团" />
+      <StateBlock
+        v-else-if="teamsState === 'error'"
+        kind="error"
+        title="拼团列表没有加载出来"
+        :detail="teamsError"
+        action-label="重新加载"
+        @action="loadTeams"
+      />
+      <p v-else-if="teams === null" class="teams-note">
+        实时拼团按商品查询。打开任意商品页，就能看到这件商品正在进行的拼团。
+      </p>
+      <StateBlock
+        v-else-if="liveTeams.length === 0"
+        kind="empty"
+        title="现在没有可以加入的拼团"
+        detail="挑一件喜欢的展品，自己发起一个吧。"
+      />
+      <ul v-else class="team-strip">
+        <li v-for="t in liveTeams" :key="t.teamId">
+          <RouterLink
+            :to="{ path: `/products/${t.productId}`, hash: '#teams' }"
+            class="team-card"
+            :class="findProduct(t.productId)?.category"
+          >
+            <img :src="findProduct(t.productId)?.images[0].src" alt="" width="96" height="96" loading="lazy" />
+            <span class="team-body">
+              <span class="team-name">{{ characterName(findProduct(t.productId)!) }}</span>
+              <span class="team-meta">
+                <span class="seats" aria-hidden="true">
+                  <i v-for="i in t.targetCount" :key="i" :class="{ on: i <= t.lockCount }" />
+                </span>
+                还差 {{ t.targetCount - t.lockCount }} 人，剩余
+                <span class="num">{{ formatCountdown(t.validEndTime - now) }}</span>
+              </span>
             </span>
-          </span>
-          <span class="team-go">去参团</span>
-        </RouterLink>
-      </li>
-    </ul>
+            <span class="team-go">去参团</span>
+          </RouterLink>
+        </li>
+      </ul>
+    </div>
   </section>
 
   <section class="container how" aria-labelledby="how-title">
@@ -193,44 +187,30 @@ onMounted(loadTeams)
 </template>
 
 <style scoped>
-/* 主视觉：左侧文案，右侧展柜。台面是贯穿整屏的米色带，托住三张海报的下部 */
+/* 主视觉：左侧大字，右侧一块搁板上立着三盒 */
 .hero {
-  position: relative;
-  overflow: hidden;
-  padding-top: clamp(28px, 5vw, 64px);
-}
-
-.hero::after {
-  content: '';
-  position: absolute;
-  inset: auto 0 0 0;
-  height: clamp(96px, 11vw, 150px);
-  background: var(--plinth);
-  z-index: 0;
+  padding: clamp(32px, 5vw, 64px) 0 clamp(40px, 6vw, 80px);
 }
 
 .hero-grid {
-  position: relative;
-  z-index: 1;
   display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-  align-items: center;
-  gap: clamp(24px, 4vw, 56px);
-}
-
-.hero-copy {
-  padding-bottom: clamp(110px, 12vw, 170px);
+  grid-template-columns: minmax(0, 4fr) minmax(0, 6fr);
+  align-items: end;
+  gap: clamp(24px, 5vw, 64px);
 }
 
 .hero-copy h1 {
-  font-size: clamp(2.5rem, 5vw, 4.25rem);
-  line-height: 1.08;
-  letter-spacing: -0.03em;
+  font-size: clamp(3rem, 6.6vw, 5.75rem);
+  line-height: 1;
+}
+
+.hero-copy h1 span {
+  display: block;
 }
 
 .hero-copy p {
   margin-top: 18px;
-  max-width: 24em;
+  max-width: 26em;
   color: var(--graphite);
   font-size: var(--t-lg);
 }
@@ -242,91 +222,56 @@ onMounted(loadTeams)
   margin-top: 28px;
 }
 
-.showcase {
+.hero-shelf {
   position: relative;
-  container-type: inline-size;
-  padding-top: clamp(40px, 6vw, 88px);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+  gap: clamp(12px, 2vw, 24px);
+  padding: 0 clamp(4px, 1.5vw, 20px) 22px;
+  animation: rise 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
-/* 背景字标：浅紫实心的窄体大字，海报压在下半部分；实心字交叠处自然融合 */
-.wordmark {
-  position: absolute;
-  inset: 0 0 auto 0;
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-stretch: 75%;
-  font-variation-settings: 'wdth' 75;
-  /* 按展柜宽度缩放，始终占满一行不溢出 */
-  font-size: 23cqi;
-  line-height: 0.82;
-  letter-spacing: -0.02em;
-  text-align: center;
-  white-space: nowrap;
-  color: #e4d8ff;
-  user-select: none;
+.hero-slot:nth-child(1) {
+  transform: rotate(-3deg);
 }
 
-.posters {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  padding-bottom: clamp(24px, 3vw, 40px);
-  animation: rise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-
-.poster {
-  position: relative;
-  display: block;
-  width: 31%;
-  aspect-ratio: 11 / 16;
-  border-radius: var(--r-plinth);
-  overflow: hidden;
-  background: var(--ink);
-  outline: 6px solid var(--paper);
-}
-
-/* 两侧海报略矮、向中间收，与中间一张交叠 */
-.poster.left {
-  margin-right: -5%;
-  transform: translateY(-4%) rotate(-3deg);
-}
-
-.poster.right {
-  margin-left: -5%;
-  transform: translateY(-4%) rotate(3deg);
-}
-
-.poster.center {
+.hero-slot:nth-child(2) {
   z-index: 1;
-  width: 38%;
+  transform: translateY(-18px) scale(1.06);
 }
 
-.poster img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.poster:hover img {
-  transform: scale(1.04);
-}
-
-.poster:focus-visible {
-  outline: 3px solid var(--violet);
-  outline-offset: 3px;
+.hero-slot:nth-child(3) {
+  transform: rotate(3deg);
 }
 
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(28px);
+    transform: translateY(24px);
   }
 }
 
+/* 搁板：一块浅色木板托住整排盒子 */
+.hero-shelf::after,
+.slot::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  height: 22px;
+  background: linear-gradient(#fff, var(--plinth-deep));
+  box-shadow: 0 12px 16px -12px rgba(22, 26, 58, 0.45);
+}
+
+.hero-shelf::after {
+  left: 0;
+  right: 0;
+  z-index: -1;
+  border-radius: 4px;
+}
+
 .shelf {
-  padding-top: 72px;
+  padding-top: 40px;
   scroll-margin-top: 90px;
 }
 
@@ -339,7 +284,8 @@ onMounted(loadTeams)
 }
 
 h2 {
-  font-size: var(--t-2xl);
+  font-size: clamp(2rem, 3.4vw, 2.5rem);
+  line-height: 1;
 }
 
 .filters {
@@ -366,9 +312,9 @@ h2 {
   width: 100%;
   height: 44px;
   padding: 0 14px 0 40px;
-  border: 1.5px solid var(--line);
+  border: 2px solid var(--line);
   border-radius: var(--r-field);
-  background: #fff;
+  background: var(--card);
 }
 
 .search input:focus {
@@ -385,22 +331,21 @@ h2 {
 .chip {
   height: 40px;
   padding: 0 16px;
-  border: 1.5px solid var(--line);
-  border-radius: 999px;
-  background: transparent;
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  background: var(--card);
   font-size: var(--t-sm);
+  font-weight: 700;
   cursor: pointer;
 }
 
 .chip:hover {
-  border-color: var(--ink);
+  background: var(--sticker);
 }
 
 .chip[aria-pressed='true'] {
   background: var(--ink);
-  border-color: var(--ink);
-  color: var(--paper);
-  font-weight: 700;
+  color: #fff;
 }
 
 .count {
@@ -409,26 +354,58 @@ h2 {
   color: var(--graphite);
 }
 
+/* 商品格：每格底下一段搁板，左右伸进列间距，同一行连成一整块 */
 .grid {
+  --shelf-gap: 36px;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 40px 28px;
+  gap: 56px var(--shelf-gap);
+  padding-inline: 12px;
+  isolation: isolate;
 }
 
+.slot {
+  position: relative;
+  padding-bottom: 22px;
+}
+
+.slot::after {
+  left: calc(var(--shelf-gap) / -2 - 1px);
+  right: calc(var(--shelf-gap) / -2 - 1px);
+  z-index: -1;
+}
+
+/* 正在拼团：整条墨蓝色带 */
 .teams {
-  padding-top: 88px;
-  scroll-margin-top: 90px;
+  margin-top: 88px;
+  padding: 56px 0 64px;
+  background: var(--ink);
+  color: #fff;
+  scroll-margin-top: 60px;
 }
 
-.teams h2 {
-  margin-bottom: 20px;
+.teams-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 24px;
+}
+
+.teams-head p {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.teams :deep(.state) {
+  color: var(--ink);
 }
 
 .teams-note {
   padding: 20px 24px;
   border-radius: var(--r-plinth);
-  background: var(--plinth);
-  color: var(--graphite);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .team-strip {
@@ -441,20 +418,32 @@ h2 {
 }
 
 .team-card {
+  --series: var(--naruto);
   display: grid;
-  grid-template-columns: 72px 1fr auto;
+  grid-template-columns: 64px 1fr auto;
   align-items: center;
-  gap: 16px;
-  padding: 10px 18px 10px 10px;
-  border-radius: 18px;
-  background: var(--violet-mist);
+  gap: 14px;
+  padding: 10px 16px 10px 10px;
+  border-radius: 12px;
+  border-left: 8px solid var(--series);
+  background: var(--card);
+  color: var(--ink);
   text-decoration: none;
+  transition: transform 0.15s;
+}
+
+.team-card.jjk {
+  --series: var(--jjk);
+}
+
+.team-card:hover {
+  transform: translateY(-2px);
 }
 
 .team-card img {
-  width: 72px;
-  height: 72px;
-  border-radius: 12px;
+  width: 64px;
+  height: 80px;
+  border-radius: 8px;
   background: var(--plinth);
   object-fit: cover;
   object-position: center 25%;
@@ -466,7 +455,8 @@ h2 {
 }
 
 .team-name {
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 1.125rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -477,29 +467,47 @@ h2 {
   color: var(--graphite);
 }
 
+.seats {
+  display: inline-flex;
+  gap: 3px;
+  margin-right: 6px;
+  vertical-align: -1px;
+}
+
+.seats i {
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+  border: 2px solid var(--series);
+}
+
+.seats i.on {
+  background: var(--series);
+}
+
 .team-meta .num {
   color: var(--ink);
-  font-weight: 700;
+  font-size: 0.95rem;
 }
 
 .team-go {
-  font-weight: 700;
-  color: var(--violet);
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: var(--ink);
+  color: #fff;
+  font-weight: 900;
   font-size: var(--t-sm);
-}
-
-.team-card:hover {
-  background: #e4d9ff;
+  white-space: nowrap;
 }
 
 .how {
-  padding-top: 88px;
+  padding-top: 72px;
 }
 
 .steps {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 28px;
+  gap: 20px;
   margin: 24px 0 0;
   padding: 0;
   list-style: none;
@@ -508,61 +516,64 @@ h2 {
 
 .steps li {
   counter-increment: step;
-  padding-top: 16px;
-  border-top: 2px solid var(--ink);
+  position: relative;
+  padding: 22px 22px 22px 84px;
+  border-radius: var(--r-plinth);
+  background: var(--card);
+  box-shadow: var(--shadow-box);
 }
 
-/* 玩法是真实的先后步骤，所以用序号 */
+/* 玩法是真实的先后步骤，所以用序号，做成黄色贴纸 */
 .steps li::before {
   content: counter(step);
-  display: block;
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 2.5rem;
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--sticker);
+  font-family: var(--font-num);
+  font-size: 1.5rem;
   line-height: 1;
-  color: var(--violet);
-  margin-bottom: 12px;
 }
 
 .steps h3 {
-  font-size: var(--t-lg);
+  font-size: 1.375rem;
 }
 
 .steps p {
-  margin-top: 6px;
+  margin-top: 4px;
   color: var(--graphite);
   font-size: var(--t-sm);
-  max-width: 26em;
 }
 
 @media (max-width: 960px) {
   .grid {
+    --shelf-gap: 24px;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 32px 20px;
+    gap: 44px var(--shelf-gap);
+  }
+  .steps {
+    grid-template-columns: 1fr;
   }
 }
 
-/* 窄屏：文案在上，展柜在下；台面只衬在海报下部 */
 @media (max-width: 860px) {
   .hero-grid {
     grid-template-columns: 1fr;
-    gap: 8px;
+    gap: 40px;
   }
-  .hero-copy {
-    padding-bottom: 0;
-  }
-  .hero::after {
-    height: clamp(90px, 22vw, 150px);
-  }
-  .showcase {
-    width: min(100%, 560px);
+  .hero-shelf {
+    width: min(100%, 600px);
     margin-inline: auto;
   }
 }
 
 @media (max-width: 720px) {
-  .team-strip,
-  .steps {
+  .team-strip {
     grid-template-columns: 1fr;
   }
   .hero-actions .btn {
@@ -572,7 +583,15 @@ h2 {
 
 @media (max-width: 480px) {
   .grid {
-    gap: 28px 14px;
+    --shelf-gap: 14px;
+    gap: 32px var(--shelf-gap);
+    padding-inline: 4px;
+  }
+  .hero-shelf {
+    gap: 8px;
+  }
+  .hero-slot:nth-child(2) {
+    transform: translateY(-10px) scale(1.04);
   }
   .shelf-head {
     align-items: stretch;
@@ -591,12 +610,12 @@ h2 {
     flex: none;
   }
   .team-card {
-    grid-template-columns: 56px 1fr auto;
-    gap: 12px;
+    grid-template-columns: 52px 1fr auto;
+    gap: 10px;
   }
   .team-card img {
-    width: 56px;
-    height: 56px;
+    width: 52px;
+    height: 66px;
   }
 }
 </style>

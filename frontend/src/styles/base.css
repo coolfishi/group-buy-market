@@ -1,22 +1,30 @@
 :root {
-  /* 色彩：展厅白 / 展台米 / 炭黑 / 石墨 / 电光紫 */
-  --paper: #faf7f2;
-  --plinth: #efe8dd;
-  --plinth-deep: #e3d9ca;
-  --line: #e0d7c9;
-  --ink: #22201e;
-  --graphite: #6b6560;
-  --violet: #6a2bff;
-  --violet-press: #5114e0;
-  --violet-mist: #eee7ff;
-  --ok: #1d7550;
-  --ok-bg: #e2f1e8;
-  --warn: #8f5500;
-  --warn-bg: #fbeed6;
+  /* 色彩：货架墙灰 / 白色盒身 / 墨蓝 / 作品色（火影橙、咒术靛蓝）/ 贴纸黄 */
+  --paper: #e9ecf1;
+  --card: #ffffff;
+  --plinth: #dfe3ea;
+  --plinth-deep: #d0d5df;
+  --line: #cfd4de;
+  --ink: #161a3a;
+  --graphite: #565b76;
+  /* 强调色沿用 violet 这个名字，值是咒术靛蓝 */
+  --violet: #2d2f8c;
+  --violet-press: #1f2170;
+  --violet-mist: #e1e3f7;
+  --naruto: #f06a1a;
+  --jjk: #2d2f8c;
+  --sticker: #ffd92e;
+  --ok: #17704b;
+  --ok-bg: #dcefe5;
+  --warn: #8a5000;
+  --warn-bg: #fcefcf;
   --danger: #b0301b;
-  --danger-bg: #fbe5df;
+  --danger-bg: #fbe3dd;
+  --shadow-box: 0 1px 0 rgba(22, 26, 58, 0.06), 0 14px 24px -14px rgba(22, 26, 58, 0.4);
 
-  --font-display: 'Bricolage Grotesque Variable', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  /* 标题：站酷庆科黄油体；数字与英文字标：Anton */
+  --font-display: 'ZCOOL QingKe HuangYou', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-num: 'Anton', 'Impact', 'Arial Narrow', sans-serif;
   --font-body: 'PingFang SC', 'Noto Sans SC', 'Source Han Sans SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, sans-serif;
 
   /* 字号阶梯 */
@@ -28,9 +36,9 @@
   --t-2xl: 2rem;
   --t-3xl: clamp(2.25rem, 4.5vw, 3.25rem);
 
-  --r-plinth: 20px;
-  --r-dialog: 24px;
-  --r-field: 12px;
+  --r-plinth: 14px;
+  --r-dialog: 18px;
+  --r-field: 10px;
   --gutter: clamp(16px, 4vw, 40px);
   --maxw: 1240px;
   --header-h: 64px;
@@ -80,9 +88,9 @@ p {
 h1,
 h2,
 h3 {
-  line-height: 1.2;
-  font-weight: 900;
-  letter-spacing: -0.01em;
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1.15;
 }
 
 a {
@@ -96,7 +104,7 @@ input {
 }
 
 :focus-visible {
-  outline: 3px solid var(--violet);
+  outline: 3px solid var(--naruto);
   outline-offset: 2px;
   border-radius: 6px;
 }
@@ -109,7 +117,9 @@ input {
 }
 
 .num {
-  font-family: var(--font-display);
+  font-family: var(--font-num);
+  font-weight: 400;
+  letter-spacing: 0.02em;
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
 }
@@ -123,7 +133,7 @@ input {
   white-space: nowrap;
 }
 
-/* 按钮：胶囊形，主按钮电光紫，次按钮炭黑描边 */
+/* 按钮：圆角方块，主按钮墨蓝带底部厚边（像能按下去的实体按钮），次按钮白底描边 */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -131,14 +141,14 @@ input {
   gap: 8px;
   min-height: 48px;
   padding: 0 22px;
-  border-radius: 999px;
-  border: 2px solid transparent;
-  font-weight: 700;
+  border-radius: 12px;
+  border: 2px solid var(--ink);
+  font-weight: 900;
   font-size: var(--t-md);
   text-decoration: none;
   cursor: pointer;
   white-space: nowrap;
-  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+  transition: background-color 0.15s, color 0.15s, transform 0.1s, box-shadow 0.1s;
 }
 
 .btn:disabled,
@@ -148,30 +158,36 @@ input {
 }
 
 .btn-primary {
-  background: var(--violet);
+  background: var(--ink);
   color: #fff;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.55);
 }
 
 .btn-primary:not(:disabled):hover {
   background: var(--violet-press);
 }
 
+.btn-primary:not(:disabled):active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.55);
+}
+
 .btn-secondary {
-  background: transparent;
-  border-color: var(--ink);
+  background: var(--card);
   color: var(--ink);
 }
 
 .btn-secondary:not(:disabled):hover {
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--sticker);
 }
 
 .btn-quiet {
+  border-color: transparent;
   background: transparent;
   color: var(--ink);
   min-height: 40px;
   padding: 0 14px;
+  font-weight: 700;
   text-decoration: underline;
   text-underline-offset: 4px;
   text-decoration-thickness: 1px;
@@ -184,6 +200,7 @@ input {
 .btn-small {
   min-height: 38px;
   padding: 0 16px;
+  border-radius: 10px;
   font-size: var(--t-sm);
 }
 

@@ -20,14 +20,13 @@ withDefaults(
 
 <style scoped>
 .price {
-  font-weight: 700;
+  font-weight: 400;
   line-height: 1;
   white-space: nowrap;
 }
 .yen {
-  font-size: 0.6em;
-  margin-right: 0.08em;
-  font-weight: 600;
+  font-size: 0.55em;
+  margin-right: 0.06em;
 }
 .sm {
   font-size: var(--t-md);
@@ -36,16 +35,13 @@ withDefaults(
   font-size: var(--t-xl);
 }
 .lg {
-  font-size: clamp(2.5rem, 5vw, 3.5rem);
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-size: clamp(2.75rem, 5.4vw, 3.75rem);
 }
 .violet {
   color: var(--violet);
 }
 .muted {
   color: var(--graphite);
-  font-weight: 500;
 }
 .strike {
   text-decoration: line-through;

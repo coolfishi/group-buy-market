@@ -29,12 +29,13 @@ defineEmits<{ action: [] }>()
   padding: 48px 20px;
   text-align: center;
   border-radius: var(--r-plinth);
-  background: var(--plinth);
+  background: var(--card);
+  border: 2px dashed var(--line);
 }
 
 .title {
-  font-weight: 700;
-  font-size: var(--t-lg);
+  font-family: var(--font-display);
+  font-size: 1.375rem;
 }
 
 .detail {
@@ -45,6 +46,7 @@ defineEmits<{ action: [] }>()
 
 .error {
   background: var(--danger-bg);
+  border-color: transparent;
 }
 
 .error .title {

@@ -38,11 +38,22 @@ function onKeydown(e: KeyboardEvent) {
 
 <style scoped>
 .main {
+  position: relative;
   aspect-ratio: 11 / 16;
   max-height: calc(100vh - 180px);
-  border-radius: var(--r-plinth);
-  background: var(--plinth);
+  margin-inline: auto;
+  border-radius: 16px;
+  background: var(--ink);
   overflow: hidden;
+}
+
+/* 吸塑窗反光 */
+.main::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.18) 0 12%, transparent 12% 72%, rgba(255, 255, 255, 0.08) 72% 77%, transparent 77%);
+  pointer-events: none;
 }
 
 .main img {
@@ -74,9 +85,9 @@ function onKeydown(e: KeyboardEvent) {
   width: 84px;
   height: 122px;
   object-fit: cover;
-  border-radius: 12px;
+  border-radius: 10px;
   background: var(--plinth);
-  border: 2px solid transparent;
+  border: 3px solid transparent;
 }
 
 .thumb[aria-pressed='true'] {
@@ -85,7 +96,7 @@ function onKeydown(e: KeyboardEvent) {
 }
 
 .thumb[aria-pressed='true'] img {
-  border-color: var(--ink);
+  border-color: var(--series, var(--ink));
 }
 
 @media (max-width: 480px) {
