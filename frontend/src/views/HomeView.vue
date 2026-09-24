@@ -228,7 +228,7 @@ onMounted(loadTeams)
   grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: end;
   gap: clamp(12px, 2vw, 24px);
-  padding: 0 clamp(4px, 1.5vw, 20px) 18px;
+  padding: 0 clamp(4px, 1.5vw, 20px) 14px;
   animation: rise 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
@@ -252,31 +252,22 @@ onMounted(loadTeams)
   }
 }
 
-/* 搁板：上 6px 是板面，一道棱线，下面是板的正面，再往下是投影。
-   投影用不透明渐变过渡到页面底色，几段搁板叠在一起时不会叠出深浅不一的接缝 */
-.hero-shelf::after,
+/* 盒子脚下一团柔和的接触阴影，像立在台面上，不再画搁板 */
+.hero-slot,
+.slot {
+  position: relative;
+}
+
+.hero-slot::after,
 .slot::after {
   content: '';
   position: absolute;
-  bottom: -16px;
   z-index: -1;
-  height: 34px;
-  background: linear-gradient(
-    to bottom,
-    #fbfcfd 0,
-    #eef1f5 6px,
-    #b7beca 6px,
-    #b7beca 7px,
-    #dfe3ea 7px,
-    #c9cfda 18px,
-    #bec5d0 18px,
-    var(--paper) 34px
-  );
-}
-
-.hero-shelf::after {
-  left: 0;
-  right: 0;
+  left: 6%;
+  right: 6%;
+  bottom: -14px;
+  height: 28px;
+  background: radial-gradient(closest-side, rgba(22, 26, 58, 0.22), transparent);
 }
 
 .shelf {
@@ -363,27 +354,16 @@ h2 {
   color: var(--graphite);
 }
 
-/* 商品格：每格底下的搁板向左右无限延伸，再由网格在两侧裁齐，
-   同一行的几段完全重合，看起来就是一整块板，两端也不会伸出去 */
+/* 商品格 */
 .grid {
   --shelf-gap: 36px;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 60px var(--shelf-gap);
+  gap: 48px var(--shelf-gap);
   padding: 0 12px 16px;
-  overflow-x: clip;
   isolation: isolate;
 }
 
-.slot {
-  position: relative;
-  padding-bottom: 18px;
-}
-
-.slot::after {
-  left: -100vw;
-  right: -100vw;
-}
 
 /* 正在拼团：整条墨蓝色带 */
 .teams {
