@@ -308,7 +308,7 @@ const locked = computed(() => busy.value || phase.value === 'cashier')
   width: 72px;
   height: 72px;
   border-radius: 12px;
-  background: var(--paper);
+  background: var(--card);
   object-fit: cover;
   object-position: center 25%;
 }

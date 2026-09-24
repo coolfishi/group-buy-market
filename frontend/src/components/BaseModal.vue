@@ -117,16 +117,17 @@ onBeforeUnmount(() => {
   display: grid;
   place-items: center;
   padding: 16px;
-  background: rgba(34, 32, 30, 0.48);
+  background: rgba(22, 26, 58, 0.55);
 }
 
 .panel {
   width: min(460px, 100%);
   max-height: calc(100dvh - 32px);
   overflow: auto;
-  background: var(--paper);
+  background: var(--card);
   border-radius: var(--r-dialog);
-  box-shadow: 0 24px 60px rgba(34, 32, 30, 0.28);
+  border-top: 8px solid var(--ink);
+  box-shadow: 0 24px 60px rgba(22, 26, 58, 0.35);
   padding: 24px;
 }
 
@@ -143,7 +144,7 @@ onBeforeUnmount(() => {
 }
 
 .head h2 {
-  font-size: var(--t-xl);
+  font-size: 1.75rem;
 }
 
 .close {

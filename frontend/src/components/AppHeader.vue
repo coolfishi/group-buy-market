@@ -102,9 +102,8 @@ function resetDemo() {
 }
 
 .bar {
-  background: rgba(250, 247, 242, 0.92);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--line);
+  background: var(--ink);
+  color: #fff;
 }
 
 .bar-inner {
@@ -120,19 +119,19 @@ function resetDemo() {
   align-items: baseline;
   gap: 8px;
   text-decoration: none;
+  line-height: 1;
 }
 
 .brand-cn {
-  font-weight: 900;
-  font-size: 1.25rem;
+  font-family: var(--font-display);
+  font-size: 1.75rem;
 }
 
 .brand-en {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 1.125rem;
-  letter-spacing: -0.01em;
-  color: var(--violet);
+  font-family: var(--font-num);
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+  color: var(--sticker);
 }
 
 nav {
@@ -146,19 +145,23 @@ nav {
   align-items: center;
   min-height: 40px;
   padding: 0 12px;
-  border-radius: 999px;
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.78);
   text-decoration: none;
   font-size: var(--t-sm);
   font-weight: 500;
 }
 
 .nav-link:hover {
-  background: var(--plinth);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .nav-link.current {
+  color: #fff;
   font-weight: 700;
-  background: var(--plinth);
+  box-shadow: inset 0 -3px 0 var(--sticker);
+  border-radius: 0;
 }
 
 .as-btn {
@@ -168,15 +171,19 @@ nav {
 }
 
 .login {
-  background: var(--ink);
-  color: var(--paper);
+  margin-left: 6px;
+  background: var(--sticker);
+  color: var(--ink);
+  font-weight: 900;
   padding: 0 18px;
 }
 
 .login:hover,
 .login.current {
-  background: var(--violet);
-  color: #fff;
+  background: #fff;
+  color: var(--ink);
+  box-shadow: none;
+  border-radius: 10px;
 }
 
 @media (max-width: 480px) {

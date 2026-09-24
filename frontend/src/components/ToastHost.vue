@@ -47,9 +47,10 @@ const toast = useToastStore()
   justify-content: space-between;
   gap: 12px;
   padding: 12px 12px 12px 18px;
-  border-radius: 14px;
+  border-radius: 12px;
   background: var(--ink);
-  color: var(--paper);
+  color: #fff;
+  box-shadow: 0 10px 24px -10px rgba(22, 26, 58, 0.6);
   font-size: var(--t-sm);
   pointer-events: auto;
 }

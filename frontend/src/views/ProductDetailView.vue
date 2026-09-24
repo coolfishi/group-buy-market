@@ -153,10 +153,17 @@ const targetText = computed(() => {
     </nav>
 
     <div class="top">
-      <ProductGallery :images="product.images" />
+      <!-- 左侧做成一个大手办盒：作品色条 + 开窗图集 -->
+      <div class="box" :class="product.category">
+        <p class="box-top">
+          <span class="num">{{ product.line }}</span>
+          <span>{{ product.maker }}</span>
+        </p>
+        <ProductGallery :images="product.images" class="box-gallery" />
+      </div>
 
       <section class="buy" aria-labelledby="product-name">
-        <p class="kicker">{{ categoryName(product.category) }}，{{ product.maker }} {{ product.line }}</p>
+        <p class="kicker"><span class="series-tag" :class="product.category">{{ categoryName(product.category) }}</span>{{ product.maker }} {{ product.line }}</p>
         <h1 id="product-name">{{ product.name }}</h1>
         <p class="tagline">{{ product.tagline }}</p>
 
@@ -240,8 +247,8 @@ const targetText = computed(() => {
           <a :href="product.sourceUrl" target="_blank" rel="noopener noreferrer">查看官方产品页</a>
         </p>
       </div>
-      <div>
-        <h2>尺寸与材质</h2>
+      <div class="box-back">
+        <h2>盒背说明</h2>
         <dl class="specs">
           <div><dt>尺寸</dt><dd>{{ product.size }}</dd></div>
           <div><dt>材质</dt><dd>{{ product.material }}</dd></div>
@@ -250,6 +257,7 @@ const targetText = computed(() => {
           <div><dt>系列</dt><dd>{{ product.line }}</dd></div>
           <div><dt>官方定价</dt><dd>{{ product.officialPriceJpy.toLocaleString('zh-CN') }} 日元（本站价格为演示价）</dd></div>
         </dl>
+        <div class="barcode" aria-hidden="true" />
       </div>
     </section>
 
@@ -322,20 +330,73 @@ const targetText = computed(() => {
   align-items: start;
 }
 
+/* 左侧大手办盒 */
+.box {
+  --series: var(--naruto);
+  --series-fg: var(--ink);
+  border-radius: 12px;
+  background: var(--card);
+  box-shadow: var(--shadow-box);
+}
+
+.box.jjk {
+  --series: var(--jjk);
+  --series-fg: #fff;
+}
+
+.box-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 16px;
+  border-radius: 12px 12px 0 0;
+  background: var(--series);
+  color: var(--series-fg);
+  font-size: var(--t-xs);
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.box-top .num {
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+}
+
+.box-gallery {
+  padding: 12px 12px 16px;
+}
+
 .buy {
   position: sticky;
   top: calc(var(--header-h) + 56px);
 }
 
 .kicker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
   font-size: var(--t-sm);
   color: var(--graphite);
 }
 
+.series-tag {
+  padding: 2px 10px;
+  border-radius: 6px;
+  background: var(--naruto);
+  color: var(--ink);
+  font-weight: 900;
+}
+
+.series-tag.jjk {
+  background: var(--jjk);
+  color: #fff;
+}
+
 h1 {
-  margin-top: 4px;
-  font-size: clamp(1.9rem, 3.6vw, 2.75rem);
-  letter-spacing: -0.02em;
+  margin-top: 10px;
+  font-size: clamp(2.25rem, 4.4vw, 3.5rem);
+  line-height: 1.05;
 }
 
 .tagline {
@@ -349,7 +410,8 @@ h1 {
   margin-top: 24px;
   padding: 20px 22px;
   border-radius: var(--r-plinth);
-  background: var(--violet-mist);
+  background: var(--card);
+  box-shadow: var(--shadow-box);
 }
 
 .price-box > p:first-child:not(.price-sub) {
@@ -358,7 +420,7 @@ h1 {
 
 .skeleton {
   height: 152px;
-  background: linear-gradient(90deg, var(--plinth) 0%, #f6f1e9 50%, var(--plinth) 100%);
+  background: linear-gradient(90deg, var(--plinth) 0%, var(--card) 50%, var(--plinth) 100%);
   background-size: 200% 100%;
   animation: shimmer 1.2s linear infinite;
 }
@@ -376,8 +438,9 @@ h1 {
 }
 
 .price-label {
-  font-weight: 700;
-  color: var(--violet);
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  color: var(--ink);
 }
 
 .price-sub {
@@ -392,11 +455,11 @@ h1 {
 
 .save {
   padding: 2px 10px;
-  border-radius: 999px;
-  background: var(--violet);
-  color: #fff;
+  border-radius: 6px;
+  background: var(--sticker);
+  color: var(--ink);
   font-size: var(--t-xs);
-  font-weight: 700;
+  font-weight: 900;
 }
 
 .rule {
@@ -414,7 +477,7 @@ h1 {
   margin-left: 6px;
   padding: 1px 8px;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: 6px;
   font-size: var(--t-xs);
 }
 
@@ -447,10 +510,17 @@ h1 {
   gap: 32px clamp(28px, 5vw, 64px);
 }
 
+/* 盒背：虚线框 + 条形码，像包装盒背面的说明 */
+.box-back {
+  align-self: start;
+  padding: 22px 24px;
+  border: 2px dashed var(--plinth-deep);
+  border-radius: var(--r-plinth);
+}
+
 .specs {
   display: grid;
   margin: 0;
-  border-top: 2px solid var(--ink);
 }
 
 .specs div {
@@ -470,13 +540,25 @@ h1 {
   margin: 0;
 }
 
+.specs div:last-child {
+  border-bottom: 0;
+}
+
+.barcode {
+  width: 160px;
+  height: 36px;
+  margin-top: 16px;
+  background: repeating-linear-gradient(90deg, var(--ink) 0 2px, transparent 2px 4px, var(--ink) 4px 5px, transparent 5px 8px, var(--ink) 8px 11px, transparent 11px 12px);
+}
+
 .block {
   margin-top: 72px;
   scroll-margin-top: 110px;
 }
 
 .block h2 {
-  font-size: var(--t-2xl);
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  line-height: 1;
   margin-bottom: 18px;
 }
 
@@ -492,12 +574,14 @@ h1 {
 .empty-teams {
   padding: 20px 24px;
   border-radius: var(--r-plinth);
-  background: var(--plinth);
+  border: 2px dashed var(--line);
+  background: var(--card);
   color: var(--graphite);
 }
 
 .about-body {
   display: grid;
+  align-content: start;
   gap: 12px;
   max-width: 40em;
   font-size: var(--t-lg);
@@ -542,9 +626,9 @@ h1 {
     grid-template-columns: 1fr 1.4fr;
     gap: 10px;
     padding: 12px 16px max(12px, env(safe-area-inset-bottom));
-    background: rgba(250, 247, 242, 0.96);
-    backdrop-filter: blur(10px);
-    border-top: 1px solid var(--line);
+    background: var(--card);
+    border-top: 4px solid var(--ink);
+    box-shadow: 0 -8px 20px -12px rgba(22, 26, 58, 0.4);
   }
   .buy-bar > :only-child {
     grid-column: 1 / -1;

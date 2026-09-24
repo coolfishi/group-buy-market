@@ -35,7 +35,7 @@ const isLive = appConfig.mode === 'live'
   padding: 10px 16px;
   border-radius: 999px;
   background: var(--ink);
-  color: var(--paper);
+  color: #fff;
 }
 
 .skip:focus {
@@ -66,7 +66,9 @@ main:focus {
 }
 
 .brand {
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  line-height: 1.2;
   color: var(--ink);
 }
 

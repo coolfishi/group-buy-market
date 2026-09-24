@@ -1,7 +1,13 @@
-import type { Order } from '@/types'
+import type { Order, Product } from '@/types'
 
 export function formatPrice(value: number): string {
   return Number.isInteger(value) ? String(value) : value.toFixed(2)
+}
+
+/** 商品名去掉系列前缀后的角色名，例如“POP UP PARADE 五条悟” → “五条悟” */
+export function characterName(product: Pick<Product, 'name'>): string {
+  const parts = product.name.trim().split(/\s+/)
+  return parts[parts.length - 1] || product.name
 }
 
 export function formatDateTime(ms: number): string {

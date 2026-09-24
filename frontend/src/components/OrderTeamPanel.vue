@@ -115,7 +115,7 @@ const empty = computed(() => Math.max(0, props.team.targetCount - props.team.mem
   align-items: center;
   padding: 6px 12px 6px 6px;
   border-radius: 999px;
-  background: var(--paper);
+  background: var(--card);
   font-size: var(--t-xs);
 }
 
@@ -127,7 +127,7 @@ const empty = computed(() => Math.max(0, props.team.targetCount - props.team.mem
   height: 30px;
   border-radius: 50%;
   background: var(--violet);
-  color: var(--paper);
+  color: #fff;
   font-weight: 700;
 }
 
@@ -136,7 +136,7 @@ const empty = computed(() => Math.max(0, props.team.targetCount - props.team.mem
 }
 
 .unpaid .dot {
-  background: var(--paper);
+  background: var(--card);
   color: var(--violet);
   border: 2px solid var(--violet);
 }
@@ -166,7 +166,7 @@ const empty = computed(() => Math.max(0, props.team.targetCount - props.team.mem
   padding: 0 6px;
   border-radius: 999px;
   background: var(--violet);
-  color: var(--paper);
+  color: #fff;
   font-style: normal;
   font-size: 11px;
 }

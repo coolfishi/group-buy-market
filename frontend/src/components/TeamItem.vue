@@ -69,53 +69,54 @@ const blockedLabel = computed(() => {
 </template>
 
 <style scoped>
+/* 拼团票：白色票面，左侧厚色边；名额用方格表示 */
 .team {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 16px;
-  padding: 14px 16px;
-  border-radius: 16px;
-  background: var(--violet-mist);
+  padding: 12px 14px 12px 16px;
+  border-radius: 12px;
+  border-left: 8px solid var(--violet);
+  background: var(--card);
+  box-shadow: var(--shadow-box);
 }
 
 .inactive {
+  border-left-color: var(--line);
   background: var(--plinth);
+  box-shadow: none;
   color: var(--graphite);
 }
 
 .seats {
   display: flex;
+  gap: 4px;
 }
 
 .seat {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 2px dashed var(--violet);
-  background: var(--paper);
-}
-
-.seat + .seat {
-  margin-left: -8px;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 2px solid var(--violet);
+  background: var(--card);
 }
 
 .seat.taken {
-  border: 2px solid var(--paper);
   background: var(--violet);
 }
 
 .inactive .seat {
   border-color: var(--graphite);
+  background: transparent;
 }
 
 .inactive .seat.taken {
-  border-color: var(--plinth);
   background: var(--graphite);
 }
 
 .owner {
-  font-weight: 700;
+  font-weight: 900;
   font-size: var(--t-sm);
 }
 
@@ -129,7 +130,9 @@ const blockedLabel = computed(() => {
 }
 
 .countdown {
-  font-weight: 700;
+  font-family: var(--font-num);
+  font-size: 0.95rem;
+  letter-spacing: 0.03em;
   color: var(--ink);
 }
 
