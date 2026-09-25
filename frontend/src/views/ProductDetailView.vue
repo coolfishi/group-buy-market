@@ -12,6 +12,7 @@ import { useSessionStore } from '@/stores/session'
 import { useToastStore } from '@/stores/toast'
 import type { MarketInfo, PurchaseRequest, PurchaseType, Team } from '@/types'
 import { saveIntent, takeIntent } from '@/utils/intent'
+import XrayNote from '@/xray/XrayNote.vue'
 
 const props = defineProps<{ goodsId: string }>()
 const route = useRoute()
@@ -196,6 +197,10 @@ const targetText = computed(() => {
             <div class="price-main">
               <span class="price-label">拼团价</span>
               <PriceTag :value="market.payPrice" size="lg" tone="violet" />
+              <XrayNote
+                label="规则树试算"
+                text="价格不是写死的：拼团服务用规则树逐个节点算出来。限流 → 参数校验 → DCC 降级与切量 → 多线程查活动和折扣（直减、满减、折扣、N 元购四种策略）→ 人群标签 → 组装结果。"
+              />
             </div>
             <p class="price-sub">
               单买 <PriceTag :value="market.originalPrice" size="sm" tone="muted" strike />
@@ -215,12 +220,24 @@ const targetText = computed(() => {
               发起拼团 ¥{{ market.payPrice }}
             </button>
           </div>
+          <p class="xray-line">
+            <XrayNote
+              label="锁单责任链"
+              text="下单时商城先防重复提交，再请拼团服务锁单：责任链依次校验活动是否可用、用户参与次数、组队名额，全部通过才落库，然后商城去支付宝下单；支付宝下单失败会回滚锁单。"
+            />
+          </p>
         </template>
       </section>
     </div>
 
     <section id="teams" class="block" aria-labelledby="teams-title">
-      <h2 id="teams-title">正在拼团</h2>
+      <h2 id="teams-title">
+        正在拼团
+        <XrayNote
+          label="Redis 组队名额"
+          text="参团时拼团服务用 Redis 原子自增抢占队伍名额，超过目标人数直接失败，避免高并发下超卖；退单后通过恢复键把名额补回来。"
+        />
+      </h2>
       <template v-if="state === 'ready' && market">
         <ul v-if="market.teams.length" class="teams">
           <TeamItem
@@ -594,6 +611,14 @@ h1 {
 
 .buy-bar {
   display: none;
+}
+
+.xray-line {
+  margin-top: 10px;
+}
+
+.xray-line :deep(.note) {
+  margin-left: 0;
 }
 
 @media (max-width: 860px) {
