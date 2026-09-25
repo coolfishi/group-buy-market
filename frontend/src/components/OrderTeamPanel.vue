@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useNow } from '@/composables/useNow'
 import type { OrderTeam } from '@/types'
 import { formatCountdown } from '@/utils/format'
+import XrayNote from '@/xray/XrayNote.vue'
 
 const props = defineProps<{ team: OrderTeam; productId?: string }>()
 
@@ -19,9 +20,17 @@ const empty = computed(() => Math.max(0, props.team.targetCount - props.team.mem
     <p class="headline">
       <template v-if="state === 'done'">
         <strong>已成团</strong>，{{ team.targetCount }} 人全部付款
+        <XrayNote
+          label="成团回调"
+          text="最后一人结算后，拼团服务在同一事务里写入回调任务并立即通知商城，商城把队伍里的订单改为拼团成功；回调失败由定时任务在分布式锁保护下重试。"
+        />
       </template>
       <template v-else-if="state === 'failed'">
         <strong>拼团已结束</strong>，到期未凑齐 {{ team.targetCount }} 人，已付款的会自动原路退款
+        <XrayNote
+          label="自动退款"
+          text="商城定时任务每 20 秒扫描，发现队伍过了截止时间还没凑齐，就调用拼团退单（退单责任链 + Paid2RefundStrategy），再向支付宝原路退款。"
+        />
       </template>
       <template v-else>
         <strong>拼团中</strong>，已付款 {{ team.completeCount }}/{{ team.targetCount }}，还差
@@ -29,6 +38,10 @@ const empty = computed(() => Math.max(0, props.team.targetCount - props.team.mem
         <time class="num countdown" :datetime="new Date(team.validEndTime).toISOString()">{{
           formatCountdown(remaining)
         }}</time>
+        <XrayNote
+          label="等待成团"
+          text="付款后商城调用拼团结算：结算责任链校验渠道、交易单号和付款时间（必须早于截止时间），通过后完成人数加一；满员时触发成团回调。"
+        />
       </template>
     </p>
 

@@ -4,6 +4,7 @@ import ToastHost from '@/components/ToastHost.vue'
 import { appConfig } from '@/config/env'
 import { copyrightNotice } from '@/data/products'
 import { asset } from '@/utils/asset'
+import XrayPanel from '@/xray/XrayPanel.vue'
 
 const isLive = appConfig.mode === 'live'
 </script>
@@ -20,10 +21,14 @@ const isLive = appConfig.mode === 'live'
       <p>
         {{ copyrightNotice }}页面不展示销量与评价。
       </p>
-      <p v-if="isLive"><a :href="asset('demo/')">打开演示站</a>：不用登录和付款，先体验完整拼团流程。</p>
+      <p v-if="isLive">
+        <a :href="asset('demo/')">打开演示站</a>：不用登录和付款，先体验完整拼团流程；
+        <a :href="asset('demo/?xray=1')">带透视模式打开</a>，边操作边看后端处理链。
+      </p>
     </div>
   </footer>
   <ToastHost />
+  <XrayPanel />
 </template>
 
 <style scoped>
