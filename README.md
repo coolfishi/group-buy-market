@@ -182,7 +182,3 @@ sudo bash /opt/toyspace-backend/integration-test.sh
     ├── dev-ops/                       Docker Compose、Nginx、MySQL、监控配置
     └── tag/                           各阶段版本的部署文件
 ```
-
-## 致谢
-
-后端基于 [小傅哥（bugstack）](https://bugstack.cn) 的 DDD 工程脚手架和拼团营销系统课程搭建，使用了其开源的 xfg-wrench 设计框架。
