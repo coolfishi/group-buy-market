@@ -157,7 +157,12 @@ onMounted(load)
                   <tbody>
                     <tr v-for="m in members[t.team_id]" :key="m.order_id">
                       <td class="num">{{ mask(m.user_id) }}</td>
-                      <td class="num">{{ m.out_trade_no }}</td>
+                      <td class="num">
+                        <RouterLink v-if="/^\d{12}$/.test(m.out_trade_no)" :to="{ path: '/trace', query: { orderId: m.out_trade_no } }">{{
+                          m.out_trade_no
+                        }}</RouterLink>
+                        <template v-else>{{ m.out_trade_no }}</template>
+                      </td>
                       <td>{{ m.goods_id }}</td>
                       <td class="num">{{ fmtMoney(m.pay_price) }}</td>
                       <td>{{ memberStatus[m.status] ?? m.status }}</td>
