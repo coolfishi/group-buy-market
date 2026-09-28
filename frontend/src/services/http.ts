@@ -1,3 +1,6 @@
+import { endpointOf } from '@/xray/mechanisms'
+import { recordEnd, recordStart } from '@/xray/trace'
+
 export type ApiErrorKind =
   | 'timeout'
   | 'network'
@@ -78,6 +81,28 @@ export interface RequestOptions {
 }
 
 export async function request<T>(url: string, options: RequestOptions): Promise<T> {
+  // 透视模式：旁路记录请求与结果，开关关闭时 traceId 为 null、不做任何记录
+  const traceId = recordStart({
+    source: 'live',
+    endpoint: endpointOf(url),
+    method: options.method ?? 'POST',
+    request: { ...(options.query ?? {}), ...(isPlainObject(options.body) ? options.body : {}) },
+  })
+  try {
+    const data = await send<T>(url, options)
+    recordEnd(traceId, { ok: true, code: SUCCESS, response: data })
+    return data
+  } catch (e) {
+    recordEnd(traceId, { ok: false, code: e instanceof ApiError ? (e.code ?? e.kind) : 'error', response: e instanceof Error ? e.message : undefined })
+    throw e
+  }
+}
+
+function isPlainObject(v: unknown): v is Record<string, unknown> {
+  return typeof v === 'object' && v !== null && !Array.isArray(v)
+}
+
+async function send<T>(url: string, options: RequestOptions): Promise<T> {
   const controller = new AbortController()
   let timedOut = false
   const timer = setTimeout(() => {

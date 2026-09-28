@@ -11,7 +11,18 @@
 | --- | --- |
 | https://shop.openrelayx.cc/ | 商城：微信登录、支付宝沙箱付款、真实拼团链路 |
 | https://shop.openrelayx.cc/demo/ | 演示站：本地模拟数据，不需要登录和付款即可走完整流程 |
-| https://shop.openrelayx.cc/admin/ | 管理台 |
+| https://shop.openrelayx.cc/admin | 管理台 |
+
+### 三分钟看懂后端：透视模式
+
+打开 **https://shop.openrelayx.cc/demo/?xray=1** （不用登录、不用付款）。页头「透视」开关打开后，右侧面板会随你的每一步操作列出后端的处理链：
+
+- 看商品价格：接口限流 → 规则树 `RootNode → SwitchNode → MarketNode → TagNode → EndNode` 试算拼团价；
+- 发起 / 参与拼团：锁单责任链 `ActivityUsabilityRuleFilter → UserTakeLimitRuleFilter → TeamStockOccupyRuleFilter`，Redis 原子自增抢组队名额防超卖；
+- 付款：结算责任链 `SCRuleFilter → OutTradeNoRuleFilter → SettableRuleFilter → EndRuleFilter`，满员写回调任务并通知商城，失败定时重试；
+- 退单 / 到期未成团：退单责任链 + 三种退单策略，MQ 回补名额，支付宝原路退款。
+
+每条都附对应的 Java 类或商城服务文件，请求和返回数据可展开查看（令牌、签名、用户标识已脱敏）。演示站的请求在浏览器本地模拟，真实站（需微信登录）面板里是真实请求。
 
 拼团查询接口对外开放：
 

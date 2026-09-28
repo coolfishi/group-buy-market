@@ -4,6 +4,7 @@ import { appConfig, liveConfigIssues } from '@/config/env'
 import { resetDemoData } from '@/services'
 import { useSessionStore } from '@/stores/session'
 import { useToastStore } from '@/stores/toast'
+import { setXray, xrayEnabled } from '@/xray/trace'
 
 const session = useSessionStore()
 const toast = useToastStore()
@@ -45,6 +46,19 @@ function resetDemo() {
           <span class="brand-en">TOYSPACE</span>
         </RouterLink>
         <nav aria-label="主导航">
+          <button
+            type="button"
+            class="nav-link xray-toggle"
+            :aria-pressed="xrayEnabled"
+            title="透视模式：边操作边看后端处理链"
+            @click="setXray(!xrayEnabled)"
+          >
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+              <circle cx="12" cy="12" r="3.2" fill="currentColor" />
+              <path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2" />
+            </svg>
+            透视
+          </button>
           <RouterLink to="/" class="nav-link" exact-active-class="current">首页</RouterLink>
           <RouterLink to="/orders" class="nav-link" active-class="current">我的订单</RouterLink>
           <button v-if="session.isLoggedIn" type="button" class="nav-link as-btn" @click="logout">退出</button>
@@ -168,6 +182,21 @@ nav {
   border: 0;
   background: transparent;
   cursor: pointer;
+}
+
+.xray-toggle {
+  gap: 5px;
+  margin-right: 6px;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  background: transparent;
+  cursor: pointer;
+}
+
+.xray-toggle[aria-pressed='true'] {
+  border-color: var(--sticker);
+  background: var(--sticker);
+  color: var(--ink);
+  font-weight: 900;
 }
 
 .login {
