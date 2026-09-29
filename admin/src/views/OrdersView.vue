@@ -95,6 +95,7 @@ onMounted(load)
             <th>下单时间</th>
             <th>付款时间</th>
             <th>备注</th>
+            <th><span class="visually-hidden">操作</span></th>
           </tr>
         </thead>
         <tbody>
@@ -114,6 +115,9 @@ onMounted(load)
             <td class="muted">
               <template v-if="o.close_reason">{{ o.close_reason }}</template>
               <template v-else-if="o.market_type === 1 && o.pay_time">结算：{{ settle[o.settle_status] }}</template>
+            </td>
+            <td>
+              <RouterLink :to="{ path: '/trace', query: { orderId: o.order_id } }" class="btn btn-link">链路</RouterLink>
             </td>
           </tr>
         </tbody>

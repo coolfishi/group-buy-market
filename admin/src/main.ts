@@ -13,6 +13,7 @@ const router = createRouter({
     { path: '/products', name: 'products', component: () => import('./views/ProductsView.vue'), meta: { title: '商品' } },
     { path: '/activities', name: 'activities', component: () => import('./views/ActivitiesView.vue'), meta: { title: '拼团活动' } },
     { path: '/teams', name: 'teams', component: () => import('./views/TeamsView.vue'), meta: { title: '拼团队伍' } },
+    { path: '/trace', name: 'trace', component: () => import('./views/TraceView.vue'), meta: { title: '链路追踪' } },
     { path: '/orders', name: 'orders', component: () => import('./views/OrdersView.vue'), meta: { title: '商城订单' } },
     { path: '/switches', name: 'switches', component: () => import('./views/SwitchesView.vue'), meta: { title: '运行开关' } },
     { path: '/notify', name: 'notify', component: () => import('./views/NotifyView.vue'), meta: { title: '通知任务' } },

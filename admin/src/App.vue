@@ -23,6 +23,7 @@ const groups = [
     items: [
       { to: '/teams', name: '拼团队伍' },
       { to: '/orders', name: '商城订单' },
+      { to: '/trace', name: '链路追踪' },
     ],
   },
   {
